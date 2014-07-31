@@ -533,7 +533,7 @@ HTMLPREFIX=$(($HTMLPREFIX + 1))
 HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
-DATE=`date '+%a %D %r'`
+DATE=`date '+%a %D %T'`
 echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<h3>Listing of GIT links used in this run.</h3>\n" >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG

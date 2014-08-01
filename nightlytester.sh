@@ -41,9 +41,18 @@ fi
 
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
-  HTMLLINE="<tr><td>${HTMLPREFIX}</td><td>${DATE}</td><td>${ARCHCREV}</td><td><a href=\"${HTMLPREFIX}-index.htm\">Here</a></td><td>${REVMESSAGE}</td><td>${HOSTNAME}</td></tr>"
-  sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
-  mv ${TEMPFL} $HTMLINDEX
+
+  DATE_TMP=`date '+%a %D %T'`
+  sed -n -e  "s@Produced by NightlyTester.*@Produced by NightlyTester \@ $DATE_TMP <\/p>\n@;p" < ${HTMLINDEX} > TMPFILE
+  mv TMPFILE ${HTMLINDEX}
+  rm -f TMPFILE
+
+
+  if [ "$LASTEQCURRENT" != "true" ]; then
+      HTMLLINE="<tr><td>${HTMLPREFIX}</td><td>${DATE}</td><td>${ARCHCREV}</td><td><a href=\"${HTMLPREFIX}-index.htm\">Here</a></td><td>${REVMESSAGE}</td><td>${HOSTNAME}</td></tr>"
+      sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
+      mv ${TEMPFL} $HTMLINDEX
+  fi
 
   if [ "$DELETEWHENDONE" != "no" ]; then
     rm -rf $TESTROOT
@@ -122,7 +131,16 @@ clone_or_copy_model(){
     } 
     # Extract model revision number
     cd ${TESTROOT}/${MODELNAME} 
+    #MODELREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
     MODELREV=".."$(git log | head -n1 | cut -c40-)
+    if [ "$LASTHTMLPREFIX" != "0" ]; then
+        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 5 | cut -d\< -f 1`
+        if [ "$MODELREV" != "$LASTMODELREV" ]; then
+            LASTEQCURRENT="false"
+        fi
+    else
+        LASTEQCURRENT="false"
+    fi
     cd - &> /dev/null
     #MODELREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
     rm $TEMPFL
@@ -526,14 +544,19 @@ run_tests_acasm() {
 
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
-HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
-LASTHTMLPREFIX=$HTMLPREFIX
+export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
+export LASTHTMLPREFIX=$HTMLPREFIX
+
+export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
+export LASTEQCURRENT="true"
+
+
 HTMLPREFIX=$(($HTMLPREFIX + 1))
 
 HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
-DATE=`date '+%a %D %T'`
+export DATE=`date '+%a %D %T'`
 echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<h3>Listing of GIT links used in this run.</h3>\n" >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
@@ -613,9 +636,13 @@ else
   } 
   # Extract revision number
   # ARCHCREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
-  cd ${TESTROOT}/acsrc
+  cd ${TESTROOT}/acsrc &> /dev/null
+  #ARCHCREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
   ARCHCREV=".."$(git log | head -n1 | cut -c40-)
-  cd -
+  if [ ${ARCHCREV} != ${LASTARCHCREV} ]; then
+        LASTEQCURRENT="false"
+  fi
+  cd - &> /dev/null
   #rm $TEMPFL
 fi
 
@@ -730,6 +757,13 @@ if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWER
   if [ "$RUN_POWERPC_ACSIM" != "no" -a "$RUN_ACSTONE" != "no" ]; then
     build_gdb "powerpc"
   fi
+fi
+
+# If All Revision tested in last execution, is not generated a new entry in the table
+if [ "$LASTEQCURRENT" != "false" ]; then
+    echo -ne "All Revisions tested in last execution\n"
+    rm ${LOGROOT}/${HTMLPREFIX}-* 
+    do_abort
 fi
 
 echo -ne "\n**********************************************\n"

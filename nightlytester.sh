@@ -132,7 +132,7 @@ clone_or_copy_model(){
     # Extract model revision number
     cd ${TESTROOT}/${MODELNAME} 
     #MODELREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
-    MODELREV=".."$(git log | head -n1 | cut -c40-)
+    MODELREV=$(git log | head -n1 | cut -c8-15)".."
     if [ "$LASTHTMLPREFIX" != "0" ]; then
         LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 5 | cut -d\< -f 1`
         if [ "$MODELREV" != "$LASTMODELREV" ]; then
@@ -638,7 +638,7 @@ else
   # ARCHCREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
   cd ${TESTROOT}/acsrc &> /dev/null
   #ARCHCREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
-  ARCHCREV=".."$(git log | head -n1 | cut -c40-)
+  ARCHCREV=$(git log | head -n1 | cut -c8-15)".."
   if [ ${ARCHCREV} != ${LASTARCHCREV} ]; then
         LASTEQCURRENT="false"
   fi

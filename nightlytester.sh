@@ -43,7 +43,7 @@ finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
 
   DATE_TMP=`date '+%a %D %T'`
-  sed -n -e  "s@Produced by NightlyTester.*@Produced by NightlyTester \@ $DATE_TMP <\/p>\n@;p" < ${HTMLINDEX} > TMPFILE
+  sed -n -e  "s@Produced by NightlyTester.*@Produced by NightlyTester \@ $DATE_TMP <\/p>@;p" < ${HTMLINDEX} > TMPFILE
   mv TMPFILE ${HTMLINDEX}
   rm -f TMPFILE
 

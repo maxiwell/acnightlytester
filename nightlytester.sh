@@ -42,7 +42,7 @@ fi
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
 
-  DATE_TMP=`date '+%a %D %T'`
+  DATE_TMP=`LANG=en_US date '+%a %D %T'`
   sed -n -e  "s@Produced by NightlyTester.*@Produced by NightlyTester \@ $DATE_TMP <\/p>@;p" < ${HTMLINDEX} > TMPFILE
   mv TMPFILE ${HTMLINDEX}
   rm -f TMPFILE
@@ -556,7 +556,7 @@ HTMLPREFIX=$(($HTMLPREFIX + 1))
 HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
-export DATE=`date '+%a %D %T'`
+export DATE=`LANG=en_US date '+%a %D %T'`
 echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<h3>Listing of GIT links used in this run.</h3>\n" >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG

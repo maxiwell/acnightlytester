@@ -236,10 +236,10 @@ build_binary_tools() {
   mkdir -p binutils
   echo -ne "Building ${MODELNAME} BINUTILS ArchC Model...\n"
   TEMPFL=${RANDOM}.out
-  ${TESTROOT}/install/bin/acbingen.sh -f ${MODELNAME}.ac > $TEMPFL 2>&1 &&
+  ${TESTROOT}/install/bin/acbingen.sh -a ${MODELNAME}_1 -f ${MODELNAME}.ac > $TEMPFL 2>&1 &&
     mkdir build-binutils &&
     cd build-binutils && # D_FORTIFY used below is used to prevent a bug present in binutils 2.15 and 2.16
-    CFLAGS="-g -O2 -D_FORTIFY_SOURCE=1" ${BINUTILSPATH}/configure --target=${MODELNAME}-elf --prefix=${TESTROOT}/${MODELNAME}/binutils >> $TEMPFL 2>&1 &&
+    CFLAGS="-w -g -O2" ${BINUTILSPATH}/configure --target=${MODELNAME}_1-elf --prefix=${TESTROOT}/${MODELNAME}/binutils >> $TEMPFL 2>&1 &&
     make >> $TEMPFL 2>&1 &&
     make install >> $TEMPFL 2>&1 
   RETCODE=$?
@@ -522,7 +522,7 @@ run_tests_acasm() {
     cd ${TESTROOT}/acasm-validation/${MODELNAME}/runtest
     export BENCH_ROOT="${TESTROOT}/acasm-validation/${MODELNAME}/benchmark/Mibench"
   fi
-  export ACBIN_PATH="${TESTROOT}/${MODELNAME}/binutils/${MODELNAME}-elf/bin"
+  export ACBIN_PATH="${TESTROOT}/${MODELNAME}/binutils/${MODELNAME}_1-elf/bin"
   export BINUTILS_PATH="${TESTROOT}/${MODELNAME}/binutils-orig/${ARCHNAME}-elf/bin"
   LOG_FILE=l${RANDOM}.out
   FORM_FILE=f${RANDOM}.out
@@ -563,6 +563,7 @@ echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLL
 echo -ne "<tr><th>Component</th><th>Link</th></tr>\n" >> $HTMLLOG
 if [ -z "$CLONELINK" ]; then
   echo -ne "<tr><td>ArchC</td><td>${WORKINGCOPY}</td></tr>\n" >> $HTMLLOG
+  LASTEQCURRENT="false"
 else
   echo -ne "<tr><td>ArchC</td><td>${CLONELINK}</td></tr>\n" >> $HTMLLOG
 fi
@@ -570,6 +571,7 @@ fi
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
   if [ -z "$ARMGITLINK" ]; then
     echo -ne "<tr><td>ARM Model</td><td>${ARMWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
+    LASTEQCURRENT="false"
   else
     echo -ne "<tr><td>ARM Model</td><td>${ARMGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -577,6 +579,7 @@ fi
 if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
   if [ -z "$MIPSGITLINK" ]; then
     echo -ne "<tr><td>MIPS Model</td><td>${MIPSWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
+    LASTEQCURRENT="false"
   else
     echo -ne "<tr><td>MIPS Model</td><td>${MIPSGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -584,6 +587,7 @@ fi
 if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
   if [ -z "$SPARCGITLINK" ]; then
     echo -ne "<tr><td>SPARC Model</td><td>${SPARCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
+    LASTEQCURRENT="false"
   else
     echo -ne "<tr><td>SPARC Model</td><td>${SPARCGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -591,6 +595,7 @@ fi
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
    if [ -z "$POWERPCGITLINK" ]; then
     echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
+    LASTEQCURRENT="false"
   else
     echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -645,6 +650,80 @@ else
   cd - &> /dev/null
   #rm $TEMPFL
 fi
+
+###########################################
+### Unpack necessary software packages
+###########################################
+#echo -ne "\n**********************************************\n"
+#echo -ne "* Uncompressing auxiliary software packages **\n"
+#echo -ne "**********************************************\n"
+
+# binutils
+if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
+    if [ -d $BINUTILSPATH ]; then
+        echo -ne "Directory binutils found...\n"
+        mkdir ${TESTROOT}/binutils
+        cd ${TESTROOT}/binutils
+        cp -r $BINUTILSPATH .
+        BINUTILSPATH=${TESTROOT}/binutils/$(basename $BINUTILSPATH)
+    elif [ -f $BINUTILSPATH ]; then
+            echo -ne "Uncompressing binutils...\n"    
+            mkdir ${TESTROOT}/binutils
+            cd ${TESTROOT}/binutils
+            tar -xjf $BINUTILSPATH
+    else
+        echo -ne "ACASM enabled and binutils not found.\n"
+        do_abort
+    fi
+fi
+
+## gdb
+## Only decompress if running acsim tests (gdb is used to validate correct execution of acstone benchmark)
+#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
+#  if [ "$RUN_ACSTONE" != "no" ]; then
+#    echo -ne "Uncompressing gdb...\n"
+#    mkdir ${TESTROOT}/gdb
+#    cd ${TESTROOT}/gdb
+#    tar -xjf ${SCRIPTROOT}/sources/gdb-6.4.tar.bz2
+#    cd gdb-6.4
+#    wget http://www.ic.unicamp.br/~auler/fix-gdb-6.4.patch > /dev/null 2>&1
+#    patch -p1 < ./fix-gdb-6.4.patch 
+#  fi
+#fi
+#
+# gcc
+#echo -ne "Uncompressing gcc...\n"
+#mkdir ${TESTROOT}/gcc
+#cd ${TESTROOT}/gcc
+#tar -xf ${SCRIPTROOT}/sources/gcc-3.3.tar.gz
+
+# glibc
+#echo -ne "Uncompressing glibc...\n"
+#mkdir ${TESTROOT}/glibc
+#cd ${TESTROOT}/glibc
+#tar -xjf ${SCRIPTROOT}/sources/glibc-2.3.2.tar.bz2
+#cd ${TESTROOT}/glibc/glibc-2.3.2
+#tar -xjf ${SCRIPTROOT}/sources/glibc-linuxthreads-2.3.2.tar.bz2
+
+## tlm
+#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
+#  echo -ne "Uncompressing tlm...\n"
+#  # only compile SystemC if we will run ACSIM/ACCSIM tests
+#  mkdir ${TESTROOT}/tlm
+#  cd ${TESTROOT}/tlm
+#  tar -xf ${SCRIPTROOT}/sources/TLM-1.0.tar.gz
+#fi
+#
+## systemc
+#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
+#  if [ "$SYSTEMCCOMPILE" != "no" ]; then
+#    echo -ne "Uncompressing SystemC...\n"
+#    # only compile SystemC if we will run ACSIM/ACCSIM tests
+#    mkdir ${TESTROOT}/systemc
+#    cd ${TESTROOT}/systemc
+#    tar -xjf ${SCRIPTROOT}/sources/systemc-2.2.0.tar.bz2
+#  fi
+#fi
 
 
 ########################################

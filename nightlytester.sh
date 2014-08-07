@@ -239,6 +239,7 @@ build_binary_tools() {
   ${TESTROOT}/install/bin/acbingen.sh -a ${MODELNAME}_1 -f ${MODELNAME}.ac > $TEMPFL 2>&1 &&
     mkdir build-binutils &&
     cd build-binutils && # D_FORTIFY used below is used to prevent a bug present in binutils 2.15 and 2.16
+    #CFLAGS="-w -g -O2 -D_FORTIFY_SOURCE=1" ${BINUTILSPATH}/configure --target=${MODELNAME}_1-elf --prefix=${TESTROOT}/${MODELNAME}/binutils >> $TEMPFL 2>&1 &&
     CFLAGS="-w -g -O2" ${BINUTILSPATH}/configure --target=${MODELNAME}_1-elf --prefix=${TESTROOT}/${MODELNAME}/binutils >> $TEMPFL 2>&1 &&
     make >> $TEMPFL 2>&1 &&
     make install >> $TEMPFL 2>&1 
@@ -317,7 +318,7 @@ build_original_toolchain() {
   echo -ne "  Building binutils...\n"
   TEMPFL=${RANDOM}.out
   cd build-binutils-orig &&
-    ${BINUTILSPATH}/configure --target=${ARCHNAME}-elf --prefix=${TESTROOT}/${MODELNAME}/binutils-orig >> $TEMPFL 2>&1 &&
+    CFLAGS="-w -O2" ${BINUTILSPATH}/configure --target=${ARCHNAME}-elf --prefix=${TESTROOT}/${MODELNAME}/binutils-orig >> $TEMPFL 2>&1 &&
     make >> $TEMPFL 2>&1 &&
     make install >> $TEMPFL 2>&1    
   RETCODE=$?
@@ -530,7 +531,8 @@ run_tests_acasm() {
   export LOG_FILE
   export FORM_FILE
   export HTML_LOG_FILE
-  ../../runtest.sh --verbose-log ../mibench.conf > /dev/null 2>&1
+  #../../runtest.sh --verbose-log ../mibench.conf > /dev/null 2>&1
+  ../../runtest.sh --verbose-log ../mibench.conf 
   HTMLACASMLOG=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-acasm-mibench-log.htm
   HTMLACASMFORM=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-acasm-mibench-form.htm
   format_html_output $LOG_FILE $HTMLACASMLOG
@@ -589,7 +591,7 @@ if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACC
     echo -ne "<tr><td>SPARC Model</td><td>${SPARCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
     LASTEQCURRENT="false"
   else
-    echo -ne "<tr><td>SPARC Model</td><td>${SPARCGITLINK}</td></tr>\n" >> $HTMLLOG
+   echo -ne "<tr><td>SPARC Model</td><td>${SPARCGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
 fi
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
@@ -774,13 +776,34 @@ fi
 ### ArchC's models
 ######################
 
-### Build ARM Model
+### Get Models
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
-
   clone_or_copy_model "arm" "${ARMGITLINK}" "${ARMWORKINGCOPY}" 
-  build_model "arm" "${RUN_ARM_ACSIM}" "${LOCALSIMULATOR}"
-  
   ARMREV=${MODELREV}
+fi
+if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
+  clone_or_copy_model "sparc" "${SPARCGITLINK}" "${SPARCWORKINGCOPY}" 
+  SPARCREV=${MODELREV}
+fi
+if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
+  clone_or_copy_model "mips" "${MIPSGITLINK}" "${MIPSWORKINGCOPY}" 
+  MIPSREV=${MODELREV}
+fi
+if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
+  clone_or_copy_model "powerpc" "${POWERPCGITLINK}" "${POWERPCWORKINGCOPY}" 
+  PPCREV=${MODELREV}
+fi
+
+# If All Revision tested in last execution, is not generated a new entry in the table
+if [ "$LASTEQCURRENT" != "false" ]; then
+    echo -ne "All Revisions tested in last execution\n"
+    rm ${LOGROOT}/${HTMLPREFIX}-* 
+    do_abort
+fi
+
+### Build Models
+if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
+  build_model "arm" "${RUN_ARM_ACSIM}" "${LOCALSIMULATOR}"
   if [ "$RUN_ARM_ACASM" != "no" ]; then
     build_binary_tools "arm"
     build_original_toolchain "arm" "arm"
@@ -789,14 +812,8 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" !
     build_gdb "arm"
   fi
 fi
-
-### Build sparcv8 Model
 if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
-
-  clone_or_copy_model "sparc" "${SPARCGITLINK}" "${SPARCWORKINGCOPY}" 
   build_model "sparc" "${RUN_SPARC_ACSIM}" "${LOCALSIMULATOR}"
-
-  SPARCREV=${MODELREV}
   if [ "$RUN_SPARC_ACASM" != "no" ]; then
     build_binary_tools "sparc"
     build_original_toolchain "sparc" "sparc"
@@ -805,14 +822,8 @@ if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACC
     build_gdb "sparc"
   fi
 fi
-
-### Build mips Model
 if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
-
-  clone_or_copy_model "mips" "${MIPSGITLINK}" "${MIPSWORKINGCOPY}" 
   build_model "mips" "${RUN_MIPS_ACSIM}" "${LOCALSIMULATOR}"
-
-  MIPSREV=${MODELREV}
   if [ "$RUN_MIPS_ACASM" != "no" ]; then
     build_binary_tools "mips"
     build_original_toolchain "mips" "mips"
@@ -821,14 +832,8 @@ if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM
     build_gdb "mips"
   fi
 fi
-
-### Build powerpc Model
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-
-  clone_or_copy_model "powerpc" "${POWERPCGITLINK}" "${POWERPCWORKINGCOPY}" 
   build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${LOCALSIMULATOR}"
-  
-  PPCREV=${MODELREV}
   if [ "$RUN_POWERPC_ACASM" != "no" ]; then
     build_binary_tools "powerpc"
     build_original_toolchain "powerpc" "powerpc"
@@ -838,12 +843,6 @@ if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWER
   fi
 fi
 
-# If All Revision tested in last execution, is not generated a new entry in the table
-if [ "$LASTEQCURRENT" != "false" ]; then
-    echo -ne "All Revisions tested in last execution\n"
-    rm ${LOGROOT}/${HTMLPREFIX}-* 
-    do_abort
-fi
 
 echo -ne "\n**********************************************\n"
 echo -ne "* Testing                                   **\n"

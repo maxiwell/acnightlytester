@@ -7,13 +7,11 @@
 
 # Parameters adjustable by environment variables
 
+NIGHTLYVERSION=1.2
 
 usage(){
 		echo -ne "\nusage: ./nightlytester.sh <config_file>\n\n"
 }
-
-
-NIGHTLYVERSION=1.2
 
 if [ $# -eq 0 ]; then
     usage
@@ -413,7 +411,9 @@ run_tests_acsim_mibench() {
   ARCH="${MODELNAME}"
   SIMULATOR="${TESTROOT}/${MODELNAME}/${MODELNAME}.x --load="
   GOLDENROOT=${TESTROOT}/acsim/GoldenMibench
-  BENCHROOT=${MODELBENCHROOT}  
+  GOLDENSPECROOT=${TESTROOT}/acsim/GoldenSpec
+  MIBENCHROOT=${MODELBENCHROOT} 
+  SPECROOT=${TESTROOT}/acsim/spec2006 
   STATSROOT=${BENCHROOT}/stats
   # Collect statistical information 
   if [ "$COLLECT_STATS" != "no" ]; then
@@ -426,7 +426,9 @@ run_tests_acsim_mibench() {
   export RUNLARGE   # Definition in nightlytester.conf
   export COMPILE    # ==================================
   export GOLDENROOT
-  export BENCHROOT
+  export GOLDENSPECROOT
+  export MIBENCHROOT
+  export SPECROOT
   export STATSROOT
   export COLLECT_STATS
 
@@ -446,6 +448,17 @@ run_tests_acsim_mibench() {
   export JPEG
   export LAME
 
+  export BZIP2	
+  export MCF 
+  export GOBMK    
+  export HMMER      
+  export SJENG 	    
+  export LIBQUANTUM
+  export H264        
+  export OMNETPP    
+  export ASTAR      
+
+  export TESTROOT
   export TESTCOMPILER
   export TESTAR
   export TESTRANLIB
@@ -912,6 +925,17 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
   fi
 fi
 
+
+############################################################################
+### SPEC Benchmark: due the size, I am using the same dir for all Models ###
+############################################################################
+echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
+#tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+cp -r ${SCRIPTROOT}/sources/spec2006 ${TESTROOT}/acsim
+[ $? -ne 0 ] && do_abort
+#mv SourceSPEC2006 spec2006
+
+
 ######################################
 ### ACSTONE Benchmark Testing      ###
 ######################################
@@ -927,14 +951,26 @@ if [ "$RUN_ACSTONE" != "no" ]; then
 fi
 
 ######################################
-### Building ARM Test Environment  ###
+### Golden Environment             ###
 ######################################
+
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
   echo -ne "Uncompressing correct results for Mibench...\n"
   cd ${TESTROOT}/acsim
   tar -xjf ${SCRIPTROOT}/sources/GoldenMibench.tar.bz2
   [ $? -ne 0 ] && do_abort
+
+  echo -ne "Uncompressing correct results for SPEC2006...\n"
+  cd ${TESTROOT}/acsim
+  tar -xjf ${SCRIPTROOT}/sources/GoldenSpec.tar.bz2
+  [ $? -ne 0 ] && do_abort
+
 fi
+
+
+######################################
+### Building ARM Test Environment  ###
+######################################
 
 if [ "$RUN_ARM_ACSIM" != "no" ]; then   
   if [ "$COMPILE" != "no" ]; then
@@ -990,12 +1026,13 @@ if [ "$RUN_MIPS_ACSIM" != "no" ]; then
      [ $? -ne 0 ] && do_abort
      mv SourceBigEndianMibench MipsMibench
      export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
+     export TESTCOMPILERCPP=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
      export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
      export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
      export TESTFLAG=$CROSS_MIPS_FLAG
  else
-    echo -ne "Uncompressing Mibench precompiled for MIPS...\n"
     cd ${TESTROOT}/acsim
+    echo -ne "Uncompressing Mibench precompiled for MIPS...\n"
     tar -xjf ${SCRIPTROOT}/sources/MipsMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
   fi

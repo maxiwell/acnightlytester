@@ -7,12 +7,34 @@
 
 # Parameters adjustable by environment variables
 
-if ! [ -f "nightlytester.conf" ]; then
-  echo "Configuration file not found. Must run in the same directory which contains the configuration file."
-  exit 1
+
+usage(){
+		echo -ne "\nusage: ./nightlytester.sh <config_file>\n\n"
+}
+
+
+NIGHTLYVERSION=1.2
+
+if [ $# -eq 0 ]; then
+    usage
+    exit
+else
+case "$1" in
+    -h)
+        usage
+        exit
+        ;;
+
+    *   )
+        if ! [ -f "$1" ]; then
+           echo -ne "\nConfiguration file not found. Must run with a valid configuration file.\n\n"
+           exit 1
+        fi
+       ;;
+esac
 fi
 
-. nightlytester.conf
+. $1
 
 # Configuring ACSIM param
 if [ "$COLLECT_STATS" != "no" ]; then
@@ -38,6 +60,7 @@ fi
 
 
 # Functions
+
 
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out

@@ -51,7 +51,7 @@
 #LOGROOT=/home/rafael/disco2/rafael/valida
 #HTMLPREFIX=1 #This prefix is used to avoid name collisions between multiple html logs and build a coherent information repository
 #DIFF="diff --report-identical-file --brief"
-DIFF="diff"
+DIFF="diff -w"
 
 #programas
 #BASICMATH=yes # demorado
@@ -106,14 +106,14 @@ compile_mibench() {
 	if [ "$COMPILE" != "no" ]; then
 		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
-		TEMPFL=${random}.out
+		TEMPFL=${RANDOM}.out
 		make clean 
-        make > $tempfl 2>&1
-        excode=$?
-        if [ $excode -ne 0 ]; then
-            echo -ne "<td><b><font color=\"crimson\"> failed </font></b>" >> $htmlmain
+        make > $TEMPFL 2>&1
+        EXCODE=$?
+        if [ $EXCODE -ne 0 ]; then
+            echo -ne "<td><b><font color=\"crimson\"> failed </font></b>" >> $HTMLMAIN
         else
-            echo -ne "<td><b><font color=\"green\"> ok </font></b>" >> $htmlmain
+            echo -ne "<td><b><font color=\"green\"> OK </font></b>" >> $HTMLMAIN
         fi
         echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${1}-comp.htm\">log</a>)</td>" >> $HTMLMAIN
         format_html_output $TEMPFL $HTML_COMP
@@ -128,8 +128,7 @@ compile_spec(){
 	if [ "$COMPILE" != "no" ]; then
 		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
-		TEMPFL=${random}.out
-
+		TEMPFL=${RANDOM}.out
         make SPEC=${SPECROOT} clean
         make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP} > $TEMPFL 2>&1
         EXCODE=$?
@@ -153,7 +152,7 @@ compile_spec(){
 # Param2 should inform the correct results folder (e.g., "${GOLDENROOT}/automotive/basicmath")
 # Param3 is a string list of files to be compared (e.g., "output_small.txt output_small.inv.txt")
 # Param4 should inform if we need to filter output produced by script (e.g. "no")
-# Param5 is the condition variable telling whether we should really do the test (e.g. "${RUNSMALL}")
+# Param5 is the condition variable telling wheeher we should really do the test (e.g. "${RUNSMALL}")
 # Param6 is the name of the tested (to be printed in log files, e.g. "basicmath-large")
 # e.g. run_test "runme_small.sh" "${GOLDENROOT}/automotive/basicmath" "output_small.txt" "yes" "$RUNSMALL" "basicmath-small"
 run_test() {
@@ -167,7 +166,7 @@ run_test() {
 		HTML_RUN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${TESTNAME}-run.htm
 		initialize_html $HTML_RUN "${TESTNAME} simulator output"
 		echo -ne "Running script ${TESTSCRIPT}...\n"
-		TEMPFL=${random}.out
+		TEMPFL=${RANDOM}.out
 		./${TESTSCRIPT} > $TEMPFL 2>&1
 		if [ "$COLLECT_STATS" != "no" ]; then
 		  # Copy output to stats folder, to be later processed by collect_stats.py
@@ -190,7 +189,7 @@ run_test() {
 		  [ "$RUNFILTER" != "no" ] && {
 			aplicafiltro ${RESULTFILE}
 		  }
-		  TEMPFL=${random}.out
+		  TEMPFL=${RANDOM}.out
 		  ${DIFF} ${RESULTFILE} ${GOLDENRES}/${RESULTFILE} > $TEMPFL 2>&1
 		  DIFFERENCES=$DIFFERENCES`cat $TEMPFL`
 		  format_html_output $TEMPFL $HTML_DIFF
@@ -234,7 +233,7 @@ echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLMAIN
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLMAIN
 
 #echo -ne "<tr><th>Program</th><th>Program</th><th>Small</th><th></th><th></th><th>Large</th><th></th><th></th></tr>\n" >> $HTMLMAIN
-echo -ne "<tr><th>Name</th><th>Compilation</th><th>Simulation (small)</th><th>Speed</th><th># Instrs.</th><th>Simulation (large)</th><th>Speed</th><th># Instrs.</th></tr>\n" >> $HTMLMAIN
+echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th>Speed</th><th># Instrs.</th><th>Simulation (large)</th><th>Speed</th><th># Instrs.</th></tr>\n" >> $HTMLMAIN
 
 echo -ne "<tr><td>Automotive</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 #basicmath
@@ -420,19 +419,18 @@ echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td>
 
 # --- SPEC2006 ---
 
-echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test data set</th><th>Speed</th><th># Instr.</th>
+                                                                  <th>Ref data set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
 
-[ "$BZIP2" != "no" ] && {
+[ "$BZIP_2" != "no" ] && {
 	echo -ne "\nCurrently testing: 401.bzip2\n"
 	echo -ne "<tr><td>401.bzip2</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/401.bzip2/src
     compile_spec "401.bzip2"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "dryer.jpg.out" "no" "yes" "401.bzip2-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "dryer.jpg.out" "no" "no" "401.bzip2-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.program.out" "no" "yes" "401.bzip2-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.combined.out" "no" "no"  "401.bzip2-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -441,38 +439,34 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>429.mcf</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/429.mcf/src
     compile_spec "429.mcf"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
     run_test "runme.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "yes" "429.mcf-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "no" "429.mcf-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "no"  "429.mcf-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
 [ "$GOBMK" != "no" ] && {
-	echo -ne "\nCurrently testing: 429.gobmk\n"
+	echo -ne "\nCurrently testing: 445.gobmk\n"
 	echo -ne "<tr><td>445.gobmk</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/445.gobmk/src
     compile_spec "445.gobmk"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "yes" "445.gobmk-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "no"  "445.gobmk-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
 [ "$HMMER" != "no" ] && {
-	echo -ne "\nCurrently testing: 429.hmmer\n"
+	echo -ne "\nCurrently testing: 456.hmmer\n"
 	echo -ne "<tr><td>456.hmmer</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/456.hmmer/src
     compile_spec "456.hmmer"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "yes" "456.hmmer-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "no"  "456.hmmer-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -481,11 +475,10 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>458.sjeng</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/458.sjeng/src
     compile_spec "458.sjeng"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "yes" "458.sjeng-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "no"  "458.sjeng-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -494,11 +487,10 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>462.libquantum</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/462.libquantum/src
     compile_spec "462.libquantum"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "yes" "462.libquantum-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "no"  "462.libquantum-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -507,11 +499,10 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>464.h264ref</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/464.h264ref/src
     compile_spec "464.h264ref"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "yes"  "464.h264ref-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "no"   "464.h264ref-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -520,11 +511,10 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>471.omnetpp</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/471.omnetpp/src
     compile_spec "471.omnetpp"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "yes"  "471.omnetpp-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "no"   "471.omnetpp-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -533,11 +523,10 @@ echo -ne "<tr><td>SPEC2006</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "<tr><td>473.astar</td>" >> $HTMLMAIN
 	cd ${SPECROOT}/CPU2006/473.astar/src
     compile_spec "473.astar"
-    make SPEC=${SPECROOT} clean
-    make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP}
     cd ..
     chmod u+x *.sh
-#    ./runme.sh
+    run_test "runme.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "yes"  "473.astar-test"
+    run_test "runme.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "no"   "473.astar-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 echo -ne "</table>\n" >> $HTMLMAIN

@@ -401,11 +401,12 @@ run_tests_acsim_acstone() {
 # Param1 is modelname (e.g. "armv5e")
 # Param2 is mibench root (e.g. "${TESTROOT}/acsim/ARMMibench")
 # Param3 is model's svn revision number (e.g. "${ARMREV})
-# e.g. run_tests_acsim_mibench "armv5e" "${TESTROOT}/acsim/ARMMibench" "${ARMREV}"
+# e.g. run_tests_acsim_mibench "armv5e" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}"
 run_tests_acsim_mibench() {
   MODELNAME=$1
   MODELBENCHROOT=$2
-  MODELREV=$3
+  MODELSPECROOT=$3
+  MODELREV=$4
 
   # Preparing test script
   ARCH="${MODELNAME}"
@@ -413,7 +414,7 @@ run_tests_acsim_mibench() {
   GOLDENROOT=${TESTROOT}/acsim/GoldenMibench
   GOLDENSPECROOT=${TESTROOT}/acsim/GoldenSpec
   MIBENCHROOT=${MODELBENCHROOT} 
-  SPECROOT=${TESTROOT}/acsim/spec2006 
+  SPECROOT=${MODELSPECROOT} 
   STATSROOT=${BENCHROOT}/stats
   # Collect statistical information 
   if [ "$COLLECT_STATS" != "no" ]; then
@@ -448,7 +449,7 @@ run_tests_acsim_mibench() {
   export JPEG
   export LAME
 
-  export BZIP2	
+  export BZIP_2	
   export MCF 
   export GOBMK    
   export HMMER      
@@ -460,6 +461,7 @@ run_tests_acsim_mibench() {
 
   export TESTROOT
   export TESTCOMPILER
+  export TESTCOMPILERCPP
   export TESTAR
   export TESTRANLIB
   export TESTFLAG
@@ -929,11 +931,11 @@ fi
 ############################################################################
 ### SPEC Benchmark: due the size, I am using the same dir for all Models ###
 ############################################################################
-echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
-#tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-cp -r ${SCRIPTROOT}/sources/spec2006 ${TESTROOT}/acsim
-[ $? -ne 0 ] && do_abort
-#mv SourceSPEC2006 spec2006
+#echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
+##tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+#cp -r ${SCRIPTROOT}/sources/spec2006 ${TESTROOT}/acsim
+#[ $? -ne 0 ] && do_abort
+##mv SourceSPEC2006 spec2006
 
 
 ######################################
@@ -962,7 +964,7 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
 
   echo -ne "Uncompressing correct results for SPEC2006...\n"
   cd ${TESTROOT}/acsim
-  tar -xjf ${SCRIPTROOT}/sources/GoldenSpec.tar.bz2
+  tar -xjf ${SCRIPTROOT}/sources/GoldenSPEC2006.tar.bz2
   [ $? -ne 0 ] && do_abort
 
 fi
@@ -978,7 +980,13 @@ if [ "$RUN_ARM_ACSIM" != "no" ]; then
     tar -xjf ${SCRIPTROOT}/sources/SourceLittleEndianMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
     mv SourceLittleEndianMibench ARMMibench
+    echo -ne "Uncompressing SPEC2006 from source to ARM cross compiling...\n"
+    #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+    cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+    [ $? -ne 0 ] && do_abort
+    mv SourceSPEC2006 ARMSpec
     export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
+    export TESTCOMPILERCPP=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
     export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
     export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
     export TESTFLAG=$CROSS_ARM_FLAG
@@ -987,8 +995,7 @@ if [ "$RUN_ARM_ACSIM" != "no" ]; then
     tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
   fi
-
-  run_tests_acsim_mibench "arm" "${TESTROOT}/acsim/ARMMibench" "${ARMREV}"
+  run_tests_acsim_mibench "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}"
 fi
 
 ##########################################
@@ -1001,7 +1008,13 @@ if [ "$RUN_SPARC_ACSIM" != "no" ]; then
      tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
      mv SourceBigEndianMibench SparcMibench
+     echo -ne "Uncompressing SPEC2006 from source to SPARC cross compiling...\n"
+     #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+     cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+     [ $? -ne 0 ] && do_abort
+     mv SourceSPEC2006 SparcSpec
      export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
+     export TESTCOMPILERCPP=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
      export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
      export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
      export TESTFLAG=$CROSS_SPARC_FLAG
@@ -1012,7 +1025,7 @@ if [ "$RUN_SPARC_ACSIM" != "no" ]; then
     [ $? -ne 0 ] && do_abort
   fi
 
-  run_tests_acsim_mibench "sparc" "${TESTROOT}/acsim/SparcMibench" "${SPARCREV}"
+  run_tests_acsim_mibench "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}"
 fi
 
 ##########################################
@@ -1025,6 +1038,11 @@ if [ "$RUN_MIPS_ACSIM" != "no" ]; then
      tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
      mv SourceBigEndianMibench MipsMibench
+     echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
+     #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+     cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+     [ $? -ne 0 ] && do_abort
+     mv SourceSPEC2006 MipsSpec
      export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
      export TESTCOMPILERCPP=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
      export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
@@ -1037,7 +1055,7 @@ if [ "$RUN_MIPS_ACSIM" != "no" ]; then
     [ $? -ne 0 ] && do_abort
   fi
 
-  run_tests_acsim_mibench "mips" "${TESTROOT}/acsim/MipsMibench" "${MIPSREV}"
+  run_tests_acsim_mibench "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}"
 fi
 
 ##########################################
@@ -1050,7 +1068,13 @@ if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
      tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
      mv SourceBigEndianMibench PowerPCMibench
+     echo -ne "Uncompressing SPEC2006 from source to POWERPC cross compiling...\n"
+     #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+     cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+     [ $? -ne 0 ] && do_abort
+     mv SourceSPEC2006 PowerPCSpec
      export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
+     export TESTCOMPILERCPP=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
      export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
      export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
      export TESTFLAG=$CROSS_POWERPC_FLAG
@@ -1061,7 +1085,7 @@ if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
      [ $? -ne 0 ] && do_abort
   fi
 
-  run_tests_acsim_mibench "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${PPCREV}"
+  run_tests_acsim_mibench "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}"
 fi
 
 #################################

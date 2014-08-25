@@ -175,11 +175,10 @@ clone_or_copy_model(){
 # Param1 is modelname (e.g. "armv5e")
 # Param2 says if we really should build using ACSIM, or just do the svn checkout (e.g. "$RUN_ARM_ACSIM")
 # Param3 says if the working copy have source simulator
-# e.g. ARMREV=build_model "armv5e"  "$RUN_ARM_ACSIM" "$LOCALSIMULATOR"
+# e.g. ARMREV=build_model "armv5e"  "$RUN_ARM_ACSIM" 
 build_model() {
   MODELNAME=$1
   USEACSIM=$2
-  LOCALSIMULATOR=$3
   
 if [ "$USEACSIM" != "no" ]; then    
     if [ "$RUN_ACSTONE" != "no" ]; then
@@ -660,6 +659,7 @@ cd ${TESTROOT}/acsrc
 if [ -z "$CLONELINK" ]; then
   echo -ne "Copying ArchC source from a local directory...\n"
   cp -a ${WORKINGCOPY} ./ &> /dev/null
+  make distclean &> /dev/null
   [ $? -ne 0 ] && {
     echo -ne "<p><b><font color=\"crimson\">ArchC source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
@@ -841,7 +841,7 @@ fi
 
 ### Build Models
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
-  build_model "arm" "${RUN_ARM_ACSIM}" "${LOCALSIMULATOR}"
+  build_model "arm" "${RUN_ARM_ACSIM}" 
   if [ "$RUN_ARM_ACASM" != "no" ]; then
     build_binary_tools "arm"
     build_original_toolchain "arm" "arm"
@@ -851,7 +851,7 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" !
   fi
 fi
 if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
-  build_model "sparc" "${RUN_SPARC_ACSIM}" "${LOCALSIMULATOR}"
+  build_model "sparc" "${RUN_SPARC_ACSIM}" 
   if [ "$RUN_SPARC_ACASM" != "no" ]; then
     build_binary_tools "sparc"
     build_original_toolchain "sparc" "sparc"
@@ -861,7 +861,7 @@ if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACC
   fi
 fi
 if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
-  build_model "mips" "${RUN_MIPS_ACSIM}" "${LOCALSIMULATOR}"
+  build_model "mips" "${RUN_MIPS_ACSIM}" 
   if [ "$RUN_MIPS_ACASM" != "no" ]; then
     build_binary_tools "mips"
     build_original_toolchain "mips" "mips"
@@ -871,7 +871,7 @@ if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM
   fi
 fi
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-  build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${LOCALSIMULATOR}"
+  build_model "powerpc" "${RUN_POWERPC_ACSIM}" 
   if [ "$RUN_POWERPC_ACASM" != "no" ]; then
     build_binary_tools "powerpc"
     build_original_toolchain "powerpc" "powerpc"

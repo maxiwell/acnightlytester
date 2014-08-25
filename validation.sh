@@ -419,8 +419,8 @@ echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td>
 
 # --- SPEC2006 ---
 
-echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test data set</th><th>Speed</th><th># Instr.</th>
-                                                                  <th>Ref data set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
+echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test Data Set</th><th>Speed</th><th># Instr.</th>
+                                                                  <th>Ref Data Set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
 
 [ "$BZIP_2" != "no" ] && {
 	echo -ne "\nCurrently testing: 401.bzip2\n"

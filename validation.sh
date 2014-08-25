@@ -418,9 +418,10 @@ echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td>
 
 
 # --- SPEC2006 ---
-
-echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test Data Set</th><th>Speed</th><th># Instr.</th>
+if is_spec2006_enabled; then
+    echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test Data Set</th><th>Speed</th><th># Instr.</th>
                                                                   <th>Ref Data Set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
+fi
 
 [ "$BZIP_2" != "no" ] && {
 	echo -ne "\nCurrently testing: 401.bzip2\n"

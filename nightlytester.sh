@@ -60,6 +60,23 @@ fi
 # Functions
 
 
+is_spec2006_enabled(){
+    if  [ "$BZIP_2" == "no" ] &&
+        [ $MCF == "no" ] &&
+        [ $GOBMK == "no" ] &&
+        [ $HMMER == "no" ] &&      
+        [ $SJENG == "no" ] &&
+        [ $LIBQUANTUM == "no" ] &&
+        [ $H264 == "no" ] &&        
+        [ $OMNETPP == "no" ] &&
+        [ $ASTAR == "no" ]; then
+            return 1;
+        else
+            return 0;
+        fi
+}
+
+
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
 
@@ -464,6 +481,8 @@ run_tests_acsim_mibench() {
   export TESTAR
   export TESTRANLIB
   export TESTFLAG
+
+  export -f is_spec2006_enabled
 
   cd ${TESTROOT}/acsim
   ./validation.sh
@@ -962,10 +981,12 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
   tar -xjf ${SCRIPTROOT}/sources/GoldenMibench.tar.bz2
   [ $? -ne 0 ] && do_abort
 
-  echo -ne "Uncompressing correct results for SPEC2006...\n"
-  cd ${TESTROOT}/acsim
-  tar -xjf ${SCRIPTROOT}/sources/GoldenSPEC2006.tar.bz2
-  [ $? -ne 0 ] && do_abort
+  if is_spec2006_enabled; then
+      echo -ne "Uncompressing correct results for SPEC2006...\n"
+    cd ${TESTROOT}/acsim
+    tar -xjf ${SCRIPTROOT}/sources/GoldenSPEC2006.tar.bz2
+    [ $? -ne 0 ] && do_abort
+  fi
 
 fi
 
@@ -980,11 +1001,14 @@ if [ "$RUN_ARM_ACSIM" != "no" ]; then
     tar -xjf ${SCRIPTROOT}/sources/SourceLittleEndianMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
     mv SourceLittleEndianMibench ARMMibench
-    echo -ne "Uncompressing SPEC2006 from source to ARM cross compiling...\n"
-    #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-    cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
-    [ $? -ne 0 ] && do_abort
-    mv SourceSPEC2006 ARMSpec
+
+    if is_spec2006_enabled; then
+        echo -ne "Uncompressing SPEC2006 from source to ARM cross compiling...\n"
+        #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+        cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+        [ $? -ne 0 ] && do_abort
+        mv SourceSPEC2006 ARMSpec
+    fi
     export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
     export TESTCOMPILERCPP=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
     export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
@@ -994,6 +1018,13 @@ if [ "$RUN_ARM_ACSIM" != "no" ]; then
     echo -ne "Uncompressing Mibench precompiled for ARM...\n"
     tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
+    
+    #FIXME: Make precompiled for SPEC2006
+    if is_spec2006_enabled; then
+       echo -ne "SPEC precompiled unavailable\n"
+       do_abort
+    fi
+
   fi
   run_tests_acsim_mibench "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}"
 fi

@@ -3,12 +3,5 @@ localfiles/
 tools/
 sources/older
 public_html/
-sources/ARMMibench.tar.bz2
-sources/GoldenMibench.tar.bz2
-sources/MipsMibench.tar.bz2
-sources/PowerPCMibench.tar.bz2
-sources/SourceBigEndianMibench.tar.bz2
-sources/SourceLittleEndianMibench.tar.bz2
-sources/SparcMibench.tar.bz2
-sources/acasm-validation.tar.bz2
+sources/*.tar.bz2
 

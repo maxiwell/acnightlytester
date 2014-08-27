@@ -311,7 +311,7 @@ build_gdb() {
   mkdir -p binutils
   echo -ne "Building GDB for ${MODELNAME}...\n"
   TEMPFL=${RANDOM}.out
-  ${TESTROOT}/install/bin/acbingen.sh -f ${MODELNAME}.ac > $TEMPFL 2>&1 &&    
+  #${TESTROOT}/install/bin/acbingen.sh -a ${MODELNAME}_1 -f ${MODELNAME}.ac > $TEMPFL 2>&1 &&    
     mkdir build-gdb &&
     cd build-gdb &&
     ${GDBPATH}/configure --target=${MODELNAME}-elf --prefix=${TESTROOT}/${MODELNAME}/binutils >> $TEMPFL 2>&1 &&
@@ -738,17 +738,17 @@ fi
 
 ## gdb
 ## Only decompress if running acsim tests (gdb is used to validate correct execution of acstone benchmark)
-#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
-#  if [ "$RUN_ACSTONE" != "no" ]; then
-#    echo -ne "Uncompressing gdb...\n"
-#    mkdir ${TESTROOT}/gdb
-#    cd ${TESTROOT}/gdb
-#    tar -xjf ${SCRIPTROOT}/sources/gdb-6.4.tar.bz2
-#    cd gdb-6.4
+if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
+  if [ "$RUN_ACSTONE" != "no" ]; then
+    echo -ne "Copying GDB source...\n"
+    mkdir ${TESTROOT}/gdb
+    cd ${TESTROOT}/gdb
+    cp -r $GDBPATH .
 #    wget http://www.ic.unicamp.br/~auler/fix-gdb-6.4.patch > /dev/null 2>&1
 #    patch -p1 < ./fix-gdb-6.4.patch 
-#  fi
-#fi
+    GDBPATH=${TESTROOT}/gdb/$(basename $GDBPATH)
+  fi
+fi
 #
 # gcc
 #echo -ne "Uncompressing gcc...\n"

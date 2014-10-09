@@ -168,6 +168,9 @@ run_test() {
 		echo -ne "Running script ${TESTSCRIPT}...\n"
 		TEMPFL=${RANDOM}.out
 		./${TESTSCRIPT} > $TEMPFL 2>&1
+        if [ $DIRSIMULATOR == "powersc" ]; then
+            mv window_power_report_mips.csv ${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
+        fi
 		if [ "$COLLECT_STATS" != "no" ]; then
 		  # Copy output to stats folder, to be later processed by collect_stats.py
 		  cp $TEMPFL ${STATSROOT}/${TESTNAME}.${ARCH}.stats
@@ -201,8 +204,14 @@ run_test() {
                 else
 		  echo -ne "<td><b><font color=\"crimson\"> Failed </font></b>" >> $HTMLMAIN
 		fi
-		echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
-		echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN
+        if [ $DIRSIMULATOR == "powersc" ]; then
+    	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
+    	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
+            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt\">power report</a>)</td>" >> $HTMLMAIN
+        else
+    	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
+            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN
+        fi
 		# Printing simulation speed and number of instructions processed
 		echo -ne "<td><b>$SIMSPEED</b></td>" >> $HTMLMAIN
 		echo -ne "<td><b>$NUMINSTRS</b></td>" >> $HTMLMAIN

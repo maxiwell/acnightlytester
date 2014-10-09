@@ -441,6 +441,7 @@ run_tests_acsim() {
   export SPECROOT
   export STATSROOT
   export COLLECT_STATS
+  export RUN_POWERSC
 
   # Define which programs to test (definition in nightlytester.conf)  
   export BASICMATH

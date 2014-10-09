@@ -763,12 +763,15 @@ test_powersc() {
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
         build_model "sparc" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        [[ "$build_fault" == "yes" ]] && SPARC_POWERSC="no"
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
         build_model "mips" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        [[ "$build_fault" == "yes" ]] && MIPS_POWERSC="no"
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
         build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        [[ "$build_fault" == "yes" ]] && POWERPC_POWERSC="no"
     fi
 
     cp ${SCRIPTROOT}/validation.sh ${TESTROOT}/acsim/validation.sh

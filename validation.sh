@@ -169,7 +169,7 @@ run_test() {
 		TEMPFL=${RANDOM}.out
 		./${TESTSCRIPT} > $TEMPFL 2>&1
         if [ $DIRSIMULATOR == "powersc" ]; then
-            mv window_power_report_mips.csv ${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
+            mv window_power_report_${ARCH}.csv ${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
         fi
 		if [ "$COLLECT_STATS" != "no" ]; then
 		  # Copy output to stats folder, to be later processed by collect_stats.py

@@ -185,6 +185,8 @@ build_model() {
       USEACSIM=$2
       LOCAL_PARAMS=$3  # Each test have a specific set of params
       LOCAL_DIR=$4     # Each test have a specific dir (e.g. arm/acsim, arm/accsim, arm/acstone)
+    
+      build_fault="no"  # funcion return
 
     if [ "$USEACSIM" != "no" ]; then    
         echo -ne "Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params...\n"
@@ -748,7 +750,7 @@ test_powersc() {
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
 
     echo -ne "\n**********************************************\n"
-    echo -ne "* Testing ACSIM simple                      **\n"
+    echo -ne "* Testing PowerSC                           **\n"
     echo -ne "**********************************************\n"
 
     ARM_POWERSC=$RUN_ARM_ACSIM

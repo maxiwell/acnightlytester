@@ -163,7 +163,7 @@ run_test() {
 	CONDITION=$5
 	TESTNAME=$6
 	if [ "$CONDITION" != "no" ]; then
-		HTML_RUN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${TESTNAME}-run.htm
+		HTML_RUN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm
 		initialize_html $HTML_RUN "${TESTNAME} simulator output"
 		echo -ne "Running script ${TESTSCRIPT}...\n"
 		TEMPFL=${RANDOM}.out
@@ -180,7 +180,7 @@ run_test() {
 		format_html_output $TEMPFL $HTML_RUN
 		finalize_html $HTML_RUN ""
 		rm $TEMPFL
-		HTML_DIFF=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${TESTNAME}-diff.htm
+		HTML_DIFF=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm
 		initialize_html $HTML_DIFF "${TESTNAME} - output compared with golden model"
 		DIFFERENCES=""
 		for RESULTFILE in $COMPLIST 
@@ -201,8 +201,8 @@ run_test() {
                 else
 		  echo -ne "<td><b><font color=\"crimson\"> Failed </font></b>" >> $HTMLMAIN
 		fi
-		echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
-		echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN
+		echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
+		echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN
 		# Printing simulation speed and number of instructions processed
 		echo -ne "<td><b>$SIMSPEED</b></td>" >> $HTMLMAIN
 		echo -ne "<td><b>$NUMINSTRS</b></td>" >> $HTMLMAIN
@@ -215,17 +215,17 @@ run_test() {
 
 # This function will sumarize statistical information about all ran programs using the collect_stats.py script.
 build_stats() {
-  HTMLSTATS=${LOGROOT}/${HTMLPREFIX}-${ARCH}-mibench-stats.htm
+  HTMLSTATS=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-mibench-stats.htm
   initialize_html $HTMLSTATS "Mibench for ${ARCH} instruction usage data"
   cd ${STATSROOT}  
   python collect_stats.py ${ARCH} &> /dev/null
   format_html_output total.${ARCH}.stats $HTMLSTATS
   finalize_html $HTMLSTATS ""
-  echo -ne "<p><B>Statistical information about instructions usage per category is available <a href=\"${HTMLPREFIX}-${ARCH}-mibench-stats.htm\">here</a>.</B></p>\n" >> $HTMLMAIN
+  echo -ne "<p><B>Statistical information about instructions usage per category is available <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-mibench-stats.htm\">here</a>.</B></p>\n" >> $HTMLMAIN
 }
 
 ### Creating HTML's headers and general structure ###
-HTMLMAIN=${LOGROOT}/${HTMLPREFIX}-${ARCH}.htm
+HTMLMAIN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}.htm
 echo -ne "<html> <head> <title> ${ARCH} Simulator - Mibench Results </title> </head><body>" > $HTMLMAIN
 echo -ne "<h1>${ARCH} Simulator - Mibench Results</h1>" >> $HTMLMAIN
 DATE=`date '+%a %D %r'`

@@ -869,8 +869,12 @@ fi
 echo -ne "</table></p>\n" >> $HTMLLOG
 
 if [ "$SYSTEMCCOMPILE" != "yes" ]; then
-  echo -ne "<p>Using user-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
-  echo -ne "<p>Using user-supplied TLM path: ${TLMPATH}</p>\n" >> $HTMLLOG
+  echo -ne "<p>User-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
+  echo -ne "<p>User-supplied TLM path: ${TLMPATH}</p>\n" >> $HTMLLOG
+fi
+
+if [ "$RUN_POWERSC" != "no" ]; then
+    echo -ne "<p>User-supplied PowerSC path: ${POWERSCPATH}</p>\n" >> $HTMLLOG
 fi
 
 # GIT clone and ArchC build configuration

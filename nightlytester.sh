@@ -870,7 +870,6 @@ echo -ne "</table></p>\n" >> $HTMLLOG
 
 if [ "$SYSTEMCCOMPILE" != "yes" ]; then
   echo -ne "<p>User-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
-  echo -ne "<p>User-supplied TLM path: ${TLMPATH}</p>\n" >> $HTMLLOG
 fi
 
 if [ "$RUN_POWERSC" != "no" ]; then
@@ -951,17 +950,6 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
   fi
 fi
 
-## tlm
-#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o 
-#   "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o 
-#   "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-#  echo -ne "Uncompressing tlm...\n"
-#  # only compile SystemC if we will run ACSIM/ACCSIM tests
-#  mkdir ${TESTROOT}/tlm
-#  cd ${TESTROOT}/tlm
-#  tar -xf ${SCRIPTROOT}/sources/TLM-1.0.tar.gz
-#fi
-#
 ## systemc
 #if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o 
 #   "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o 
@@ -988,7 +976,7 @@ POWERSC_STRING=""
 ./boot.sh > $TEMPFL 2>&1
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" -o  \
      "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-    ACSIM_STRING="--with-systemc=${SYSTEMCPATH} --with-tlm=${TLMPATH}"
+    ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
 fi
 if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
     ACASM_STRING="--with-binutils=${BINUTILSPATH}"

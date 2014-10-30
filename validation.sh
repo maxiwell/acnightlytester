@@ -163,6 +163,12 @@ run_test() {
 	CONDITION=$5
 	TESTNAME=$6
 	if [ "$CONDITION" != "no" ]; then
+        for RESULTFILE in $COMPLIST 
+		do
+            # remove older RESULTFILE, if exist
+            rm -f $RESULTFILE &> /dev/null
+        done
+
 		HTML_RUN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm
 		initialize_html $HTML_RUN "${TESTNAME} simulator output"
 		echo -ne "Running script ${TESTSCRIPT}...\n"

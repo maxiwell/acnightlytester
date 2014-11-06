@@ -984,10 +984,7 @@ fi
 if [ "$RUN_ACSTONE" != "no" ]; then
     ACSTONE_STRING=" --with-gdb=${GDBPATH}"
 fi
-if [ "$RUN_POWERSC" != "no" ]; then
-    POWERSC_STRING="--with-powersc=${POWERSCPATH}"
-fi
-./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING $POWERSC_STRING >> $TEMPFL 2>&1    
+./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
 
 # Compile
 make >> $TEMPFL 2>&1 &&

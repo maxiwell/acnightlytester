@@ -868,13 +868,6 @@ if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWER
 fi
 echo -ne "</table></p>\n" >> $HTMLLOG
 
-if [ "$SYSTEMCCOMPILE" != "yes" ]; then
-  echo -ne "<p>User-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
-fi
-
-if [ "$RUN_POWERSC" != "no" ]; then
-    echo -ne "<p>User-supplied PowerSC path: ${POWERSCPATH}</p>\n" >> $HTMLLOG
-fi
 
 # GIT clone and ArchC build configuration
 mkdir ${TESTROOT}
@@ -950,18 +943,9 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
   fi
 fi
 
-## systemc
-#if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o 
-#   "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o 
-#   "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-#  if [ "$SYSTEMCCOMPILE" != "no" ]; then
-#    echo -ne "Uncompressing SystemC...\n"
-#    # only compile SystemC if we will run ACSIM/ACCSIM tests
-#    mkdir ${TESTROOT}/systemc
-#    cd ${TESTROOT}/systemc
-#    tar -xjf ${SCRIPTROOT}/sources/systemc-2.2.0.tar.bz2
-#  fi
-#fi
+if [ "$SYSTEMCCOMPILE" != "yes" ]; then
+  echo -ne "<p>User-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
+fi
 
 ### Configure & install ArchC
 cd ${TESTROOT}/acsrc

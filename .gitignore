@@ -1,0 +1,9 @@
+
+localfiles/
+tools/
+sources/older
+public_html/
+sources/*.tar.bz2
+sources/spec2006-all/
+sources/SourceSPEC2006/
+sources/older

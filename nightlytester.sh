@@ -182,9 +182,10 @@ clone_or_copy_model(){
 
 build_model() {
       MODELNAME=$1
-      USEACSIM=$2
-      LOCAL_PARAMS=$3  # Each test have a specific set of params
-      LOCAL_DIR=$4     # Each test have a specific dir (e.g. arm/acsim, arm/accsim, arm/acstone)
+      MODELREV=$2
+      USEACSIM=$3
+      LOCAL_PARAMS=$4  # Each test have a specific set of params
+      LOCAL_DIR=$5     # Each test have a specific dir (e.g. arm/acsim, arm/accsim, arm/acstone)
     
       build_fault="no"  # funcion return
 
@@ -560,16 +561,16 @@ test_acsim_simple() {
     echo -ne "**********************************************\n"
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
-        build_model "arm" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
+        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-        build_model "sparc" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
+        build_model "sparc" "${SPARCREV}" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-        build_model "mips" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS}" "acsim"
+        build_model "mips" "${MIPSREV}" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS}" "acsim"
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-        build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
+        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
     fi
 
     cp ${SCRIPTROOT}/validation.sh ${TESTROOT}/acsim/validation.sh
@@ -721,22 +722,22 @@ test_acstone() {
     echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th></tr>\n" >> $HTMLLOG
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
-      build_model "arm" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
+      build_model "arm" "${ARMREV}"  "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
       build_gdb "arm"
       run_tests_acsim_acstone "arm" "${ARMREV}"
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-      build_model "sparc" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
+      build_model "sparc" "${SPARCREV}"  "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
       build_gdb "sparc"
       run_tests_acsim_acstone "sparc" "${SPARCREV}"
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-      build_model "mips" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
+      build_model "mips" "${MIPSREV}" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
       build_gdb "mips"
       run_tests_acsim_acstone "mips" "${MIPSREV}"
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-      build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
+      build_model "powerpc" "${PPCREV}"  "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -gdb" "acstone" 
       build_gdb "powerpc"
       run_tests_acsim_acstone "powerpc" "${PPCREV}"    
     fi
@@ -760,19 +761,19 @@ test_powersc() {
 
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
-        build_model "arm" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
         [[ "$build_fault" == "yes" ]] && ARM_POWERSC="no"
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-        build_model "sparc" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        build_model "sparc" "${SPARCREV}"  "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
         [[ "$build_fault" == "yes" ]] && SPARC_POWERSC="no"
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-        build_model "mips" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        build_model "mips" "${MIPSREV}"  "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
         [[ "$build_fault" == "yes" ]] && MIPS_POWERSC="no"
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-        build_model "powerpc" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
         [[ "$build_fault" == "yes" ]] && POWERPC_POWERSC="no"
     fi
 

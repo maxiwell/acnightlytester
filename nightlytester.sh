@@ -10,27 +10,43 @@
 NIGHTLYVERSION=2.0
 
 usage(){
-		echo -ne "\nusage: ./nightlytester.sh <config_file>\n\n"
+		echo -ne "\nusage: ./nightlytester.sh configfile.conf [options]\n"
+        echo -ne "\n    Options:"
+        echo -ne "\n        -f: optional flags to make the Nightly Tester run even if no changes in GIT repositories."
+        echo -ne "\n\n"
+
 }
 
 if [ $# -eq 0 ]; then
     usage
     exit
-else
+fi
+
 case "$1" in
     -h)
         usage
         exit
         ;;
 
-    *   )
+    *)
         if ! [ -f "$1" ]; then
            echo -ne "\nConfiguration file not found. Must run with a valid configuration file.\n\n"
            exit 1
         fi
        ;;
 esac
-fi
+
+case "$2" in
+    -f)
+        FORCENIGHTLY="yes"
+        ;;
+    *)
+        if ! [ -z "$2" ]; then
+            echo -ne "\nOption unrecognized: $2\n\n"
+            exit
+        fi
+        ;;
+esac
 
 . $1
 
@@ -86,7 +102,7 @@ finalize_nightly_tester() {
   rm -f TMPFILE
 
 
-  if [ "$LASTEQCURRENT" != "true" ]; then
+  if [ "$FORCENIGHTLY" == "yes" -o "$LASTEQCURRENT" == "no" ]; then
       HTMLLINE="<tr><td>${HTMLPREFIX}</td><td>${DATE}</td><td>${ARCHCREV}</td><td><a href=\"${HTMLPREFIX}-index.htm\">Here</a></td><td>${REVMESSAGE}</td><td>${HOSTNAME}</td></tr>"
       sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
       mv ${TEMPFL} $HTMLINDEX
@@ -474,7 +490,7 @@ run_tests_acsim() {
 
   export TESTROOT
   export TESTCOMPILER
-  export TESTCOMPILERCPP
+  export TESTCOMPILERCXX
   export TESTAR
   export TESTRANLIB
   export TESTFLAG
@@ -592,7 +608,7 @@ test_acsim() {
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
         echo -ne "\n Running ARM... \n"
         export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
-        export TESTCOMPILERCPP=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
+        export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
         export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_ARM_FLAG
@@ -601,7 +617,7 @@ test_acsim() {
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
         echo -ne "\n Running Sparc... \n"
         export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
-        export TESTCOMPILERCPP=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
+        export TESTCOMPILERCXX=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
         export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_SPARC_FLAG
@@ -610,7 +626,7 @@ test_acsim() {
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
         echo -ne "\n Running Mips... \n"
         export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
-        export TESTCOMPILERCPP=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
+        export TESTCOMPILERCXX=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
         export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_MIPS_FLAG
@@ -619,7 +635,7 @@ test_acsim() {
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
         echo -ne "\n Running PowerPC... \n"
         export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
-        export TESTCOMPILERCPP=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
+        export TESTCOMPILERCXX=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
         export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_POWERPC_FLAG
@@ -843,7 +859,7 @@ export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}
 export LASTHTMLPREFIX=$HTMLPREFIX
 
 export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
-export LASTEQCURRENT="true"
+export LASTEQCURRENT="yes"
 
 
 HTMLPREFIX=$(($HTMLPREFIX + 1))
@@ -858,7 +874,7 @@ echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLL
 echo -ne "<tr><th>Component</th><th>Link</th></tr>\n" >> $HTMLLOG
 if [ -z "$CLONELINK" ]; then
   echo -ne "<tr><td>ArchC</td><td>${WORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-  LASTEQCURRENT="false"
+  LASTEQCURRENT="no"
 else
   echo -ne "<tr><td>ArchC</td><td>${CLONELINK}</td></tr>\n" >> $HTMLLOG
 fi
@@ -866,7 +882,7 @@ fi
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
   if [ -z "$ARMGITLINK" ]; then
     echo -ne "<tr><td>ARM Model</td><td>${ARMWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="false"
+    LASTEQCURRENT="no"
   else
     echo -ne "<tr><td>ARM Model</td><td>${ARMGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -874,7 +890,7 @@ fi
 if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
   if [ -z "$MIPSGITLINK" ]; then
     echo -ne "<tr><td>MIPS Model</td><td>${MIPSWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="false"
+    LASTEQCURRENT="no"
   else
     echo -ne "<tr><td>MIPS Model</td><td>${MIPSGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -882,7 +898,7 @@ fi
 if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
   if [ -z "$SPARCGITLINK" ]; then
     echo -ne "<tr><td>SPARC Model</td><td>${SPARCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="false"
+    LASTEQCURRENT="no"
   else
    echo -ne "<tr><td>SPARC Model</td><td>${SPARCGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -890,7 +906,7 @@ fi
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
    if [ -z "$POWERPCGITLINK" ]; then
     echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="false"
+    LASTEQCURRENT="no"
   else
     echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCGITLINK}</td></tr>\n" >> $HTMLLOG
   fi
@@ -931,7 +947,7 @@ else
   #ARCHCREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
   ARCHCREV=$(git log | head -n1 | cut -c8-15)".."
   if [ ${ARCHCREV} != ${LASTARCHCREV} ]; then
-        LASTEQCURRENT="false"
+        LASTEQCURRENT="no"
   fi
   cd - &> /dev/null
   #rm $TEMPFL
@@ -1036,7 +1052,7 @@ if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWER
 fi
 
 # If All Revision tested in last execution, is not generated a new entry in the table
-if [ "$LASTEQCURRENT" != "false" ]; then
+if [ "$FORCENIGHTLY" != "yes" -a "$LASTEQCURRENT" == "yes" ]; then
     echo -ne "All Revisions tested in last execution\n"
     rm ${LOGROOT}/${HTMLPREFIX}-* 
     do_abort

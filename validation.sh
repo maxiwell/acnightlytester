@@ -107,7 +107,8 @@ compile_mibench() {
 		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${RANDOM}.out
-		make clean 
+        echo -ne "Compiling...\n"
+		make clean > /dev/null 
         make > $TEMPFL 2>&1
         EXCODE=$?
         if [ $EXCODE -ne 0 ]; then
@@ -129,8 +130,9 @@ compile_spec(){
 		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${RANDOM}.out
-        make SPEC=${SPECROOT} clean
-        make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCPP} > $TEMPFL 2>&1
+        echo -ne "Compiling...\n"
+        make SPEC=${SPECROOT} clean > /dev/null
+        make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCXX} > $TEMPFL 2>&1
         EXCODE=$?
         if [ $EXCODE -ne 0 ]; then
             echo -ne "<td><b><font color=\"crimson\"> Failed </font></b>" >> $HTMLMAIN

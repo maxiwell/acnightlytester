@@ -152,7 +152,7 @@ clone_or_copy_model(){
   else
     echo -ne "Cloning ${MODELNAME} ArchC Model GIT...\n"
     TEMPFL=${RANDOM}.out
-    #svn co ${SVNLINK} ${TESTROOT}/${MODELNAME} > $TEMPFL 2>&1
+    #svn co ${SVNLINK} ${TESTROOT}/${MODELNAME} > $TEMPFL 3>&2
     git clone ${GITLINK} ${TESTROOT}/${MODELNAME}/base > $TEMPFL 2>&1
     [ $? -ne 0 ] && {
       rm $TEMPFL
@@ -201,9 +201,9 @@ build_model() {
                 make -f Makefile.archc clean &> /dev/null
                 make -f Makefile.archc >> $TEMPFL 2>&1
             else
-                echo -ne "<p><b><font color=\"crimson\">${MODELNAME} Model GIT can not be used with LOCALSIMULATOR=yes. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+                echo -ne "<p><b><font color=\"crimson\">${MODELNAME} Makefile.archc not found; necessary when LOCALSIMULATOR=yes. Check script parameters.</font></b></p>\n" >> $HTMLLOG
                 finalize_html $HTMLLOG ""
-                echo -ne "GIT clone \e[31mfailed\e[m. GIT can not be used with LOCALSIMULATOR=yes. Check script parameters.\n"
+                echo -ne "Local simulator \e[31mfailed\e[m. Makefile.archc not found; necessary when LOCALSIMULATOR=yes. Check script parameters.\n"
                 do_abort
            fi 
         else
@@ -551,14 +551,22 @@ run_tests_accsim_mibench() {
 ### TEST DRIVER
 #######################################
 
-test_acsim_simple() {
+test_acsim() {
 
     echo -ne "<h3>Testing: ACSIM </h3>\n" >> $HTMLLOG
-    echo -ne "<p>Command used to build ACSIM models: <b> ./acsim model.ac ${ACSIM_PARAMS} </b> </p>\n" >> $HTMLLOG
+    if [ "$LOCALSIMULATOR" != "no" ]; then
+        echo -ne "<p>Testing a Local Simulator. The 'acsim' was not run</p>\n" >> $HTMLLOG
 
-    echo -ne "\n**********************************************\n"
-    echo -ne "* Testing ACSIM simple                      **\n"
-    echo -ne "**********************************************\n"
+        echo -ne "\n****************************************\n"
+        echo -ne "* Testing Local Simulator             **\n"
+        echo -ne "****************************************\n"
+    else
+        echo -ne "<p>Command used to build ACSIM models: <b> ./acsim model.ac ${ACSIM_PARAMS} </b> </p>\n" >> $HTMLLOG
+
+        echo -ne "\n****************************************\n"
+        echo -ne "* Testing ACSIM                       **\n"
+        echo -ne "****************************************\n"
+    fi
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
         build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
@@ -583,18 +591,38 @@ test_acsim_simple() {
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
         echo -ne "\n Running ARM... \n"
+        export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
+        export TESTCOMPILERCPP=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
+        export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_ARM_FLAG
         run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "acsim" 
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
         echo -ne "\n Running Sparc... \n"
+        export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
+        export TESTCOMPILERCPP=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
+        export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_SPARC_FLAG
         run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "acsim" 
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
         echo -ne "\n Running Mips... \n"
+        export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
+        export TESTCOMPILERCPP=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
+        export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_MIPS_FLAG
         run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "acsim" 
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
         echo -ne "\n Running PowerPC... \n"
+        export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
+        export TESTCOMPILERCPP=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
+        export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_POWERPC_FLAG
         run_tests_acsim "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}" "acsim" 
     fi
     
@@ -606,9 +634,9 @@ test_accsim() {
     echo -ne "<h3>Testing: ACCSIM </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build ACCSIM models: <b> ./accsim model.ac ${ACCSIM_PARAMS} /path/to/program </b> </p>\n" >> $HTMLLOG
 
-    echo -ne "\n**********************************************\n"
-    echo -ne "* Testing ACCSIM simple                      **\n"
-    echo -ne "**********************************************\n"
+    echo -ne "\n****************************************\n"
+    echo -ne "* Testing ACCSIM                       **\n"
+    echo -ne "*****************************************\n"
 
     cp ${SCRIPTROOT}/validation-accsim.sh ${TESTROOT}/acsim/validation-accsim.sh
     chmod u+x ${TESTROOT}/acsim/validation-accsim.sh
@@ -1037,9 +1065,9 @@ fi
 if [ "$RUN_ARM_ACSIM" != "no" ]; then   
   if [ "$COMPILE" != "no" ]; then
     echo -ne "Uncompressing Mibench from source to ARM cross compiling...\n"
-    tar -xjf ${SCRIPTROOT}/sources/SourceLittleEndianMibench.tar.bz2
+    tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
-    mv SourceLittleEndianMibench ARMMibench
+    mv SourceMibench ARMMibench
 
     if is_spec2006_enabled; then
         echo -ne "Uncompressing SPEC2006 from source to ARM cross compiling...\n"
@@ -1048,11 +1076,6 @@ if [ "$RUN_ARM_ACSIM" != "no" ]; then
         [ $? -ne 0 ] && do_abort
         mv SourceSPEC2006 ARMSpec
     fi
-    export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
-    export TESTCOMPILERCPP=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
-    export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
-    export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
-    export TESTFLAG=$CROSS_ARM_FLAG
   else
     echo -ne "Uncompressing Mibench precompiled for ARM...\n"
     tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
@@ -1070,19 +1093,14 @@ fi
 if [ "$RUN_SPARC_ACSIM" != "no" ]; then
   if [ "$COMPILE" != "no" ]; then
      echo -ne "Uncompressing Mibench from source to SPARC cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
+     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
-     mv SourceBigEndianMibench SparcMibench
+     mv SourceMibench SparcMibench
      echo -ne "Uncompressing SPEC2006 from source to SPARC cross compiling...\n"
      #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
      cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
      [ $? -ne 0 ] && do_abort
      mv SourceSPEC2006 SparcSpec
-     export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
-     export TESTCOMPILERCPP=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
-     export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
-     export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
-     export TESTFLAG=$CROSS_SPARC_FLAG
   else
     echo -ne "Uncompressing Mibench precompiled for SPARC...\n"
     cd ${TESTROOT}/acsim
@@ -1095,19 +1113,14 @@ fi
 if [ "$RUN_MIPS_ACSIM" != "no" ]; then
   if [ "$COMPILE" != "no" ]; then
      echo -ne "Uncompressing Mibench from source to MIPS cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
+     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
-     mv SourceBigEndianMibench MipsMibench
+     mv SourceMibench MipsMibench
      echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
      #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
      cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
      [ $? -ne 0 ] && do_abort
      mv SourceSPEC2006 MipsSpec
-     export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
-     export TESTCOMPILERCPP=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
-     export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
-     export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
-     export TESTFLAG=$CROSS_MIPS_FLAG
  else
     cd ${TESTROOT}/acsim
     echo -ne "Uncompressing Mibench precompiled for MIPS...\n"
@@ -1120,19 +1133,14 @@ fi
 if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
   if [ "$COMPILE" != "no" ]; then
      echo -ne "Uncompressing Mibench from source to POWERPC cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceBigEndianMibench.tar.bz2
+     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
      [ $? -ne 0 ] && do_abort
-     mv SourceBigEndianMibench PowerPCMibench
+     mv SourceMibench PowerPCMibench
      echo -ne "Uncompressing SPEC2006 from source to POWERPC cross compiling...\n"
      #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
      cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
      [ $? -ne 0 ] && do_abort
      mv SourceSPEC2006 PowerPCSpec
-     export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
-     export TESTCOMPILERCPP=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
-     export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
-     export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
-     export TESTFLAG=$CROSS_POWERPC_FLAG
   else 
      echo -ne "Uncompressing Mibench precompiled for PowerPC...\n"
      cd ${TESTROOT}/acsim
@@ -1145,8 +1153,17 @@ fi
 ###  Call the tests
 #########################
 
+if [ "$LOCALSIMULATOR" != "no" ]; then
+
+    # FIXME: Local Simulator may be any class of simulator, not only acsim class
+    test_acsim
+
+    finalize_nightly_tester
+    exit 0
+fi
+
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
-    test_acsim_simple
+    test_acsim
 fi
 
 if [ $RUN_POWERSC != "no" ]; then

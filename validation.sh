@@ -438,7 +438,7 @@ echo -ne "<tr><td colspan=8 height=25></td></tr>\n" >> $HTMLMAIN
 # --- SPEC2006 ---
 if is_spec2006_enabled; then
     echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test Data Set</th><th>Speed</th><th># Instr.</th>
-                                                                  <th>Ref Data Set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
+                                                                  <th>Train Data Set</th><th>Speed</th><th># Instr.</th></tr>\n" >> $HTMLMAIN
 fi
 
 [ "$BZIP_2" != "no" ] && {
@@ -448,8 +448,8 @@ fi
     compile_spec "401.bzip2"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.program.out" "no" "yes" "401.bzip2-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.combined.out" "no" "no"  "401.bzip2-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.program.out" "no" "$RUNTEST" "401.bzip2-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.combined.out" "no" "$RUNTRAIN"  "401.bzip2-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -460,8 +460,8 @@ fi
     compile_spec "429.mcf"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "yes" "429.mcf-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "no"  "429.mcf-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "$RUNTEST" "429.mcf-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/429.mcf/data/test/output" "inp.out" "no" "$RUNTRAIN"  "429.mcf-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -472,8 +472,8 @@ fi
     compile_spec "445.gobmk"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "yes" "445.gobmk-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "no"  "445.gobmk-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "$RUNTEST" "445.gobmk-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/445.gobmk/data/test/output" "capture.out" "no" "$RUNTRAIN"  "445.gobmk-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -484,8 +484,8 @@ fi
     compile_spec "456.hmmer"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "yes" "456.hmmer-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "no"  "456.hmmer-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "$RUNTEST" "456.hmmer-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/456.hmmer/data/test/output" "bombesin.out" "no" "$RUNTRAIN"  "456.hmmer-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -496,8 +496,8 @@ fi
     compile_spec "458.sjeng"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "yes" "458.sjeng-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "no"  "458.sjeng-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "$RUNTEST" "458.sjeng-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/458.sjeng/data/test/output" "test.out" "no" "$RUNTRAIN"  "458.sjeng-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -508,8 +508,8 @@ fi
     compile_spec "462.libquantum"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "yes" "462.libquantum-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "no"  "462.libquantum-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "$RUNTEST" "462.libquantum-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/462.libquantum/data/test/output" "test.out" "no" "$RUNTRAIN"  "462.libquantum-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -520,8 +520,8 @@ fi
     compile_spec "464.h264ref"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "yes"  "464.h264ref-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "no"   "464.h264ref-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "$RUNTEST"  "464.h264ref-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/464.h264ref/data/test/output" "foreman_test_baseline_encodelog.out" "no" "$RUNTRAIN"   "464.h264ref-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -532,8 +532,8 @@ fi
     compile_spec "471.omnetpp"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "yes"  "471.omnetpp-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "no"   "471.omnetpp-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "$RUNTEST"  "471.omnetpp-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/471.omnetpp/data/test/output" "omnetpp.log" "no" "$RUNTRAIN"   "471.omnetpp-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -544,8 +544,8 @@ fi
     compile_spec "473.astar"
     cd ..
     chmod u+x *.sh
-    run_test "runme.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "yes"  "473.astar-test"
-    run_test "runme.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "no"   "473.astar-test"
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "$RUNTEST"  "473.astar-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/473.astar/data/test/output" "lake.out" "no" "$RUNTRAIN"   "473.astar-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 echo -ne "</table>\n" >> $HTMLMAIN

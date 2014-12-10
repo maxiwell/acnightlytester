@@ -530,8 +530,10 @@ run_tests_accsim_mibench() {
   export ARCH
   export SIMULATOR 
   export RUNSMALL   # ==================================
-  export RUNLARGE   # Definition in nightlytester.conf
-  export COMPILE    # ==================================
+  export RUNLARGE   # 
+  export COMPILE    # Definition in nightlytester.conf
+  export RUNTEST    #
+  export RUNTRAIN   # ================================== 
   export GOLDENROOT
   export BENCHROOT
   export STATSROOT
@@ -856,12 +858,18 @@ test_powersc() {
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
 
-if [ -z $HTMLPREFIX ]; then
+if [ ! -a $HTMLPREFIX ]; then
     cp htmllogs/index.htm $HTMLINDEX
 fi
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
 export LASTHTMLPREFIX=$HTMLPREFIX
 export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
+
+if [ -z $LASTARCHCREV ]; then
+    echo -ne "Problem in index.html file.\n"
+    do_abort
+fi
+
 export LASTEQCURRENT="yes"
 
 HTMLPREFIX=$(($HTMLPREFIX + 1))
@@ -934,7 +942,7 @@ if [ -z "$CLONELINK" ]; then
   ARCHCREV="N/A"
 else
   echo -ne "Cloning ArchC GIT version...\n"
-  git clone $CLONELINK . > /dev/null 2>&1 
+  git clone $CLONELINK . > /dev/null 2>&1  
   [ $? -ne 0 ] && {
     rm $TEMPFL
     echo -ne "<p><b><font color=\"crimson\">ArchC GIT clone failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG

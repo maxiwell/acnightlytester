@@ -252,7 +252,7 @@ echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLM
 #echo -ne "<tr><th>Program</th><th>Program</th><th>Small</th><th></th><th></th><th>Large</th><th></th><th></th></tr>\n" >> $HTMLMAIN
 echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th>Speed</th><th># Instrs.</th><th>Simulation (large)</th><th>Speed</th><th># Instrs.</th></tr>\n" >> $HTMLMAIN
 
-echo -ne "<tr><td>Automotive</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+#echo -ne "<tr><td>Automotive</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 #basicmath
 [ "$BASICMATH" != "no" ] && {
 	echo -ne "\nCurrently testing: BASICMATH\n"
@@ -303,7 +303,7 @@ echo -ne "<tr><td>Automotive</td><td></td><td></td><td></td><td></td><td></td><t
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- telecomm ---
-echo -ne "<tr><td>Telecomm</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+#echo -ne "<tr><td>Telecomm</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 
 #adpcm - problema: Remover string produzida pelo "SystemC" no início do arquivo binário de saída - resolvido
 [ "$ADPCM" != "no" ] && {
@@ -352,7 +352,7 @@ echo -ne "<tr><td>Telecomm</td><td></td><td></td><td></td><td></td><td></td><td>
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- network ---
-echo -ne "<tr><td>Network</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+#echo -ne "<tr><td>Network</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 
 #dijkstra
 [ "$DIJKSTRA" != "no" ] && {
@@ -378,7 +378,7 @@ echo -ne "<tr><td>Network</td><td></td><td></td><td></td><td></td><td></td><td><
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- security ---
-echo -ne "<tr><td>Security</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+#echo -ne "<tr><td>Security</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 
 #rijndael
 [ "$RIJNDAEL" != "no" ] && {
@@ -405,7 +405,7 @@ echo -ne "<tr><td>Security</td><td></td><td></td><td></td><td></td><td></td><td>
 }
 
 # --- consumer ---
-echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
+#echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 
 #jpeg
 [ "$JPEG" != "no" ] && {
@@ -434,6 +434,7 @@ echo -ne "<tr><td>Consumer</td><td></td><td></td><td></td><td></td><td></td><td>
 }
 
 
+echo -ne "<tr><td colspan=8 height=25></td></tr>\n" >> $HTMLMAIN
 # --- SPEC2006 ---
 if is_spec2006_enabled; then
     echo -ne "<tr><th>SPEC2006</th><th>Compilation</th><th>Test Data Set</th><th>Speed</th><th># Instr.</th>

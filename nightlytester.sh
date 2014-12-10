@@ -184,10 +184,10 @@ clone_or_copy_model(){
     if [ "$LASTHTMLPREFIX" != "0" ]; then
         LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 5 | cut -d\< -f 1`
         if [ "$MODELREV" != "$LASTMODELREV" ]; then
-            LASTEQCURRENT="false"
+            LASTEQCURRENT="no"
         fi
     else
-        LASTEQCURRENT="false"
+        LASTEQCURRENT="no"
     fi
     cd - &> /dev/null
     #MODELREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
@@ -855,15 +855,16 @@ test_powersc() {
 
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
+
+if [ -z $HTMLPREFIX ]; then
+    cp htmllogs/index.htm $HTMLINDEX
+fi
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
 export LASTHTMLPREFIX=$HTMLPREFIX
-
 export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
 export LASTEQCURRENT="yes"
 
-
 HTMLPREFIX=$(($HTMLPREFIX + 1))
-
 HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"

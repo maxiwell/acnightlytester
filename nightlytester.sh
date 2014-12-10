@@ -452,8 +452,10 @@ run_tests_acsim() {
   export DIRSIMULATOR
   export SIMULATOR 
   export RUNSMALL   # ==================================
-  export RUNLARGE   # Definition in nightlytester.conf
-  export COMPILE    # ==================================
+  export RUNLARGE   # 
+  export COMPILE    # Definition in nightlytester.conf
+  export RUNTEST    #
+  export RUNTRAIN   # ================================== 
   export GOLDENROOT
   export GOLDENSPECROOT
   export MIBENCHROOT

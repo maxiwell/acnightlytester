@@ -78,6 +78,7 @@ fi
 
 is_spec2006_enabled(){
     if  [ "$BZIP_2" == "no" ] &&
+        [ "$GCC" == "no" ] &&
         [ $MCF == "no" ] &&
         [ $GOBMK == "no" ] &&
         [ $HMMER == "no" ] &&      
@@ -480,7 +481,8 @@ run_tests_acsim() {
   export JPEG
   export LAME
 
-  export BZIP_2	
+  export BZIP_2
+  export GCC  
   export MCF 
   export GOBMK    
   export HMMER      
@@ -489,6 +491,8 @@ run_tests_acsim() {
   export H264        
   export OMNETPP    
   export ASTAR      
+
+  export ENDIAN
 
   export TESTROOT
   export TESTCOMPILER
@@ -616,6 +620,7 @@ test_acsim() {
         export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_ARM_FLAG
+        export ENDIAN="little" 
         run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "acsim" 
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
@@ -625,6 +630,7 @@ test_acsim() {
         export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_SPARC_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "acsim" 
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
@@ -634,6 +640,7 @@ test_acsim() {
         export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_MIPS_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "acsim" 
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
@@ -643,6 +650,7 @@ test_acsim() {
         export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
         export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
         export TESTFLAG=$CROSS_POWERPC_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}" "acsim" 
     fi
     

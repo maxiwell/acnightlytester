@@ -109,7 +109,7 @@ compile_mibench() {
 		TEMPFL=${RANDOM}.out
         echo -ne "Compiling...\n"
 		make clean > /dev/null 
-        make > $TEMPFL 2>&1
+        make ENDIAN=${ENDIAN} > $TEMPFL 2>&1
         EXCODE=$?
         if [ $EXCODE -ne 0 ]; then
             echo -ne "<td><b><font color=\"crimson\"> failed </font></b>" >> $HTMLMAIN
@@ -132,7 +132,7 @@ compile_spec(){
 		TEMPFL=${RANDOM}.out
         echo -ne "Compiling...\n"
         make SPEC=${SPECROOT} clean > /dev/null
-        make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCXX} > $TEMPFL 2>&1
+        make SPEC=${SPECROOT} CC=${TESTCOMPILER} CXX=${TESTCOMPILERCXX} ENDIAN="${ENDIAN}" > $TEMPFL 2>&1
         EXCODE=$?
         if [ $EXCODE -ne 0 ]; then
             echo -ne "<td><b><font color=\"crimson\"> Failed </font></b>" >> $HTMLMAIN
@@ -452,6 +452,20 @@ fi
     run_test "runme_train.sh" "${GOLDENSPECROOT}/401.bzip2/data/test/output" "input.combined.out" "no" "$RUNTRAIN"  "401.bzip2-test"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
+
+[ "$GCC" != "no" ] && {
+    APP="403.gcc" 
+	echo -ne "\nCurrently testing: $APP\n"
+	echo -ne "<tr><td>$APP</td>" >> $HTMLMAIN
+	cd ${SPECROOT}/CPU2006/$APP/src
+    compile_spec "$APP"
+    cd ..
+    chmod u+x *.sh
+    run_test "runme_test.sh" "${GOLDENSPECROOT}/$APP/data/test/output" "cccp.s" "no" "$RUNTEST" "$APP-test"
+    run_test "runme_train.sh" "${GOLDENSPECROOT}/$APP/data/test/output" "integrate.s" "no" "$RUNTRAIN"  "$APP-test"
+	echo -ne "</tr>\n" >> $HTMLMAIN
+}
+
 
 [ "$MCF" != "no" ] && {
 	echo -ne "\nCurrently testing: 429.mcf\n"

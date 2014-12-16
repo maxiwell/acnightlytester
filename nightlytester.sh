@@ -843,18 +843,42 @@ test_powersc() {
 
     if [ "$ARM_POWERSC" != "no" ]; then
         echo -ne "\n Running ARM... \n"
+        export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
+        export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
+        export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_ARM_FLAG
+        export ENDIAN="little" 
         run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "powersc"
     fi
     if [ "$SPARC_POWERSC" != "no" ]; then
         echo -ne "\n Running Sparc... \n"
+        export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
+        export TESTCOMPILERCXX=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
+        export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_SPARC_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "powersc"
     fi
     if [ "$MIPS_POWERSC" != "no" ]; then
         echo -ne "\n Running Mips... \n"
+        export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
+        export TESTCOMPILERCXX=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
+        export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_MIPS_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "powersc"
     fi
     if [ "$POWERPC_POWERSC" != "no" ]; then
         echo -ne "\n Running PowerPC... \n"
+        export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
+        export TESTCOMPILERCXX=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
+        export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
+        export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
+        export TESTFLAG=$CROSS_POWERPC_FLAG
+        export ENDIAN="big" 
         run_tests_acsim "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}" "powersc"
     fi
     

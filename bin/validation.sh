@@ -53,27 +53,6 @@
 #DIFF="diff --report-identical-file --brief"
 DIFF="diff -w"
 
-#programas
-#BASICMATH=yes # demorado
-#BITCOUNT=yes
-#QUICKSORT=yes
-#SUSAN=yes
-#ADPCM=yes
-#CRC=yes
-#FFT=yes # demorado
-#GSM=yes
-#DIJKSTRA=yes
-#PATRICIA=yes # demorado
-#RIJNDAEL=yes
-#SHA=yes
-#JPEG=yes
-#LAME=yes # demorado
-#filtro para remover o aviso do SystemC dos arquivos de saída
-#Apenas deverá ser usado se o SystemC produz um aviso "deprecated"
-#quando o simulador é executado.
-#FILTRO="sed 1,2d"
-# Script
-
 aplicafiltro() {
 	#${FILTRO} $1 > ${1}.temp
 	#mv ${1}.temp $1
@@ -260,8 +239,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/automotive/basicmath
 	compile_mibench "basicmath"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/automotive/basicmath" "output_small.txt" "yes" "$RUNSMALL" "basicmath-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/automotive/basicmath" "output_large.txt" "yes" "$RUNLARGE" "basicmath-large"	
+	run_test "runme_small.sh" "${GOLDENROOT}/automotive/basicmath" "output_small.txt" "no" "$RUNSMALL" "basicmath-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/automotive/basicmath" "output_large_softfloat.txt" "no" "$RUNLARGE" "basicmath-large"	
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -305,7 +284,7 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 # --- telecomm ---
 #echo -ne "<tr><td>Telecomm</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n" >> $HTMLMAIN
 
-#adpcm - problema: Remover string produzida pelo "SystemC" no início do arquivo binário de saída - resolvido
+#adpcm
 [ "$ADPCM" != "no" ] && {
 	echo -ne "\nCurrently testing: ADPCM\n"
 	echo -ne "<tr><td>adpcm</td>" >> $HTMLMAIN
@@ -313,8 +292,13 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	compile_mibench "adpcm"
 	cd ..
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm output_small.pcm" "yes" "$RUNSMALL" "adpcm-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm output_large.pcm" "yes" "$RUNLARGE" "adpcm-large"
+    if [ "$ENDIAN" == "big" ]; then
+    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm BIG_ENDIAN_output_small.pcm" "no" "$RUNSMALL" "adpcm-small"
+	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm BIG_ENDIAN_output_large.pcm" "no" "$RUNLARGE" "adpcm-large"
+    else
+    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm output_small.pcm" "no" "$RUNSMALL" "adpcm-small"
+	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm output_large.pcm" "no" "$RUNLARGE" "adpcm-large"
+    fi
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 #CRC32
@@ -324,8 +308,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/CRC32
 	compile_mibench "crc"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/CRC32" "output_small.txt" "yes" "$RUNSMALL" "crc32-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/CRC32" "output_large.txt" "yes" "$RUNLARGE" "crc32-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/CRC32" "output_small.txt" "no" "$RUNSMALL" "crc32-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/CRC32" "output_large.txt" "no" "$RUNLARGE" "crc32-large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 #FFT
@@ -335,8 +319,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/FFT
 	compile_mibench "fft"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/FFT" "output_small.txt output_small.inv.txt" "yes" "$RUNSMALL" "fft-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/FFT" "output_large.txt output_large.inv.txt" "yes" "$RUNLARGE" "fft-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/FFT" "output_small.txt output_small.inv.txt" "no" "$RUNSMALL" "fft-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/FFT" "output_large.txt output_large.inv.txt" "no" "$RUNLARGE" "fft-large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -347,8 +331,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/gsm
 	compile_mibench "gsm"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/gsm" "output_small.encode.gsm output_small.decode.run" "yes" "$RUNSMALL" "gsm-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/gsm" "output_large.encode.gsm output_large.decode.run" "yes" "$RUNLARGE" "gsm-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/gsm" "output_small.encode.gsm output_small.decode.run" "no" "$RUNSMALL" "gsm-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/gsm" "output_large.encode.gsm output_large.decode.run" "no" "$RUNLARGE" "gsm-large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- network ---
@@ -361,8 +345,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/network/dijkstra
 	compile_mibench "dijkstra"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/network/dijkstra" "output_small.dat" "yes" "$RUNSMALL" "dijkstra-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/network/dijkstra" "output_large.dat" "yes" "$RUNLARGE" "dijkstra-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/network/dijkstra" "output_small.dat" "no" "$RUNSMALL" "dijkstra-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/network/dijkstra" "output_large.dat" "no" "$RUNLARGE" "dijkstra-large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -373,8 +357,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/network/patricia
 	compile_mibench "patricia"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/network/patricia" "output_small.txt" "yes" "$RUNSMALL" "patricia-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/network/patricia" "output_large.txt" "yes" "$RUNLARGE" "patricia-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/network/patricia" "output_small.txt" "no" "$RUNSMALL" "patricia-small"
+	run_test "runme_large.sh" "${GOLDENROOT}/network/patricia" "output_large.txt" "no" "$RUNLARGE" "patricia-large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- security ---

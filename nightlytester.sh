@@ -605,11 +605,12 @@ test_acsim() {
         build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
     fi
 
-    cp ${SCRIPTROOT}/validation.sh ${TESTROOT}/acsim/validation.sh
+    cp ${SCRIPTROOT}/bin/validation.sh ${TESTROOT}/acsim/validation.sh
     chmod u+x ${TESTROOT}/acsim/validation.sh
+  
     export LOGROOT
     export HTMLPREFIX
-    
+
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
     echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th></tr>\n" >> $HTMLLOG
 
@@ -666,7 +667,7 @@ test_accsim() {
     echo -ne "* Testing ACCSIM                       **\n"
     echo -ne "*****************************************\n"
 
-    cp ${SCRIPTROOT}/validation-accsim.sh ${TESTROOT}/acsim/validation-accsim.sh
+    cp ${SCRIPTROOT}/bin/validation-accsim.sh ${TESTROOT}/acsim/validation-accsim.sh
     chmod u+x ${TESTROOT}/acsim/validation-accsim.sh
     export LOGROOT
     export HTMLPREFIX
@@ -759,8 +760,8 @@ test_acstone() {
     cd ${TESTROOT} &> /dev/null
     tar -xjf ${SCRIPTROOT}/sources/AllArchs-acstone.tar.bz2
     [ $? -ne 0 ] && do_abort
-    cp ${SCRIPTROOT}/acstone_run_all.sh ${TESTROOT}/acstone &&
-      cp ${SCRIPTROOT}/acstone_run_teste.sh ${TESTROOT}/acstone &&
+    cp ${SCRIPTROOT}/bin/acstone_run_all.sh ${TESTROOT}/acstone &&
+      cp ${SCRIPTROOT}/bin/acstone_run_teste.sh ${TESTROOT}/acstone &&
       cp ${SCRIPTROOT}/collect_stats.py ${TESTROOT}/acstone
     [ $? -ne 0 ] && do_abort	
     chmod u+x ${TESTROOT}/acstone/*.sh
@@ -833,7 +834,7 @@ test_powersc() {
         [[ "$build_fault" == "yes" ]] && POWERPC_POWERSC="no"
     fi
 
-    cp ${SCRIPTROOT}/validation.sh ${TESTROOT}/acsim/validation.sh
+    cp ${SCRIPTROOT}/bin/validation.sh ${TESTROOT}/acsim/validation.sh
     chmod u+x ${TESTROOT}/acsim/validation.sh
     export LOGROOT
     export HTMLPREFIX
@@ -961,8 +962,8 @@ echo -ne "</table></p>\n" >> $HTMLLOG
 mkdir ${TESTROOT}
 mkdir ${TESTROOT}/acsrc
 mkdir ${TESTROOT}/install
-cd ${TESTROOT}/acsrc
 
+cd ${TESTROOT}/acsrc
 if [ -z "$CLONELINK" ]; then
   echo -ne "Copying ArchC source from a local directory...\n"
   cp -a ${WORKINGCOPY} ./ &> /dev/null

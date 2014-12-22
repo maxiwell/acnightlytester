@@ -371,8 +371,14 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/security/rijndael
 	compile_mibench "rijndael"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large"
+
+    if [ "$ENDIAN" == "little" ]; then
+	    run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small"
+    	run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large"
+    else
+    	run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small"
+	    run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large"
+    fi
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }	
 

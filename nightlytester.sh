@@ -55,6 +55,32 @@ if [ "$COLLECT_STATS" != "no" ]; then
   ACSIM_PARAMS="${ACSIM_PARAMS} --stats"
 fi
 
+
+# ********************************
+# * Trap control                **
+# ********************************
+
+cleanup()
+{
+    echo -ne "Cleaning ${TESTROOT}\n"
+    rm -rf ${TESTROOT}
+    echo -ne "Cleaning ${LOGROOT}/${HTMLPREFIX}-*\n"
+    rm -rf ${LOGROOT}/${HTMLPREFIX}-*
+
+    rm -rf /tmp/nightly-token
+}
+
+
+control_c()
+{
+  echo -en "\n***Exiting ***\n"
+  cleanup
+  exit $?
+}
+ 
+# trap keyboard interrupt (control-c)
+trap control_c SIGINT
+
 # ********************************
 # * Software location constants **
 # ********************************
@@ -114,6 +140,9 @@ finalize_nightly_tester() {
   else
     echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
   fi
+
+  rm -f /tmp/nightly-token
+
 }
 
 do_abort() {
@@ -889,6 +918,14 @@ test_powersc() {
 ####################################
 ### ENTRY POINT
 ####################################
+
+# Check if other instance of Nightly is running
+if [ -a /tmp/nightly-token ]; then
+    echo -ne "A instance of Nightly is running...\n"
+    exit 0
+else
+    touch /tmp/nightly-token
+fi
 
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it

@@ -535,7 +535,16 @@ run_tests_acsim() {
   cd ${TESTROOT}/acsim
   ./validation.sh
   
-  echo -ne "<tr><td>${MODELNAME} </td><td>${MODELREV}</td><td><a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Here</a></td></tr>\n" >> $HTMLLOG
+  echo -ne "<tr><td>${MODELNAME} </td><td>${MODELREV}</td><td><a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Here</a></td>" >> $HTMLLOG
+  FAILED=`grep -ne "Failed" ${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
+  if [ -z "$FAILED" ]; then
+      echo -ne "<td><b><font color="green"> OK </font></b></td></tr>\n" >> $HTMLLOG
+  else
+      echo -ne "<td><b><font color="crimson"> Failed </font></b></td></tr>\n" >> $HTMLLOG
+  fi
+   
+
+
 }
 
 # This function is used to run simulation tests using Mibench and ArchC's generated *COMPILED* simulator for a target architecture
@@ -641,7 +650,7 @@ test_acsim() {
     export HTMLPREFIX
 
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
         echo -ne "\n Running ARM... \n"
@@ -869,7 +878,7 @@ test_powersc() {
     export HTMLPREFIX
     
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
 
     if [ "$ARM_POWERSC" != "no" ]; then
         echo -ne "\n Running ARM... \n"

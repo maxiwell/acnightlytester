@@ -638,7 +638,6 @@ test_acsim() {
         echo -ne "<tr><td>arm </td><td>${ARMREV}</td>" >> $HTMLLOG
         build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
         echo -ne "\n Running ARM... \n"
-#        export TUPLE=$CROSS_ARM/`ls $CROSS_ARM | cut -d- -f1-3` 
         export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
         export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
         export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 

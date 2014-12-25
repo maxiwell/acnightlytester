@@ -81,26 +81,11 @@ control_c()
 # trap keyboard interrupt (control-c)
 trap control_c SIGINT
 
-# ********************************
-# * Software location constants **
-# ********************************
-# If user-supplied path is not present, we must compile our own software packages
-
-# SystemC
-if [ -z "$SYSTEMCPATH" ]; then
-  SYSTEMCPATH=${TESTROOT}/systemc/install
-  SYSTEMCCOMPILE=yes
-else
-  SYSTEMCCOMPILE=no
-fi
-
 # *************************************
 # * Extracted sources path constants **
 # *************************************
 
-
 # Functions
-
 
 is_spec2006_enabled(){
     if  [ "$BZIP_2" == "no" ] &&
@@ -118,7 +103,6 @@ is_spec2006_enabled(){
             return 0;
         fi
 }
-
 
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
@@ -226,20 +210,25 @@ clone_or_copy_model(){
 
 }
 
+#######################################
+### BUILDING
+#######################################
+
 build_model() {
       MODELNAME=$1
       MODELREV=$2
       USEACSIM=$3
       LOCAL_PARAMS=$4  # Each test have a specific set of params
-      LOCAL_DIR=$5     # Each test have a specific dir (e.g. arm/acsim, arm/accsim, arm/acstone)
+      DIRSIMULATOR=$5     # Each test have a specific dir (e.g. arm/acsim, arm/accsim, arm/acstone)
     
       build_fault="no"  # funcion return
 
+      BUILD_RETCODE="false"
     if [ "$USEACSIM" != "no" ]; then    
-        echo -ne "Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params...\n"
+        echo -ne "\n Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
         cd ${TESTROOT}/${MODELNAME}
-        cp -r base $LOCAL_DIR
-        cd $LOCAL_DIR
+        cp -r base $DIRSIMULATOR
+        cd $DIRSIMULATOR
         TEMPFL=${RANDOM}.out
         if [ $LOCALSIMULATOR != "no" ]; then
             echo -ne "Using local source simulator...\n"
@@ -258,19 +247,19 @@ build_model() {
             fi
             ${TESTROOT}/install/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
         fi
-        RETCODE=$?
-        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${LOCAL_DIR}-build-log.htm
+        BUILD_RETCODE=$?
+        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
         initialize_html $HTMLBUILDLOG "${MODELNAME} rev $MODELREV build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
         rm $TEMPFL
-        if [ $RETCODE -ne 0 ]; then
-            echo -ne "<p><b><font color=\"crimson\">${MODELNAME} Model rev. $MODELREV build failed. Check <a href=\"${HTMLPREFIX}-${MODELNAME}-${LOCAL_DIR}-build-log.htm\">log</a>.</font></b></p>\n" >> $HTMLLOG  
-            finalize_html $HTMLLOG ""
+
+        if [ $BUILD_RETCODE -ne 0 ]; then
+            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>-</td></th>" >> $HTMLLOG
             echo -ne "ACSIM \e[31mfailed\e[m to build $MODELNAME model.\n"
             build_fault="yes"
         else
-            echo -ne "<p>${MODELNAME} Model rev. $MODELREV built successfully. Check <a href=\"${HTMLPREFIX}-${MODELNAME}-${LOCAL_DIR}-build-log.htm\">compilation log</a>.</p>\n" >> $HTMLLOG
+            echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG
         fi
     fi
 }
@@ -394,6 +383,10 @@ build_original_toolchain() {
     echo -ne "<p>${ARCHNAME} original binutils built successfully. Check <a href=\"${HTMLPREFIX}-${MODELNAME}-binutils-original-build-log.htm\">compilation log</a>.</p>\n" >> $HTMLLOG
   fi
 }
+
+#######################################
+### RUN TESTS
+#######################################
 
 # This functions is used to run simulations tests using ACSTONE and ArchC's generated simulator for a target architecture
 run_tests_acsim_acstone() {
@@ -535,8 +528,10 @@ run_tests_acsim() {
   cd ${TESTROOT}/acsim
   ./validation.sh
   
-  echo -ne "<tr><td>${MODELNAME} </td><td>${MODELREV}</td><td><a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Here</a></td>" >> $HTMLLOG
+  echo -ne "<td><a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Here</a></td>" >> $HTMLLOG
+
   FAILED=`grep -ne "Failed" ${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
+
   if [ -z "$FAILED" ]; then
       echo -ne "<td><b><font color="green"> OK </font></b></td></tr>\n" >> $HTMLLOG
   else
@@ -630,19 +625,6 @@ test_acsim() {
         echo -ne "****************************************\n"
     fi
 
-    if [ "$RUN_ARM_ACSIM" != "no" ]; then
-        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
-    fi
-    if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-        build_model "sparc" "${SPARCREV}" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
-    fi
-    if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-        build_model "mips" "${MIPSREV}" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS}" "acsim"
-    fi
-    if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
-    fi
-
     cp ${SCRIPTROOT}/bin/validation.sh ${TESTROOT}/acsim/validation.sh
     chmod u+x ${TESTROOT}/acsim/validation.sh
   
@@ -650,10 +632,13 @@ test_acsim() {
     export HTMLPREFIX
 
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Component</th><th>Version</th><th>Compilation</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
 
     if [ "$RUN_ARM_ACSIM" != "no" ]; then
+        echo -ne "<tr><td>arm </td><td>${ARMREV}</td>" >> $HTMLLOG
+        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS}" "acsim" 
         echo -ne "\n Running ARM... \n"
+#        export TUPLE=$CROSS_ARM/`ls $CROSS_ARM | cut -d- -f1-3` 
         export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
         export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
         export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
@@ -663,6 +648,8 @@ test_acsim() {
         run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "acsim" 
     fi
     if [ "$RUN_SPARC_ACSIM" != "no" ]; then
+        echo -ne "<tr><td>sparc </td><td>${SPARCREV}</td>" >> $HTMLLOG
+        build_model "sparc" "${SPARCREV}" "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
         echo -ne "\n Running Sparc... \n"
         export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
         export TESTCOMPILERCXX=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
@@ -673,6 +660,8 @@ test_acsim() {
         run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "acsim" 
     fi
     if [ "$RUN_MIPS_ACSIM" != "no" ]; then
+        echo -ne "<tr><td>mips </td><td>${MIPSREV}</td>" >> $HTMLLOG
+        build_model "mips" "${MIPSREV}" "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS}" "acsim"
         echo -ne "\n Running Mips... \n"
         export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
         export TESTCOMPILERCXX=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
@@ -683,6 +672,8 @@ test_acsim() {
         run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "acsim" 
     fi
     if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
+        echo -ne "<tr><td>powerpc </td><td>${PPCREV}</td>" >> $HTMLLOG
+        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS}" "acsim"
         echo -ne "\n Running PowerPC... \n"
         export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
         export TESTCOMPILERCXX=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
@@ -854,71 +845,69 @@ test_powersc() {
     MIPS_POWERSC=$RUN_MIPS_ACSIM
     POWERPC_POWERSC=$RUN_POWERPC_ACSIM
 
-
-    if [ "$RUN_ARM_ACSIM" != "no" ]; then
-        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
-        [[ "$build_fault" == "yes" ]] && ARM_POWERSC="no"
-    fi
-    if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-        build_model "sparc" "${SPARCREV}"  "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
-        [[ "$build_fault" == "yes" ]] && SPARC_POWERSC="no"
-    fi
-    if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-        build_model "mips" "${MIPSREV}"  "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
-        [[ "$build_fault" == "yes" ]] && MIPS_POWERSC="no"
-    fi
-    if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
-        [[ "$build_fault" == "yes" ]] && POWERPC_POWERSC="no"
-    fi
-
     cp ${SCRIPTROOT}/bin/validation.sh ${TESTROOT}/acsim/validation.sh
     chmod u+x ${TESTROOT}/acsim/validation.sh
     export LOGROOT
     export HTMLPREFIX
     
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Component</th><th>Version</th><th>Compilation</th><th>Report</th><th>Status</th></tr>\n" >> $HTMLLOG
 
     if [ "$ARM_POWERSC" != "no" ]; then
-        echo -ne "\n Running ARM... \n"
-        export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
-        export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
-        export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
-        export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
-        export TESTFLAG=$CROSS_ARM_FLAG
-        export ENDIAN="little" 
-        run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "powersc"
+        echo -ne "<tr><td>arm </td><td>${ARMREV}</td>" >> $HTMLLOG
+        build_model "arm" "${ARMREV}" "${RUN_ARM_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        if [ ${build_fault} != "yes" ]; then
+            echo -ne "\n Running ARM... \n"
+            export TESTCOMPILER=$CROSS_ARM/`ls $CROSS_ARM | grep gcc$` 
+            export TESTCOMPILERCXX=$CROSS_ARM/`ls $CROSS_ARM | grep g++$` 
+            export TESTAR=$CROSS_ARM/`ls $CROSS_ARM | grep "\-ar$" | grep -v gcc` 
+            export TESTRANLIB=$CROSS_ARM/`ls $CROSS_ARM | grep ranlib$ | grep -v gcc`
+            export TESTFLAG=$CROSS_ARM_FLAG
+            export ENDIAN="little" 
+            run_tests_acsim "arm" "${TESTROOT}/acsim/ARMMibench" "${TESTROOT}/acsim/ARMSpec" "${ARMREV}" "powersc"
+        fi
     fi
     if [ "$SPARC_POWERSC" != "no" ]; then
-        echo -ne "\n Running Sparc... \n"
-        export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
-        export TESTCOMPILERCXX=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
-        export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
-        export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
-        export TESTFLAG=$CROSS_SPARC_FLAG
-        export ENDIAN="big" 
-        run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "powersc"
+        echo -ne "<tr><td>sparc </td><td>${SPARCREV}</td>" >> $HTMLLOG
+        build_model "sparc" "${SPARCREV}"  "${RUN_SPARC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        if [ ${build_fault} != "yes" ]; then
+            echo -ne "\n Running Sparc... \n"
+            export TESTCOMPILER=$CROSS_SPARC/`ls $CROSS_SPARC | grep gcc$` 
+            export TESTCOMPILERCXX=$CROSS_SPARC/`ls $CROSS_SPARC | grep g++$` 
+            export TESTAR=$CROSS_SPARC/`ls $CROSS_SPARC | grep "\-ar$" | grep -v gcc` 
+            export TESTRANLIB=$CROSS_SPARC/`ls $CROSS_SPARC | grep ranlib$ | grep -v gcc`
+            export TESTFLAG=$CROSS_SPARC_FLAG
+            export ENDIAN="big" 
+            run_tests_acsim "sparc" "${TESTROOT}/acsim/SparcMibench" "${TESTROOT}/acsim/SparcSpec" "${SPARCREV}" "powersc"
+        fi
     fi
     if [ "$MIPS_POWERSC" != "no" ]; then
-        echo -ne "\n Running Mips... \n"
-        export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
-        export TESTCOMPILERCXX=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
-        export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
-        export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
-        export TESTFLAG=$CROSS_MIPS_FLAG
-        export ENDIAN="big" 
-        run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "powersc"
+        echo -ne "<tr><td>mips </td><td>${MIPSREV}</td>" >> $HTMLLOG
+        build_model "mips" "${MIPSREV}"  "${RUN_MIPS_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        if [ ${build_fault} != "yes" ]; then
+            echo -ne "\n Running Mips... \n"
+            export TESTCOMPILER=$CROSS_MIPS/`ls $CROSS_MIPS | grep gcc$` 
+            export TESTCOMPILERCXX=$CROSS_MIPS/`ls $CROSS_MIPS | grep g++$` 
+            export TESTAR=$CROSS_MIPS/`ls $CROSS_MIPS | grep "\-ar$" | grep -v gcc` 
+            export TESTRANLIB=$CROSS_MIPS/`ls $CROSS_MIPS | grep ranlib$ | grep -v gcc`
+            export TESTFLAG=$CROSS_MIPS_FLAG
+            export ENDIAN="big" 
+            run_tests_acsim "mips" "${TESTROOT}/acsim/MipsMibench" "${TESTROOT}/acsim/MipsSpec" "${MIPSREV}" "powersc"
+        fi
     fi
     if [ "$POWERPC_POWERSC" != "no" ]; then
-        echo -ne "\n Running PowerPC... \n"
-        export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
-        export TESTCOMPILERCXX=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
-        export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
-        export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
-        export TESTFLAG=$CROSS_POWERPC_FLAG
-        export ENDIAN="big" 
-        run_tests_acsim "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}" "powersc"
+        echo -ne "<tr><td>powerpc </td><td>${PPCREV}</td>" >> $HTMLLOG
+        build_model "powerpc" "${PPCREV}" "${RUN_POWERPC_ACSIM}" "${ACSIM_PARAMS} -pw" "powersc"
+        if [ ${build_fault} != "yes" ]; then
+            echo -ne "\n Running PowerPC... \n"
+            export TESTCOMPILER=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep gcc$` 
+            export TESTCOMPILERCXX=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep g++$` 
+            export TESTAR=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep "\-ar$" | grep -v gcc` 
+            export TESTRANLIB=$CROSS_POWERPC/`ls $CROSS_POWERPC | grep ranlib$ | grep -v gcc`
+            export TESTFLAG=$CROSS_POWERPC_FLAG
+            export ENDIAN="big" 
+            run_tests_acsim "powerpc" "${TESTROOT}/acsim/PowerPCMibench" "${TESTROOT}/acsim/PowerPCSpec" "${PPCREV}" "powersc"
+        fi
     fi
     
     finalize_html $HTMLLOG "</table></p>"

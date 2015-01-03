@@ -11,13 +11,12 @@ acsim_build_model() {
 
       BUILD_RETCODE="false"
     if [ "$USEACSIM" != "no" ]; then    
-        echo -ne "\n Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
         cd ${TESTROOT}/${MODELNAME}
         cp -r base $DIRSIMULATOR
         cd $DIRSIMULATOR
         TEMPFL=${RANDOM}.out
         if [ $LOCALSIMULATOR != "no" ]; then
-            echo -ne "Using local source simulator...\n"
+            echo -ne "\n Building ${MODELNAME} ArchC model from a local source simulator..."
             if [ -e Makefile.archc ]; then
                 make -f Makefile.archc clean &> /dev/null
                 make -f Makefile.archc >> $TEMPFL 2>&1
@@ -28,6 +27,7 @@ acsim_build_model() {
                 do_abort
            fi 
         else
+            echo -ne "\n Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
             if [ -e Makefile.archc ]; then
                 make -f Makefile.archc distclean &> /dev/null
             fi

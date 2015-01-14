@@ -13,7 +13,7 @@ powersc_test() {
  
     echo -ne "<h3>Testing: POWERSC </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
-    echo -ne "<p> <b> Note: </b> ARM and PowerPC models don't have POWERSC table files and were ignored</p>\n" >> $HTMLLOG 
+    echo -ne "<p> <b>Note: </b> ARM and PowerPC models don't have POWERSC table files.</p>\n" >> $HTMLLOG 
 
     echo -ne "\n**********************************************\n"
     echo -ne "* Testing PowerSC                           **\n"

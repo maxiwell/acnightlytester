@@ -11,17 +11,20 @@
 
 powersc_test() {
  
-    echo -ne "<h3>Testing: PowerSC </h3>\n" >> $HTMLLOG
+    echo -ne "<h3>Testing: POWERSC </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
+    echo -ne "<p> <b> Note: </b> ARM and PowerPC models don't have POWERSC table files and were ignored</p>\n" >> $HTMLLOG 
 
     echo -ne "\n**********************************************\n"
     echo -ne "* Testing PowerSC                           **\n"
     echo -ne "**********************************************\n"
 
-    ARM_POWERSC=$RUN_ARM_ACSIM
+    # ARM and PowerPC dont have POWERSC table files
+    ARM_POWERSC="no"
+    POWERPC_POWERSC="no"
+
     SPARC_POWERSC=$RUN_SPARC_ACSIM
     MIPS_POWERSC=$RUN_MIPS_ACSIM
-    POWERPC_POWERSC=$RUN_POWERPC_ACSIM
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh

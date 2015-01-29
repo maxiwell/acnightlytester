@@ -15,6 +15,41 @@ NIGHTLYVERSION=2.1
 . bin/helper_functions.sh
 . bin/acsim.sh
 . bin/powersc.sh
+. bin/localsim.sh
+
+#####################################
+### Functions
+#####################################
+create_test_env() {
+    MODEL=$1
+    RUN_MODEL=$2
+    if [ "$RUN_MODEL" != "no" ]; then   
+        if [ "$COMPILE" != "no" ]; then
+            echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
+            tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
+            [ $? -ne 0 ] && do_abort
+            mv SourceMibench ${MODEL}_mibench
+            if is_spec2006_enabled; then
+                echo -ne "Uncompressing SPEC2006 from source to ${MODEL} cross compiling...\n"
+                tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
+                [ $? -ne 0 ] && do_abort
+                mv SourceSPEC2006 ${MODEL}_spec
+            fi
+        else
+            echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
+            do_abort
+#            echo -ne "Uncompressing Mibench precompiled for ${MODEL}...\n"
+#            tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
+#            [ $? -ne 0 ] && do_abort
+#    
+#            #FIXME: Make precompiled for SPEC2006
+#            if is_spec2006_enabled; then
+#            echo -ne "SPEC precompiled unavailable\n"
+#            do_abort
+        fi
+    fi
+}
+
 
 ####################################
 ### ENTRY POINT
@@ -31,7 +66,8 @@ fi
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
 
-if [ ! -a $HTMLINDEX ]; then
+if [ ! -f $HTMLINDEX ]; then
+    mkdir $LOGROOT &> /dev/null
     cp htmllogs/index.htm $HTMLINDEX
 fi
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
@@ -243,132 +279,51 @@ fi
 mkdir ${TESTROOT}/acsim
 
 # Golden Environment             
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o     \
-     "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o \
-     "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-  echo -ne "Uncompressing correct results for Mibench...\n"
-  cd ${TESTROOT}/acsim
-  tar -xjf ${SCRIPTROOT}/sources/GoldenMibench.tar.bz2
-  [ $? -ne 0 ] && do_abort
-
-  if is_spec2006_enabled; then
-      echo -ne "Uncompressing correct results for SPEC2006...\n"
+if is_acsim_enabled; then
+    echo -ne "Uncompressing correct results for Mibench...\n"
     cd ${TESTROOT}/acsim
-    tar -xjf ${SCRIPTROOT}/sources/GoldenSPEC2006.tar.bz2
+    tar -xjf ${SCRIPTROOT}/sources/GoldenMibench.tar.bz2
     [ $? -ne 0 ] && do_abort
-  fi
-fi
-
-# Building ARM Test Environment  
-if [ "$RUN_ARM_ACSIM" != "no" ]; then   
-  if [ "$COMPILE" != "no" ]; then
-    echo -ne "Uncompressing Mibench from source to ARM cross compiling...\n"
-    tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
-    [ $? -ne 0 ] && do_abort
-    mv SourceMibench ARMMibench
     if is_spec2006_enabled; then
-        echo -ne "Uncompressing SPEC2006 from source to ARM cross compiling...\n"
-        #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-        cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
+        echo -ne "Uncompressing correct results for SPEC2006...\n"
+        tar -xjf ${SCRIPTROOT}/sources/GoldenSPEC2006.tar.bz2
         [ $? -ne 0 ] && do_abort
-        mv SourceSPEC2006 ARMSpec
     fi
-  else
-    echo -ne "Uncompressing Mibench precompiled for ARM...\n"
-    tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
-    [ $? -ne 0 ] && do_abort
-    
-    #FIXME: Make precompiled for SPEC2006
-    if is_spec2006_enabled; then
-       echo -ne "SPEC precompiled unavailable\n"
-       do_abort
-    fi
-  fi
 fi
 
-# Building SPARCV8 Test Environment 
-if [ "$RUN_SPARC_ACSIM" != "no" ]; then
-  if [ "$COMPILE" != "no" ]; then
-     echo -ne "Uncompressing Mibench from source to SPARC cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
-     [ $? -ne 0 ] && do_abort
-     mv SourceMibench SparcMibench
-     if is_spec2006_enabled; then
-         echo -ne "Uncompressing SPEC2006 from source to SPARC cross compiling...\n"
-         #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-         cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
-         [ $? -ne 0 ] && do_abort
-         mv SourceSPEC2006 SparcSpec
-     fi
- else
-    echo -ne "Uncompressing Mibench precompiled for SPARC...\n"
-    cd ${TESTROOT}/acsim
-    tar -xjf ${SCRIPTROOT}/sources/SparcMibench.tar.bz2
-    [ $? -ne 0 ] && do_abort
-  fi
-fi
-
-# Building MIPS Test Environment    
-if [ "$RUN_MIPS_ACSIM" != "no" ]; then
-  if [ "$COMPILE" != "no" ]; then
-     echo -ne "Uncompressing Mibench from source to MIPS cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
-     [ $? -ne 0 ] && do_abort
-     mv SourceMibench MipsMibench
-     if is_spec2006_enabled; then
-         echo -ne "Uncompressing SPEC2006 from source to MIPS cross compiling...\n"
-         #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-         cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
-         [ $? -ne 0 ] && do_abort
-         mv SourceSPEC2006 MipsSpec
-     fi
- else
-    cd ${TESTROOT}/acsim
-    echo -ne "Uncompressing Mibench precompiled for MIPS...\n"
-    tar -xjf ${SCRIPTROOT}/sources/MipsMibench.tar.bz2
-    [ $? -ne 0 ] && do_abort
-  fi
-fi
-
-# Building PowerPC Test Environment  
-if [ "$RUN_POWERPC_ACSIM" != "no" ]; then
-  if [ "$COMPILE" != "no" ]; then
-     echo -ne "Uncompressing Mibench from source to POWERPC cross compiling...\n"
-     tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
-     [ $? -ne 0 ] && do_abort
-     mv SourceMibench PowerPCMibench
-     if is_spec2006_enabled; then
-        echo -ne "Uncompressing SPEC2006 from source to POWERPC cross compiling...\n"
-        #tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-        cp -r ${SCRIPTROOT}/sources/SourceSPEC2006 ${TESTROOT}/acsim
-        [ $? -ne 0 ] && do_abort
-        mv SourceSPEC2006 PowerPCSpec
-    fi
-  else 
-     echo -ne "Uncompressing Mibench precompiled for PowerPC...\n"
-     cd ${TESTROOT}/acsim
-     tar -xjf ${SCRIPTROOT}/sources/PowerPCMibench.tar.bz2
-     [ $? -ne 0 ] && do_abort
-  fi
-fi
+create_test_env "arm"     $RUN_ARM_ACSIM
+create_test_env "sparc"   $RUN_SPARC_ACSIM
+create_test_env "mips"    $RUN_MIPS_ACSIM
+create_test_env "powerpc" $RUN_POWERPC_ACSIM
 
 if [ "$LOCALSIMULATOR" != "no" ]; then
 
-    # FIXME: Local Simulator may be any class of simulator, not only acsim class
-    acsim_test
+    localsim_prologue
+    localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $CROSS_ARM "little"
+    localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
+    localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
+    localsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $CROSS_POWERPC "big"
+    localsim_epilogue
 
     finalize_nightly_tester
     exit 0
 fi
 
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
-    acsim_test
-fi
+acsim_prologue
+acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $CROSS_ARM "little"
+acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
+acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
+acsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $CROSS_POWERPC "big"
+acsim_epilogue
 
 if [ $RUN_POWERSC != "no" ]; then
-    powersc_test
+    powersc_prologue
+    powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
+    powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
+    powersc_epilogue
 fi
 
+# FIXME DEPRECATED
 if [ "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
     accsim_test
 fi
@@ -380,6 +335,7 @@ fi
 if [ $RUN_ACSTONE != "no" ]; then
     acstone_test
 fi
+# FIXME ----------- 
 
 
 #########################
@@ -387,3 +343,4 @@ fi
 finalize_nightly_tester
 
 exit 0
+

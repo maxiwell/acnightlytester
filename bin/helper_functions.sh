@@ -95,11 +95,35 @@ is_spec2006_enabled(){
         [ $H264 == "no" ] &&        
         [ $OMNETPP == "no" ] &&
         [ $ASTAR == "no" ]; then
-            return 1;
-        else
-            return 0;
-        fi
+        return 1;
+    else
+        return 0;
+    fi
 }
+
+is_acsim_enabled() {
+    if [ "$RUN_ARM_ACSIM" != "no" ] ||
+       [  "$RUN_MIPS_ACSIM" != "no" ] ||
+       [  "$RUN_SPARC_ACSIM" != "no" ] ||
+       [  "$RUN_POWERPC_ACSIM" != "no" ]; then
+       return 0;
+    else
+       return 1;
+    fi
+}
+
+is_accsim_enabled() {
+    if [ "$RUN_ARM_ACCSIM" != "no" -o   \
+         "$RUN_MIPS_ACCSIM" != "no" -o  \
+         "$RUN_SPARC_ACCSIM" != "no" -o \
+         "$RUN_POWERPC_ACCSIM" != "no" ]; then
+        return 0;
+    else
+        return 1;
+    fi
+}
+
+
 
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
@@ -166,7 +190,7 @@ clone_or_copy_model(){
   mkdir -p ${TESTROOT}/${MODELNAME}/base
   if [ -z "$GITLINK" ]; then
     echo -ne "Copying $MODELNAME source from a local directory...\n"
-    cp -a ${MODELWORKINGCOPY} ${TESTROOT}/${MODELNAME}/base &> /dev/null
+    cp -a ${MODELWORKINGCOPY} ${TESTROOT}/${MODELNAME}/modelbase &> /dev/null
     [ $? -ne 0 ] && {
       echo -ne "<p><b><font color=\"crimson\">${MODELNAME} source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
       finalize_html $HTMLLOG ""

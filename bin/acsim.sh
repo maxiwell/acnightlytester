@@ -31,6 +31,7 @@ acsim_build_model() {
             echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td></th>" >> $HTMLLOG
             echo -ne "ACSIM \e[31mfailed\e[m to build $MODELNAME model.\n"
             BUILD_FAULT="yes"
+            do_abort
         else
             echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG
         fi

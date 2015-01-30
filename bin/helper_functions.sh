@@ -85,8 +85,8 @@ trap control_c SIGINT
 # Functions
 
 is_spec2006_enabled(){
-    if  [ "$BZIP_2" == "no" ] &&
-        [ "$GCC" == "no" ] &&
+    if  [ $BZIP_2 == "no" ] &&
+        [ $GCC == "no" ] &&
         [ $MCF == "no" ] &&
         [ $GOBMK == "no" ] &&
         [ $HMMER == "no" ] &&      
@@ -103,9 +103,9 @@ is_spec2006_enabled(){
 
 is_acsim_enabled() {
     if [ "$RUN_ARM_ACSIM" != "no" ] ||
-       [  "$RUN_MIPS_ACSIM" != "no" ] ||
-       [  "$RUN_SPARC_ACSIM" != "no" ] ||
-       [  "$RUN_POWERPC_ACSIM" != "no" ]; then
+       [ "$RUN_MIPS_ACSIM" != "no" ] ||
+       [ "$RUN_SPARC_ACSIM" != "no" ] ||
+       [ "$RUN_POWERPC_ACSIM" != "no" ]; then
        return 0;
     else
        return 1;
@@ -123,6 +123,17 @@ is_accsim_enabled() {
     fi
 }
 
+have_workingcopy() {
+    if [ -z "$ARCHCWORKINGCOPY" ] &&
+       [ -z "$ARMWORKINGCOPY" ] &&
+       [ -z "$SPARCWORKINGCOPY" ] &&
+       [ -z "$POWERPCWORKINGCOPY" ] &&
+       [ -z "$MIPSWORKINGCOPY" ]; then
+       return 1;
+   else
+       return 0;
+   fi
+}
 
 
 finalize_nightly_tester() {
@@ -217,7 +228,7 @@ clone_or_copy_model(){
     #MODELREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
     MODELREV=$(git log | head -n1 | cut -c8-15)".."
     if [ "$LASTHTMLPREFIX" != "0" ]; then
-        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 5 | cut -d\< -f 1`
+        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
         if [ "$MODELREV" != "$LASTMODELREV" ]; then
             LASTEQCURRENT="no"
         fi
@@ -225,7 +236,6 @@ clone_or_copy_model(){
         LASTEQCURRENT="no"
     fi
     cd - &> /dev/null
-    #MODELREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
     rm $TEMPFL
   fi
 }

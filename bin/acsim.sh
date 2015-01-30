@@ -138,7 +138,7 @@ acsim_prologue(){
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
 
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
 
 }
 
@@ -155,8 +155,9 @@ acsim_test(){
     MODEL=$1
     RUN_MODEL=$2
     REV_MODEL=$3
-    CROSS_MODEL=$4
-    ENDIAN=$5
+    LINK_MODEL=$4
+    CROSS_MODEL=$5
+    ENDIAN=$6
 
     if [ $RUN_MODEL == "no" ]; then
         return 0
@@ -171,7 +172,7 @@ acsim_test(){
         return 1
     fi
 
-    echo -ne "<tr><td>${MODEL} </td><td>${REV_MODEL}</td>" >> $HTMLLOG
+    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS}" "acsim" 
     echo -ne "\n Running ${MODEL}... \n"
 

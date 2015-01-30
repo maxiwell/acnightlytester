@@ -87,63 +87,27 @@ HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
 export DATE=`LANG=en_US date '+%a %D %T'`
 echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
-echo -ne "<h3>Listing of GIT links used in this run.</h3>\n" >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-echo -ne "<tr><th>Component</th><th>Link</th></tr>\n" >> $HTMLLOG
-if [ -z "$CLONELINK" ]; then
-  echo -ne "<tr><td>ArchC</td><td>${WORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-  LASTEQCURRENT="no"
-else
-  echo -ne "<tr><td>ArchC</td><td>${CLONELINK}</td></tr>\n" >> $HTMLLOG
-fi
+echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Compilation</th></tr>\n" >> $HTMLLOG
 
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
-  if [ -z "$ARMGITLINK" ]; then
-    echo -ne "<tr><td>ARM Model</td><td>${ARMWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="no"
-  else
-    echo -ne "<tr><td>ARM Model</td><td>${ARMGITLINK}</td></tr>\n" >> $HTMLLOG
-  fi
-fi
-if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
-  if [ -z "$MIPSGITLINK" ]; then
-    echo -ne "<tr><td>MIPS Model</td><td>${MIPSWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="no"
-  else
-    echo -ne "<tr><td>MIPS Model</td><td>${MIPSGITLINK}</td></tr>\n" >> $HTMLLOG
-  fi
-fi
-if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
-  if [ -z "$SPARCGITLINK" ]; then
-    echo -ne "<tr><td>SPARC Model</td><td>${SPARCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="no"
-  else
-   echo -ne "<tr><td>SPARC Model</td><td>${SPARCGITLINK}</td></tr>\n" >> $HTMLLOG
-  fi
-fi
-if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-   if [ -z "$POWERPCGITLINK" ]; then
-    echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCWORKINGCOPY}</td></tr>\n" >> $HTMLLOG
-    LASTEQCURRENT="no"
-  else
-    echo -ne "<tr><td>POWERPC Model</td><td>${POWERPCGITLINK}</td></tr>\n" >> $HTMLLOG
-  fi
-fi
-echo -ne "</table></p>\n" >> $HTMLLOG
-
-
-# GIT clone and ArchC build configuration
+######################################
+### Clone, configure & install ArchC
+######################################
 mkdir ${TESTROOT}
 mkdir ${TESTROOT}/acsrc
 mkdir ${TESTROOT}/install
 
+ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
+echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
+
 cd ${TESTROOT}/acsrc
-if [ -z "$CLONELINK" ]; then
+if [ -z "$ARCHCGITLINK" ]; then
   echo -ne "Copying ArchC source from a local directory...\n"
-  cp -a ${WORKINGCOPY} ./ &> /dev/null
+  cp -a ${ARCHCWORKINGCOPY} ./ &> /dev/null
   make distclean &> /dev/null
   [ $? -ne 0 ] && {
-    echo -ne "<p><b><font color=\"crimson\">ArchC source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+    echo -ne "<td><font color=\"crimson\"> Copy Failed </font></td><td> - </td></tr>\n" >> $HTMLLOG
+    echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "Local directory copy \e[31mfailed\e[m. Check script parameters.\n"
     do_abort
@@ -151,16 +115,15 @@ if [ -z "$CLONELINK" ]; then
   ARCHCREV="N/A"
 else
   echo -ne "Cloning ArchC GIT version...\n"
-  git clone $CLONELINK . > /dev/null 2>&1  
+  git clone $ARCHCGITLINK . > /dev/null 2>&1  
   [ $? -ne 0 ] && {
-    rm $TEMPFL
-    echo -ne "<p><b><font color=\"crimson\">ArchC GIT clone failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+    echo -ne "<td><font color=\"crimson\"> Clone Failed </font></td><td> - </td></tr>\n" >> $HTMLLOG
+    echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "GIT clone \e[31mfailed\e[m. Check script parameters.\n"
     do_abort
   } 
   # Extract revision number
-  # ARCHCREV=`sed -n -e '/Checked out revision/{s/Checked out revision \+\([0-9]\+\).*/\1/;p}' <$TEMPFL`
   cd ${TESTROOT}/acsrc &> /dev/null
   #ARCHCREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
   ARCHCREV=$(git log | head -n1 | cut -c8-15)".."
@@ -168,10 +131,51 @@ else
         LASTEQCURRENT="no"
   fi
   cd - &> /dev/null
-  #rm $TEMPFL
 fi
 
-# binutils
+echo -ne "<td> ${ARCHCREV} </td>" >> $HTMLLOG
+echo -ne "Building/Installing ArchC...\n"
+TEMPFL=${RANDOM}.out
+
+# ./configure
+ACSIM_STRING=""
+ACASM_STRING=""
+ACSTONE_STRING=""
+POWERSC_STRING=""
+./boot.sh > $TEMPFL 2>&1
+if is_acsim_enabled || is_accsim_enabled; then
+    ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
+fi
+if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
+    ACASM_STRING="--with-binutils=${BINUTILSPATH}"
+fi
+if [ "$RUN_ACSTONE" != "no" ]; then
+    ACSTONE_STRING=" --with-gdb=${GDBPATH}"
+fi
+./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
+
+# Compile ArchC
+make >> $TEMPFL 2>&1 &&
+make install >> $TEMPFL 2>&1
+RETCODE=$?
+HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
+initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
+format_html_output $TEMPFL $HTMLBUILDLOG
+finalize_html $HTMLBUILDLOG ""
+rm $TEMPFL
+if [ $RETCODE -ne 0 ]; then
+  echo -ne "<td> <font color=\"crimson\">Failed </font> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+  echo -ne "</table></p>\n" >> $HTMLLOG
+  finalize_html $HTMLLOG ""
+  echo -ne "ArchC build \e[31mfailed\e[m.\n"
+  do_abort
+else
+  echo -ne "<td> <font color=\"green\">OK </font> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+fi
+
+#################
+### binutils
+#################
 if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
     echo -ne "<p>Using user-supplied Binutils path: ${BINUTILSPATH}</p>\n" >> $HTMLLOG
     if [ -d $BINUTILSPATH ]; then
@@ -191,9 +195,10 @@ if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM"
     fi
 fi
 
-## gdb
-## Only decompress if running acsim tests (gdb is used to validate correct execution of acstone benchmark)
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" ]; then
+################
+### gdb
+################
+if is_acsim_enabled; then
   if [ "$RUN_ACSTONE" != "no" ]; then
     echo -ne "<p>Using user-supplied GDB path: ${GDBPATH}</p>\n" >> $HTMLLOG
     echo -ne "Copying GDB source...\n"
@@ -206,52 +211,19 @@ if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM"
   fi
 fi
 
+################
+### SystemC
+################
+echo -ne "<tr><td>SystemC</td><td>${SYSTEMCPATH}</td>" >> $HTMLLOG
 if [ "$SYSTEMCCOMPILE" != "yes" ]; then
-  echo -ne "<p>User-supplied SystemC path: ${SYSTEMCPATH}</p>\n" >> $HTMLLOG
+  echo -ne "<td>-</td><td>-</td></tr>\n" >> $HTMLLOG
 fi
 
-### Configure & install ArchC
-cd ${TESTROOT}/acsrc
-echo -ne "Building/Installing ArchC...\n"
-TEMPFL=${RANDOM}.out
+echo -ne "</table></p>\n" >> $HTMLLOG
 
-# Configure script
-ACSIM_STRING=""
-ACASM_STRING=""
-ACSTONE_STRING=""
-POWERSC_STRING=""
-./boot.sh > $TEMPFL 2>&1
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_MIPS_ACSIM" != "no" -o "$RUN_SPARC_ACSIM" != "no" -o "$RUN_POWERPC_ACSIM" != "no" -o  \
-     "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-    ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
-fi
-if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
-    ACASM_STRING="--with-binutils=${BINUTILSPATH}"
-fi
-if [ "$RUN_ACSTONE" != "no" ]; then
-    ACSTONE_STRING=" --with-gdb=${GDBPATH}"
-fi
-./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
-
-# Compile
-make >> $TEMPFL 2>&1 &&
-make install >> $TEMPFL 2>&1
-RETCODE=$?
-HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
-initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
-format_html_output $TEMPFL $HTMLBUILDLOG
-finalize_html $HTMLBUILDLOG ""
-rm $TEMPFL
-if [ $RETCODE -ne 0 ]; then
-  echo -ne "<p><b><font color=\"crimson\">ArchC rev. $ARCHCREV build failed. Check <a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>.</font></b></p>\n" >> $HTMLLOG
-  echo -ne "ArchC build \e[31mfailed\e[m.\n"
-  finalize_html $HTMLLOG ""
-  do_abort
-else
-  echo -ne "<p>ArchC rev. $ARCHCREV built successfully. Check <a href=\"${HTMLPREFIX}-archc-build-log.htm\">compilation log</a>.</p>\n" >> $HTMLLOG
-fi
-
+################################
 ### Get ArchC Models
+################################
 if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
   clone_or_copy_model "arm" "${ARMGITLINK}" "${ARMWORKINGCOPY}" 
   ARMREV=${MODELREV}
@@ -269,16 +241,24 @@ if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWER
   PPCREV=${MODELREV}
 fi
 
-# If All Revision tested in last execution, is not generated a new entry in the table
-if [ "$FORCENIGHTLY" != "yes" -a "$LASTEQCURRENT" == "yes" ]; then
-    echo -ne "All Revisions tested in last execution\n"
-    rm ${LOGROOT}/${HTMLPREFIX}-* 
-    do_abort
+########################################################
+### Execute or Abort?
+########################################################
+
+if  [ "$FORCENIGHTLY" != "yes" ] &&       # If -f args; then Execute;
+    ! have_workingcopy &&            # If WorkingCopy links; then Execute;
+    [ "$LASTEQCURRENT" == "yes" ]; then  # If last execution have GIT Revisions equal the current, Abort
+        echo -ne "All Revisions tested in last execution\n"
+        rm ${LOGROOT}/${HTMLPREFIX}-* 
+        do_abort
 fi
+
+##########################
+# Golden Environment      
+##########################
 
 mkdir ${TESTROOT}/acsim
 
-# Golden Environment             
 if is_acsim_enabled; then
     echo -ne "Uncompressing correct results for Mibench...\n"
     cd ${TESTROOT}/acsim
@@ -290,6 +270,14 @@ if is_acsim_enabled; then
         [ $? -ne 0 ] && do_abort
     fi
 fi
+
+############################
+
+ARMLINK="${ARMGITLINK}${ARMWORKINGCOPY}"
+SPARCLINK="${SPARCGITLINK}${SPARCWORKINGCOPY}"
+MIPSLINK="${MIPSGITLINK}${MIPSWORKINGCOPY}"
+POWERPCLINK="${POWERPCGITLINK}${POWERPCWORKINGCOPY}"
+
 
 create_test_env "arm"     $RUN_ARM_ACSIM
 create_test_env "sparc"   $RUN_SPARC_ACSIM
@@ -310,10 +298,10 @@ if [ "$LOCALSIMULATOR" != "no" ]; then
 fi
 
 acsim_prologue
-acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $CROSS_ARM "little"
-acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
-acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
-acsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $CROSS_POWERPC "big"
+acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little"
+acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK      $CROSS_SPARC "big"
+acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK       $CROSS_MIPS "big"
+acsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
 acsim_epilogue
 
 if [ $RUN_POWERSC != "no" ]; then

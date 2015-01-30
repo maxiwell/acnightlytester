@@ -149,8 +149,9 @@ acsim_epilogue(){
 # $1: model name
 # $2: var declared in .conf that define if model will execute
 # $3: revision git of the model
-# $4: cross-compiler path of the model
-# $5: endian
+# $4: Link source code
+# $5: cross-compiler path of the model
+# $6: endian
 acsim_test(){
     MODEL=$1
     RUN_MODEL=$2

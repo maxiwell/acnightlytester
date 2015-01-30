@@ -106,7 +106,7 @@ if [ -z "$ARCHCGITLINK" ]; then
   cp -a ${ARCHCWORKINGCOPY} ./ &> /dev/null
   make distclean &> /dev/null
   [ $? -ne 0 ] && {
-    echo -ne "<td><font color=\"crimson\"> Copy Failed </font></td><td> - </td></tr>\n" >> $HTMLLOG
+    echo -ne "<td><b><font color=\"crimson\"> Copy Failed </font></b></td><td> - </td></tr>\n" >> $HTMLLOG
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "Local directory copy \e[31mfailed\e[m. Check script parameters.\n"
@@ -117,7 +117,7 @@ else
   echo -ne "Cloning ArchC GIT version...\n"
   git clone $ARCHCGITLINK . > /dev/null 2>&1  
   [ $? -ne 0 ] && {
-    echo -ne "<td><font color=\"crimson\"> Clone Failed </font></td><td> - </td></tr>\n" >> $HTMLLOG
+    echo -ne "<td><b><font color=\"crimson\"> Clone Failed </font></b></td><td> - </td></tr>\n" >> $HTMLLOG
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "GIT clone \e[31mfailed\e[m. Check script parameters.\n"
@@ -287,10 +287,10 @@ create_test_env "powerpc" $RUN_POWERPC_ACSIM
 if [ "$LOCALSIMULATOR" != "no" ]; then
 
     localsim_prologue
-    localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $CROSS_ARM "little"
-    localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
-    localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
-    localsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $CROSS_POWERPC "big"
+    localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM "little"
+    localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK     $CROSS_SPARC "big"
+    localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK      $CROSS_MIPS "big"
+    localsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $POWERPCLINK   $CROSS_POWERPC "big"
     localsim_epilogue
 
     finalize_nightly_tester
@@ -306,8 +306,8 @@ acsim_epilogue
 
 if [ $RUN_POWERSC != "no" ]; then
     powersc_prologue
-    powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $CROSS_SPARC "big"
-    powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $CROSS_MIPS "big"
+    powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
+    powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
     powersc_epilogue
 fi
 

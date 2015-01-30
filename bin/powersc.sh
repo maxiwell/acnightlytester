@@ -16,7 +16,7 @@ powersc_prologue(){
     echo -ne "**********************************************\n"
  
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Component</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
@@ -30,14 +30,16 @@ powersc_epilogue(){
 # $1: model name
 # $2: var declared in .conf that define if model will execute
 # $3: revision git of the model
-# $4: cross-compiler path of the model
-# $5: endian
+# $4: link source code
+# $5: cross-compiler path of the model
+# $6: endian
 powersc_test() {
     MODEL=$1
     RUN_MODEL=$2
     REV_MODEL=$3
-    CROSS_MODEL=$4
-    ENDIAN=$5
+    LINK_MODEL=$4
+    CROSS_MODEL=$5
+    ENDIAN=$6
 
     if [ $RUN_MODEL == "no" ]; then
         return 0
@@ -52,7 +54,7 @@ powersc_test() {
         return 1
     fi
 
-    echo -ne "<tr><td>${MODEL} </td><td>${REV_MODEL}</td>" >> $HTMLLOG
+    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -pw" "powersc" 
     echo -ne "\n Running ${MODEL}... \n"
 

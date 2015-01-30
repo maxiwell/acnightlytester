@@ -51,7 +51,7 @@ fi
 export LASTEQCURRENT="yes"
 
 export HTMLPREFIX=$(($HTMLPREFIX + 1))
-HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
+export HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
 export DATE=`LANG=en_US date '+%a %D %T'`
@@ -133,13 +133,13 @@ format_html_output $TEMPFL $HTMLBUILDLOG
 finalize_html $HTMLBUILDLOG ""
 rm $TEMPFL
 if [ $RETCODE -ne 0 ]; then
-  echo -ne "<td> <font color=\"crimson\">Failed </font> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+  echo -ne "<td> <b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
   echo -ne "</table></p>\n" >> $HTMLLOG
   finalize_html $HTMLLOG ""
   echo -ne "ArchC build \e[31mfailed\e[m.\n"
   do_abort
 else
-  echo -ne "<td> <font color=\"green\">OK </font> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+  echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
 fi
 
 #################
@@ -248,11 +248,15 @@ MIPSLINK="${MIPSGITLINK}${MIPSWORKINGCOPY}"
 POWERPCLINK="${POWERPCGITLINK}${POWERPCWORKINGCOPY}"
 
 if [ "$CONDOR" == "yes" ]; then
-    ${SCRIPTROOT}/bin/condor.sh "arm"   $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM "little" $TESTROOT $SCRIPTROOT $CONFIGFILE
-    echo "${TESTROOT}"
-#    bin/condor/sparc.sh
-#    bin/condor/mips.sh
-#    bin/condor/powerpc.sh
+    export SCRIPTROOT
+    export CONFIGFILE
+
+    acsim_html_table "mips"
+    powersc_html_table "mips"
+
+#   ${SCRIPTROOT}/bin/acsim_condor.sh "arm" $RUN_ARM_ACSIM $ARMREV $ARMLINK $CROSS_ARM "little" $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "mips" $RUN_MIPS_ACSIM $MIPSREV $MIPSLINK $CROSS_MIPS "big" $TESTROOT
+    ${SCRIPTROOT}/bin/powersc_condor.sh "mips" $RUN_MIPS_ACSIM $MIPSREV $MIPSLINK $CROSS_MIPS "big" $TESTROOT
     finalize_nightly_tester
     exit 0
 fi

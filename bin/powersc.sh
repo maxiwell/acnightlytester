@@ -10,10 +10,6 @@ powersc_prologue(){
     echo -ne "<h3>Testing: POWERSC </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
     echo -ne "<p> <b>Note: </b> ARM and PowerPC models don't have POWERSC table files.</p>\n" >> $HTMLLOG 
-
-    echo -ne "\n**********************************************\n"
-    echo -ne "* Testing PowerSC                           **\n"
-    echo -ne "**********************************************\n"
  
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
     echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
@@ -25,6 +21,17 @@ powersc_prologue(){
 powersc_epilogue(){
     finalize_html $HTMLLOG "</table></p>"
 }
+
+powersc_html_table() {
+    powersc_prologue
+
+    for ARG in "$@"; do
+        echo -ne "__${ARG}_powersc_replace__\n" >> $HTMLLOG
+    done
+
+    powersc_epilogue
+}
+
 
 
 # $1: model name
@@ -54,6 +61,7 @@ powersc_test() {
         return 1
     fi
 
+    echo -ne "\n Testing POWERSC..."
     echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -pw" "powersc" 
     echo -ne "\n Running ${MODEL}... \n"

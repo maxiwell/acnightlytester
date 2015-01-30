@@ -131,21 +131,29 @@ acsim_prologue(){
     echo -ne "<h3>Testing: ACSIM </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build ACSIM models: <b> ./acsim model.ac ${ACSIM_PARAMS} </b> </p>\n" >> $HTMLLOG
 
-    echo -ne "\n****************************************\n"
-    echo -ne "* Testing ACSIM                       **\n"
-    echo -ne "****************************************\n"
+    echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">\n" >> $HTMLLOG
+    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
-
-    echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
 
 }
 
 acsim_epilogue(){
     finalize_html $HTMLLOG "</table></p>"
 }
+
+acsim_html_table() {
+    acsim_prologue
+
+    for ARG in "$@"; do
+        echo -ne "__${ARG}_acsim_replace__\n" >> $HTMLLOG
+    done
+
+    acsim_epilogue
+}
+
+
 
 # $1: model name
 # $2: var declared in .conf that define if model will execute
@@ -174,6 +182,7 @@ acsim_test(){
         return 1
     fi
 
+    echo -ne "\n Testing ACSIM..."
     echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS}" "acsim" 
     echo -ne "\n Running ${MODEL}... \n"
@@ -186,6 +195,6 @@ acsim_test(){
     export ENDIAN
     export LOGROOT
     export HTMLPREFIX
-    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim" 
-    
+    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim"  
 }
+

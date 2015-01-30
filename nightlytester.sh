@@ -7,7 +7,7 @@
 
 # Parameters adjustable by environment variables
 
-NIGHTLYVERSION=2.1
+NIGHTLYVERSION=2.3
 
 ####################################
 ### Import external funtions
@@ -17,43 +17,12 @@ NIGHTLYVERSION=2.1
 . bin/powersc.sh
 . bin/localsim.sh
 
-#####################################
-### Functions
-#####################################
-create_test_env() {
-    MODEL=$1
-    RUN_MODEL=$2
-    if [ "$RUN_MODEL" != "no" ]; then   
-        if [ "$COMPILE" != "no" ]; then
-            echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
-            tar -xjf ${SCRIPTROOT}/sources/SourceMibench.tar.bz2
-            [ $? -ne 0 ] && do_abort
-            mv SourceMibench ${MODEL}_mibench
-            if is_spec2006_enabled; then
-                echo -ne "Uncompressing SPEC2006 from source to ${MODEL} cross compiling...\n"
-                tar -xjf ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2
-                [ $? -ne 0 ] && do_abort
-                mv SourceSPEC2006 ${MODEL}_spec
-            fi
-        else
-            echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
-            do_abort
-#            echo -ne "Uncompressing Mibench precompiled for ${MODEL}...\n"
-#            tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
-#            [ $? -ne 0 ] && do_abort
-#    
-#            #FIXME: Make precompiled for SPEC2006
-#            if is_spec2006_enabled; then
-#            echo -ne "SPEC precompiled unavailable\n"
-#            do_abort
-        fi
-    fi
-}
-
 
 ####################################
 ### ENTRY POINT
 ####################################
+
+command_line_handler $@
 
 # Check if other instance of Nightly is running (LOCK file)
 if [ -a /tmp/nightly-token ]; then
@@ -81,7 +50,7 @@ fi
 
 export LASTEQCURRENT="yes"
 
-HTMLPREFIX=$(($HTMLPREFIX + 1))
+export HTMLPREFIX=$(($HTMLPREFIX + 1))
 HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
@@ -278,6 +247,17 @@ SPARCLINK="${SPARCGITLINK}${SPARCWORKINGCOPY}"
 MIPSLINK="${MIPSGITLINK}${MIPSWORKINGCOPY}"
 POWERPCLINK="${POWERPCGITLINK}${POWERPCWORKINGCOPY}"
 
+if [ "$CONDOR" == "yes" ]; then
+    ${SCRIPTROOT}/bin/condor.sh "arm"   $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM "little" $TESTROOT $SCRIPTROOT $CONFIGFILE
+    echo "${TESTROOT}"
+#    bin/condor/sparc.sh
+#    bin/condor/mips.sh
+#    bin/condor/powerpc.sh
+    finalize_nightly_tester
+    exit 0
+fi
+
+# The code below is the Nightly sequential
 
 create_test_env "arm"     $RUN_ARM_ACSIM
 create_test_env "sparc"   $RUN_SPARC_ACSIM

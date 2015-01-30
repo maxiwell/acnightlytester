@@ -10,47 +10,56 @@
 usage(){
 		echo -ne "\nusage: ./nightlytester.sh configfile.conf [options]\n"
         echo -ne "\n    Options:"
-        echo -ne "\n        -f: optional flags to make the Nightly Tester run even if no changes in GIT repositories."
+        echo -ne "\n        -f      : optional flags to make the Nightly Tester run even if no changes in GIT repositories."
+        echo -ne "\n        --condor: make changes in execution flow to adapt to Condor schedule"
         echo -ne "\n\n"
 }
 
-if [ $# -eq 0 ]; then
-    usage
-    exit
-fi
-
-case "$1" in
-    -h)
+command_line_handler() {
+    if [ $# -eq 0 ]; then
         usage
         exit
-        ;;
-
-    *)
-        if ! [ -f "$1" ]; then
-           echo -ne "\nConfiguration file not found. Must run with a valid configuration file.\n\n"
-           exit 1
-        fi
-       ;;
-esac
-
-case "$2" in
-    -f)
-        FORCENIGHTLY="yes"
-        ;;
-    *)
-        if ! [ -z "$2" ]; then
-            echo -ne "\nOption unrecognized: $2\n\n"
+    fi
+    case "$1" in
+        -h)
+            usage
             exit
-        fi
-        ;;
-esac
+            ;;
+        *)
+            if ! [ -f "$1" ]; then
+               echo -ne "\nConfiguration file not found. Must run with a valid configuration file.\n\n"
+               exit 1
+            fi
+            CONFIGFILE=$1
+           ;;
+    esac
+    shift 1
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -f)
+                FORCENIGHTLY="yes";
+                shift 
+                ;;
+            --condor)
+                CONDOR="yes";
+                shift 
+                ;;
+            *)
+                if ! [ -z "$2" ]; then
+                    echo -ne "\nOption unrecognized: $2\n\n"
+                    exit
+                fi
+                ;;
+        esac
+    done
+    . $CONFIGFILE
 
-. $1
+    # Configuring ACSIM param
+    if [ "$COLLECT_STATS" != "no" ]; then
+      ACSIM_PARAMS="${ACSIM_PARAMS} --stats"
+    fi
+}
 
-# Configuring ACSIM param
-if [ "$COLLECT_STATS" != "no" ]; then
-  ACSIM_PARAMS="${ACSIM_PARAMS} --stats"
-fi
 
 
 # ********************************
@@ -239,4 +248,37 @@ clone_or_copy_model(){
     rm $TEMPFL
   fi
 }
+
+create_test_env() {
+    MODEL=$1
+    RUN_MODEL=$2
+    if [ "$RUN_MODEL" != "no" ]; then   
+        if [ "$COMPILE" != "no" ]; then
+            echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
+            cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 .
+            tar -xjf SourceMibench.tar.bz2
+            [ $? -ne 0 ] && do_abort
+            mv SourceMibench ${MODEL}_mibench
+            if is_spec2006_enabled; then
+                echo -ne "Uncompressing SPEC2006 from source to ${MODEL} cross compiling...\n"
+                cp ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2 .
+                tar -xjf SourceSPEC2006.tar.bz2
+                [ $? -ne 0 ] && do_abort
+                mv SourceSPEC2006 ${MODEL}_spec
+            fi
+        else
+            echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
+            do_abort
+#            echo -ne "Uncompressing Mibench precompiled for ${MODEL}...\n"
+#            tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
+#            [ $? -ne 0 ] && do_abort
+#    
+#            #FIXME: Make precompiled for SPEC2006
+#            if is_spec2006_enabled; then
+#            echo -ne "SPEC precompiled unavailable\n"
+#            do_abort
+        fi
+    fi
+}
+
 

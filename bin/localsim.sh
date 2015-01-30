@@ -67,14 +67,16 @@ localsim_epilogue(){
 # $1: model name
 # $2: var declared in .conf that define if model will execute
 # $3: revision git of the model
-# $4: cross-compiler path of the model
-# $5: endian
+# $4: Link source code
+# $5: cross-compiler path of the model
+# $6: endian
 localsim_test(){
     MODEL=$1
     RUN_MODEL=$2
     REV_MODEL=$3
-    CROSS_MODEL=$4
-    ENDIAN=$5
+    LINK_MODEL=$4
+    CROSS_MODEL=$5
+    ENDIAN=$6
 
     if [ $RUN_MODEL == "no" ]; then
         return 0

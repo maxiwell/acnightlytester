@@ -83,7 +83,7 @@ acsim_run() {
   export CRC
   export FFT
   export GSM
-  export DIJKSTRA
+  
   export PATRICIA
   export RIJNDAEL
   export SHA

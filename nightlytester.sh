@@ -207,7 +207,7 @@ if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM
 fi
 if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
   clone_or_copy_model "powerpc" "${POWERPCGITLINK}" "${POWERPCWORKINGCOPY}" 
-  PPCREV=${MODELREV}
+  POWERPCREV=${MODELREV}
 fi
 
 ########################################################
@@ -251,12 +251,18 @@ if [ "$CONDOR" == "yes" ]; then
     export SCRIPTROOT
     export CONFIGFILE
 
-    acsim_html_table "mips"
-    powersc_html_table "mips"
+    acsim_html_table "arm" "sparc" "mips" "powerpc"
 
-#   ${SCRIPTROOT}/bin/acsim_condor.sh "arm" $RUN_ARM_ACSIM $ARMREV $ARMLINK $CROSS_ARM "little" $TESTROOT
-    ${SCRIPTROOT}/bin/acsim_condor.sh "mips" $RUN_MIPS_ACSIM $MIPSREV $MIPSLINK $CROSS_MIPS "big" $TESTROOT
-    ${SCRIPTROOT}/bin/powersc_condor.sh "mips" $RUN_MIPS_ACSIM $MIPSREV $MIPSLINK $CROSS_MIPS "big" $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
+
+    powersc_html_table "sparc" "mips"
+
+    ${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    
     finalize_nightly_tester
     exit 0
 fi
@@ -274,7 +280,7 @@ if [ "$LOCALSIMULATOR" != "no" ]; then
     localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM "little"
     localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK     $CROSS_SPARC "big"
     localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK      $CROSS_MIPS "big"
-    localsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $POWERPCLINK   $CROSS_POWERPC "big"
+    localsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK   $CROSS_POWERPC "big"
     localsim_epilogue
 
     finalize_nightly_tester
@@ -285,7 +291,7 @@ acsim_prologue
 acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little"
 acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK      $CROSS_SPARC "big"
 acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK       $CROSS_MIPS "big"
-acsim_test "powerpc" $RUN_POWERPC_ACSIM $PPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
+acsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
 acsim_epilogue
 
 if [ $RUN_POWERSC != "no" ]; then

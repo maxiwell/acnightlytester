@@ -319,25 +319,25 @@ if [ "$CONDOR" == "yes" ]; then
     export SCRIPTROOT
     export CONFIGFILE
 
-    acsim_html_table "arm" "sparc" "mips" "powerpc"
-    ${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
-    ${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    ${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
-    ${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
+    #acsim_html_table "arm" "sparc" "mips" "powerpc"
+    #${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
+    #${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    #${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    #${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
 
-    powersc_html_table "sparc" "mips"
-    ${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    ${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    #powersc_html_table "sparc" "mips"
+    #${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    #${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
 
-    #mkdir ${TESTROOT}/condor_folder && cd  ${TESTROOT}/condor_folder
+    mkdir ${TESTROOT}/condor && cd  ${TESTROOT}/condor
 
-    #cp ${SCRIPTROOT}/condor.config exec1.condor
-    #sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
-    #sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
-    #sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
-    #sed -i "s@PREFIX@exec1@g" exec1.condor
+    cp ${SCRIPTROOT}/condor.config exec1.condor
+    sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
+    sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
+    sed -i "s@PREFIX@exec1@g" exec1.condor
 
-    #condor_submit exec1.condor
+    condor_submit exec1.condor
 
     finalize_nightly_tester
     exit 0

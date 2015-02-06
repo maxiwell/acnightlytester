@@ -320,14 +320,12 @@ if [ "$CONDOR" == "yes" ]; then
     export CONFIGFILE
 
     acsim_html_table "arm" "sparc" "mips" "powerpc"
-
     ${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
     ${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
     ${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
     ${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
 
     powersc_html_table "sparc" "mips"
-
     ${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
     ${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
 

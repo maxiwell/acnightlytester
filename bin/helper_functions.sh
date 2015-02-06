@@ -69,9 +69,9 @@ command_line_handler() {
 cleanup()
 {
     echo -ne "Cleaning ${TESTROOT}\n"
-    rm -rf ${TESTROOT}
+    rm -rf ${TESTROOT}  &> /dev/null
     echo -ne "Cleaning ${LOGROOT}/${HTMLPREFIX}-*\n"
-    rm -rf ${LOGROOT}/${HTMLPREFIX}-*
+    rm -rf ${LOGROOT}/${HTMLPREFIX}-*  &> /dev/null
 
     rm -rf /tmp/nightly-token
 }
@@ -250,33 +250,42 @@ clone_or_copy_model(){
 }
 
 create_test_env() {
-    MODEL=$1
-    RUN_MODEL=$2
+    local MODEL=$1
+    local RUN_MODEL=$2
+    CROSS_MODEL=$3
+    local HTMLLOG=$4
     if [ "$RUN_MODEL" != "no" ]; then   
-        if [ "$COMPILE" != "no" ]; then
-            echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
-            cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 .
-            tar -xjf SourceMibench.tar.bz2
+        echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
+        cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 .
+        tar -xjf SourceMibench.tar.bz2
+        [ $? -ne 0 ] && do_abort
+        mv SourceMibench ${MODEL}_mibench
+        if is_spec2006_enabled; then
+            echo -ne "Uncompressing SPEC2006 from source to ${MODEL} cross compiling...\n"
+            cp ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2 .
+            tar -xjf SourceSPEC2006.tar.bz2
             [ $? -ne 0 ] && do_abort
-            mv SourceMibench ${MODEL}_mibench
-            if is_spec2006_enabled; then
-                echo -ne "Uncompressing SPEC2006 from source to ${MODEL} cross compiling...\n"
-                cp ${SCRIPTROOT}/sources/SourceSPEC2006.tar.bz2 .
-                tar -xjf SourceSPEC2006.tar.bz2
-                [ $? -ne 0 ] && do_abort
-                mv SourceSPEC2006 ${MODEL}_spec
-            fi
+            mv SourceSPEC2006 ${MODEL}_spec
+        fi
+
+        echo -ne "Copying Cross ${MODEL} source...\n"
+        mkdir ${TESTROOT}/cross &> /dev/null
+        cd ${TESTROOT}/cross
+        if [[ $CROSS_MODEL == *"http"* ]]; then
+            wget ${CROSS_MODEL} &> /dev/null
+            TARFILE=$(basename $CROSS_MODEL)
+            tar -xf ${TARFILE}
+            export CROSS_MODEL=${TESTROOT}/cross/$(tar -tf ${TARFILE} | head -n1)/bin
+            RETCODE=$?
         else
-            echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
+            tar -xf ${CROSS_MODEL}
+            RETCODE=$?
+        fi
+        if [ $RETCODE -ne 0 ]; then
+            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
             do_abort
-#            echo -ne "Uncompressing Mibench precompiled for ${MODEL}...\n"
-#            tar -xjf ${SCRIPTROOT}/sources/ARMMibench.tar.bz2
-#            [ $? -ne 0 ] && do_abort
-#    
-#            #FIXME: Make precompiled for SPEC2006
-#            if is_spec2006_enabled; then
-#            echo -ne "SPEC precompiled unavailable\n"
-#            do_abort
+        else
+            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${HTMLLOG}
         fi
     fi
 }

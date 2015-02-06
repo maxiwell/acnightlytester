@@ -32,6 +32,8 @@ else
     touch /tmp/nightly-token
 fi
 
+mkdir -p ${TESTROOT}
+
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
 
@@ -59,15 +61,11 @@ echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
 echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Compilation</th></tr>\n" >> $HTMLLOG
 
-######################################
-### Clone, configure & install ArchC
-######################################
-mkdir ${TESTROOT}
-mkdir ${TESTROOT}/acsrc
-mkdir ${TESTROOT}/install
 
-ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
-echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
+######################################
+### Archc, git clone
+######################################
+mkdir ${TESTROOT}/acsrc
 
 cd ${TESTROOT}/acsrc
 if [ -z "$ARCHCGITLINK" ]; then
@@ -89,7 +87,7 @@ else
     echo -ne "<td><b><font color=\"crimson\"> Clone Failed </font></b></td><td> - </td></tr>\n" >> $HTMLLOG
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
-    echo -ne "GIT clone \e[31mfailed\e[m. Check script parameters.\n"
+    echo -ne "GIT clone \e[31mfailed\e[m. Check2 script parameters.\n"
     do_abort
   } 
   # Extract revision number
@@ -102,44 +100,40 @@ else
   cd - &> /dev/null
 fi
 
-echo -ne "<td> ${ARCHCREV} </td>" >> $HTMLLOG
-echo -ne "Building/Installing ArchC...\n"
-TEMPFL=${RANDOM}.out
+ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
+echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
+echo -ne "<td> ${ARCHCREV} </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
 
-# ./configure
-ACSIM_STRING=""
-ACASM_STRING=""
-ACSTONE_STRING=""
-POWERSC_STRING=""
-./boot.sh > $TEMPFL 2>&1
-if is_acsim_enabled || is_accsim_enabled; then
-    ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
+################################
+### Get ArchC Models
+################################
+if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
+  clone_or_copy_model "arm" "${ARMGITLINK}" "${ARMWORKINGCOPY}" 
+  ARMREV=${MODELREV}
 fi
-if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
-    ACASM_STRING="--with-binutils=${BINUTILSPATH}"
+if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
+  clone_or_copy_model "sparc" "${SPARCGITLINK}" "${SPARCWORKINGCOPY}" 
+  SPARCREV=${MODELREV}
 fi
-if [ "$RUN_ACSTONE" != "no" ]; then
-    ACSTONE_STRING=" --with-gdb=${GDBPATH}"
+if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
+  clone_or_copy_model "mips" "${MIPSGITLINK}" "${MIPSWORKINGCOPY}" 
+  MIPSREV=${MODELREV}
 fi
-./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
+if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
+  clone_or_copy_model "powerpc" "${POWERPCGITLINK}" "${POWERPCWORKINGCOPY}" 
+  POWERPCREV=${MODELREV}
+fi
 
-# Compile ArchC
-make >> $TEMPFL 2>&1 &&
-make install >> $TEMPFL 2>&1
-RETCODE=$?
-HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
-initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
-format_html_output $TEMPFL $HTMLBUILDLOG
-finalize_html $HTMLBUILDLOG ""
-rm $TEMPFL
-if [ $RETCODE -ne 0 ]; then
-  echo -ne "<td> <b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
-  echo -ne "</table></p>\n" >> $HTMLLOG
-  finalize_html $HTMLLOG ""
-  echo -ne "ArchC build \e[31mfailed\e[m.\n"
-  do_abort
-else
-  echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+########################################################
+### Execute or Abort?
+########################################################
+
+if  [ "$FORCENIGHTLY" != "yes" ] &&       # If -f args; then Execute;
+    ! have_workingcopy &&            # If WorkingCopy links; then Execute;
+    [ "$LASTEQCURRENT" == "yes" ]; then  # If last execution have GIT Revisions equal the current, Abort
+        echo -ne "All Revisions tested in last execution\n"
+        rm ${LOGROOT}/${HTMLPREFIX}-* 
+        do_abort
 fi
 
 #################
@@ -180,47 +174,109 @@ if is_acsim_enabled; then
   fi
 fi
 
-################
-### SystemC
-################
-echo -ne "<tr><td>SystemC</td><td>${SYSTEMCPATH}</td>" >> $HTMLLOG
-if [ "$SYSTEMCCOMPILE" != "yes" ]; then
-  echo -ne "<td>-</td><td>-</td></tr>\n" >> $HTMLLOG
+##########################################
+### SystemC, untar, configure and install
+##########################################
+#if is_acsim_enabled || is_accsim_enabled; then
+#    echo -ne "<tr><td>SystemC</td><td>${SYSTEMCSRC}</td><td>-</td>" >> $HTMLLOG
+#    echo -ne "Building/Installing SystemC...\n"
+#
+#    TEMPFL=${RANDOM}.out
+#    mkdir ${TESTROOT}/systemc
+#    cd ${TESTROOT}/systemc
+#    tar -xvf ${SYSTEMCSRC} &> /dev/null
+#    cd systemc*
+#    ./configure --prefix=${TESTROOT}/systemc/install  >> $TEMPFL 2>&1 
+#    make  >> $TEMPFL 2>&1 
+#    make install  >> $TEMPFL 2>&1 
+#    RETCODE=$?
+#    HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
+#    initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
+#    format_html_output $TEMPFL $HTMLBUILDLOG
+#    finalize_html $HTMLBUILDLOG ""
+#    rm $TEMPFL
+#    if [ $RETCODE -ne 0 ]; then
+#        echo -ne "<td> <b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+#        echo -ne "</table></p>\n" >> $HTMLLOG
+#        finalize_html $HTMLLOG ""
+#        echo -ne "ArchC build \e[31mfailed\e[m.\n"
+#        do_abort
+#    else
+#        echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+#    fi
+#    export SYSTEMCPATH=${TESTROOT}/systemc/install
+#    export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+#fi
+
+    export SYSTEMCPATH=/home/max/ArchC/tools/systemc-2.3.1
+    export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+
+##############################################
+# Cross-compiler, reserving space in the table
+#############################################
+if [ ${COMPILE} == "yes" ]; then
+    if [ ${RUN_ARM_ACSIM} == "yes" ]; then
+        echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__STATUS_CROSS_arm__</td>" >> $HTMLLOG
+    fi
+    if [ ${RUN_SPARC_ACSIM} == "yes" ]; then
+        echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__STATUS_CROSS_sparc__</td>" >> $HTMLLOG
+    fi
+    if [ ${RUN_MIPS_ACSIM} == "yes" ]; then
+        echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__STATUS_CROSS_mips__</td>" >> $HTMLLOG
+    fi
+    if [ ${RUN_POWERPC_ACSIM} == "yes" ]; then
+        echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__STATUS_CROSS_powerpc__</td>" >> $HTMLLOG
+    fi
+else
+    echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
+    do_abort
+fi
+
+######################################
+### ArchC, configure & install
+######################################
+mkdir ${TESTROOT}/install
+
+echo -ne "Building/Installing ArchC...\n"
+TEMPFL=${RANDOM}.out
+
+# ./configure
+ACSIM_STRING=""
+ACASM_STRING=""
+ACSTONE_STRING=""
+POWERSC_STRING=""
+./boot.sh > $TEMPFL 2>&1
+if is_acsim_enabled || is_accsim_enabled; then
+    ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
+fi
+if [ "$RUN_ARM_ACASM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_POWERPC_ACASM" != "no" ]; then
+    ACASM_STRING="--with-binutils=${BINUTILSPATH}"
+fi
+if [ "$RUN_ACSTONE" != "no" ]; then
+    ACSTONE_STRING=" --with-gdb=${GDBPATH}"
+fi
+./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
+
+# Compile ArchC
+make >> $TEMPFL 2>&1 &&
+make install >> $TEMPFL 2>&1
+RETCODE=$?
+HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
+initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
+format_html_output $TEMPFL $HTMLBUILDLOG
+finalize_html $HTMLBUILDLOG ""
+rm $TEMPFL
+if [ $RETCODE -ne 0 ]; then
+  sed -i "s@__ARCHC_LOG__@<b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>)@g" $HTMLLOG
+  echo -ne "</table></p>\n" >> $HTMLLOG
+  finalize_html $HTMLLOG ""
+  echo -ne "ArchC build \e[31mfailed\e[m.\n"
+  do_abort
+else
+  sed -i "s@__ARCHC_LOG__@<b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-archc-build-log.htm\">log</a>)@g" $HTMLLOG
 fi
 
 echo -ne "</table></p>\n" >> $HTMLLOG
-
-################################
-### Get ArchC Models
-################################
-if [ "$RUN_ARM_ACSIM" != "no" -o "$RUN_ARM_ACASM" != "no" -o "$RUN_ARM_ACCSIM" != "no" ]; then
-  clone_or_copy_model "arm" "${ARMGITLINK}" "${ARMWORKINGCOPY}" 
-  ARMREV=${MODELREV}
-fi
-if [ "$RUN_SPARC_ACSIM" != "no" -o "$RUN_SPARC_ACASM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" ]; then
-  clone_or_copy_model "sparc" "${SPARCGITLINK}" "${SPARCWORKINGCOPY}" 
-  SPARCREV=${MODELREV}
-fi
-if [ "$RUN_MIPS_ACSIM" != "no" -o "$RUN_MIPS_ACASM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" ]; then
-  clone_or_copy_model "mips" "${MIPSGITLINK}" "${MIPSWORKINGCOPY}" 
-  MIPSREV=${MODELREV}
-fi
-if [ "$RUN_POWERPC_ACSIM" != "no" -o "$RUN_POWERPC_ACASM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
-  clone_or_copy_model "powerpc" "${POWERPCGITLINK}" "${POWERPCWORKINGCOPY}" 
-  POWERPCREV=${MODELREV}
-fi
-
-########################################################
-### Execute or Abort?
-########################################################
-
-if  [ "$FORCENIGHTLY" != "yes" ] &&       # If -f args; then Execute;
-    ! have_workingcopy &&            # If WorkingCopy links; then Execute;
-    [ "$LASTEQCURRENT" == "yes" ]; then  # If last execution have GIT Revisions equal the current, Abort
-        echo -ne "All Revisions tested in last execution\n"
-        rm ${LOGROOT}/${HTMLPREFIX}-* 
-        do_abort
-fi
 
 ##########################
 # Golden Environment      
@@ -253,37 +309,36 @@ if [ "$CONDOR" == "yes" ]; then
 
     acsim_html_table "arm" "sparc" "mips" "powerpc"
 
-    #${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
 
-    powersc_html_table "sparc" "mips"
+   # powersc_html_table "sparc" "mips"
 
     #${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
     #${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
 
-    mkdir ${TESTROOT}/condor_folder && cd  ${TESTROOT}/condor_folder
+    #mkdir ${TESTROOT}/condor_folder && cd  ${TESTROOT}/condor_folder
 
-    cp ${SCRIPTROOT}/condor.config exec1.condor
-    sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
-    sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
-    sed -i "s@LOG@exec1.log@g" exec1.condor
-    
-
+    #cp ${SCRIPTROOT}/condor.config exec1.condor
+    #sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
+    #sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
+    #sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
+    #sed -i "s@LOG@exec1.log@g" exec1.condor
 
  #   condor_submit exec1.condor
 
-#    finalize_nightly_tester
+    finalize_nightly_tester
     exit 0
 fi
 
 # The code below is the Nightly sequential
 
-create_test_env "arm"     $RUN_ARM_ACSIM
-create_test_env "sparc"   $RUN_SPARC_ACSIM
-create_test_env "mips"    $RUN_MIPS_ACSIM
-create_test_env "powerpc" $RUN_POWERPC_ACSIM
+create_test_env "arm"     $RUN_ARM_ACSIM  $CROSS_ARM $HTMLLOG
+create_test_env "sparc"   $RUN_SPARC_ACSIM $CROSS_SPARC $HTMLLOG
+create_test_env "mips"    $RUN_MIPS_ACSIM  $CROSS_MIPS $HTMLLOG
+create_test_env "powerpc" $RUN_POWERPC_ACSIM  $CROSS_POWERPC $HTMLLOG
 
 if [ "$LOCALSIMULATOR" != "no" ]; then
 

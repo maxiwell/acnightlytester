@@ -12,6 +12,9 @@ CROSS_MODEL=$5
 ENDIAN=$6
 TESTFOLDER=$7
 
+echo "Oii"
+exit
+
 # Folder that I will copy the $TESTROOT to execute locally. 
 CONDOR_FOLDER=/tmp/condor/
 mkdir -p ${CONDOR_FOLDER}

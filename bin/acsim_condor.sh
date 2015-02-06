@@ -12,16 +12,21 @@ CROSS_MODEL=$5
 ENDIAN=$6
 TESTFOLDER=$7
 
+# Folder that I will copy the $TESTROOT to execute locally. 
 CONDOR_FOLDER=/tmp/condor/
-
 mkdir -p ${CONDOR_FOLDER}
 if [ $? -ne 0 ]; then
     echo -ne "Create file ${CONDOR_FOLDER} failed\n"
     return 1
 fi
 
-### Get env
-### SCRIPTROOT must be in NFS (like /home/lsc/...)
+### Copy the all files compiled and installed by startup machine (archc2.lsc.ic.unicamp.br) to local machine (nodeX)
+# Line to test in a same machine, before send to condor
+cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
+# Line to use in real condor machine
+#cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
+
+### Get ENV. $SCRIPTROOT must be in NFS (like /home/lsc/...)
 SAVE_ENV=$PWD
 cd ${SCRIPTROOT}
 . bin/helper_functions.sh
@@ -30,20 +35,14 @@ cd ${SCRIPTROOT}
 . $CONFIGFILE
 cd $SAVE_ENV  &> /dev/null
 
-ORIG_LOGROOT=${LOGROOT}
 ORIG_HTMLLOG=${HTMLLOG}
 
 ### This lines override the variables defined by $CONFIGFILE to a local path in Condor Machine
 export TESTROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)"    
-export LOGROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)_public_html/"
-export HTMLINDEX="${LOGROOT}/$(basename $HTMLINDEX)"
-export HTMLLOG="${LOGROOT}/${HTMLPREFIX}-index.htm"
+export LOGTMP="${TESTROOT}/public_html/"
+export HTMLLOG="${LOGTMP}/${HTMLPREFIX}-index.htm"
 
-### Copy the Archc compiled and installed to local machine
-cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
-
-### change the env from original TESTROOT to local TESTROOT
-mkdir ${LOGROOT} &> /dev/null
+# Enter in local TESTROOT
 cd ${TESTROOT}/acsim
 
 ###########################################
@@ -57,15 +56,7 @@ echo -ne "\n*** Job Concluded ***\n"
 ###########################################
 
 ### Get generates files
-#cp $LOGROOT/* $ORIG_LOGROOT 
-
-rm -rf $LOGROOT &> /dev/null
-rm -rf $TESTROOT &> /dev/null
-
-### Restoring the modified variables
-. ${SCRIPTROOT}/${CONFIGFILE}
-TESTROOT="$TESTFOLDER"
+cp -r ${LOGTMP}/* ${LOGROOT}/ 
 
 chmod 777 ${CONDOR_FOLDER} -R
 rm -rf ${CONDOR_FOLDER} 
-

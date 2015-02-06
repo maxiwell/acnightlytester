@@ -83,7 +83,7 @@ format_html_output() {
 # Param1 is the program name (to pring in log files!)
 compile_mibench() {
 	if [ "$COMPILE" != "no" ]; then
-		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
+		HTML_COMP=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${RANDOM}.out
         echo -ne "Compiling...\n"
@@ -106,7 +106,7 @@ compile_mibench() {
 
 compile_spec(){
 	if [ "$COMPILE" != "no" ]; then
-		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
+		HTML_COMP=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${RANDOM}.out
         echo -ne "Compiling...\n"
@@ -150,13 +150,13 @@ run_test() {
             rm -f $RESULTFILE &> /dev/null
         done
 
-		HTML_RUN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm
+		HTML_RUN=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm
 		initialize_html $HTML_RUN "${TESTNAME} simulator output"
 		echo -ne "Running script ${TESTSCRIPT}...\n"
 		TEMPFL=${RANDOM}.out
 		./${TESTSCRIPT} > $TEMPFL 2>&1
         if [ $DIRSIMULATOR == "powersc" ]; then
-            mv window_power_report_${ARCH}.csv ${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
+            mv window_power_report_${ARCH}.csv ${LOGTMP}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
         fi
 		if [ "$COLLECT_STATS" != "no" ]; then
 		  # Copy output to stats folder, to be later processed by collect_stats.py
@@ -170,7 +170,7 @@ run_test() {
 		format_html_output $TEMPFL $HTML_RUN
 		finalize_html $HTML_RUN ""
 		rm $TEMPFL
-		HTML_DIFF=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm
+		HTML_DIFF=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm
 		initialize_html $HTML_DIFF "${TESTNAME} - output compared with golden model"
 		DIFFERENCES=""
 		for RESULTFILE in $COMPLIST 
@@ -211,7 +211,7 @@ run_test() {
 
 # This function will sumarize statistical information about all ran programs using the collect_stats.py script.
 build_stats() {
-  HTMLSTATS=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-mibench-stats.htm
+  HTMLSTATS=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-mibench-stats.htm
   initialize_html $HTMLSTATS "Mibench for ${ARCH} instruction usage data"
   cd ${STATSROOT}  
   python collect_stats.py ${ARCH} &> /dev/null
@@ -221,7 +221,7 @@ build_stats() {
 }
 
 ### Creating HTML's headers and general structure ###
-HTMLMAIN=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}.htm
+HTMLMAIN=${LOGTMP}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}.htm
 echo -ne "<html> <head> <title> ${ARCH} Simulator - Mibench Results </title> </head><body>" > $HTMLMAIN
 echo -ne "<h1>${ARCH} Simulator - Mibench Results</h1>" >> $HTMLMAIN
 DATE=`date '+%a %D %r'`

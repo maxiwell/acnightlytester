@@ -37,9 +37,16 @@ mkdir -p ${TESTROOT}
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
 
+# Temporary HTML files, necessary for condor scheme. If use $LOGROOT only (without $LOGTMP), all page 
+# generates by jobs (in many machines) would use the network. The $LOGTMP folder was a alternative
+# to save Bandwidth, creating the pages locally. The only pages that use the NFS is $HTMLINDEX and $HTMLLOG,
+# because they must be shared. 
+export LOGTMP=${TESTROOT}/public_html
+mkdir -p ${LOGTMP}
+
 if [ ! -f $HTMLINDEX ]; then
-    mkdir $LOGROOT &> /dev/null
-    cp htmllogs/index.htm $HTMLINDEX
+    cp htmllogs/index.htm ${LOGROOT}
+    HTMLINDEX=${LOGROOT}/index.htm
 fi
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
 export LASTHTMLPREFIX=$HTMLPREFIX
@@ -133,6 +140,7 @@ if  [ "$FORCENIGHTLY" != "yes" ] &&       # If -f args; then Execute;
     [ "$LASTEQCURRENT" == "yes" ]; then  # If last execution have GIT Revisions equal the current, Abort
         echo -ne "All Revisions tested in last execution\n"
         rm ${LOGROOT}/${HTMLPREFIX}-* 
+        rm -rf ${LOGTMP}/* 
         do_abort
 fi
 
@@ -191,7 +199,7 @@ if is_acsim_enabled || is_accsim_enabled; then
         make  >> $TEMPFL 2>&1 
         make install  >> $TEMPFL 2>&1 
         RETCODE=$?
-        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
+        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-systemc-build-log.htm
         initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
@@ -274,7 +282,7 @@ fi
 make >> $TEMPFL 2>&1 &&
 make install >> $TEMPFL 2>&1
 RETCODE=$?
-HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
+HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-archc-build-log.htm
 initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
 format_html_output $TEMPFL $HTMLBUILDLOG
 finalize_html $HTMLBUILDLOG ""
@@ -309,7 +317,13 @@ if is_acsim_enabled; then
     fi
 fi
 
-############################
+finalize_startup   
+
+##############################################################
+# Here, the condor machine dispatch jobs. 
+# If is no --condor option, works sequentially, don't worry. 
+##############################################################
+
 
 ARMLINK="${ARMGITLINK}${ARMWORKINGCOPY}"
 SPARCLINK="${SPARCGITLINK}${SPARCWORKINGCOPY}"
@@ -345,8 +359,6 @@ if [ "$CONDOR" == "yes" ]; then
 fi
 
 # The code below is the Nightly sequential
-
-
 create_test_env "arm"     $RUN_ARM_ACSIM  $CROSS_ARM $HTMLLOG
 CROSS_ARM=$CROSS_MODEL
 create_test_env "sparc"   $RUN_SPARC_ACSIM $CROSS_SPARC $HTMLLOG

@@ -21,7 +21,7 @@ acsim_build_model() {
         fi
         ${TESTROOT}/acinstall/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
         BUILD_RETCODE=$?
-        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
+        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
         initialize_html $HTMLBUILDLOG "${MODELNAME} rev $MODELREV build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
@@ -115,7 +115,7 @@ acsim_run() {
   cd ${TESTROOT}/acsim
   ./acsim_validation.sh
   
-  FAILED=`grep -ne "Failed" ${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
+  FAILED=`grep -ne "Failed" ${LOGTMP}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
 
   if [ -z "$FAILED" ]; then
       echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG
@@ -193,14 +193,14 @@ acsim_test(){
     export TESTRANLIB="${CROSS_MODEL}/${TUPLE}-ranlib"
     export TESTFLAG="-specs=archc -static"
     export ENDIAN
-    export LOGROOT
+    export LOGTMP
     export HTMLPREFIX
     acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim" 
 
     CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
     MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
-    cat /proc/cpuinfo > ${LOGROOT}/$CPUINFOFILE
-    cat /proc/meminfo > ${LOGROOT}/$MEMINFOFILE
+    cat /proc/cpuinfo > ${LOGTMP}/$CPUINFOFILE
+    cat /proc/meminfo > ${LOGTMP}/$MEMINFOFILE
     echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
 
 }

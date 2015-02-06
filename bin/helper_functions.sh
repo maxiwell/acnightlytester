@@ -70,8 +70,6 @@ cleanup()
 {
     echo -ne "Cleaning ${TESTROOT}\n"
     rm -rf ${TESTROOT}  &> /dev/null
-    echo -ne "Cleaning ${LOGROOT}/${HTMLPREFIX}-*\n"
-    rm -rf ${LOGROOT}/${HTMLPREFIX}-*  &> /dev/null
 
     rm -rf /tmp/nightly-token
 }
@@ -145,6 +143,10 @@ have_workingcopy() {
 }
 
 
+finalize_startup(){
+    mv ${LOGTMP}/* ${LOGROOT}/
+}
+
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
 
@@ -159,6 +161,10 @@ finalize_nightly_tester() {
       sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
       mv ${TEMPFL} $HTMLINDEX
   fi
+
+  # Copy the HTML generates by Jobs to HTMLLOG final.
+  # Use the $LOGROOT in all code, degrades the Network bandwidth 
+  cp -r ${LOGTMP}/* ${LOGROOT}  &> /dev/null
 
   if [ "$DELETEWHENDONE" != "no" ]; then
     rm -rf $TESTROOT
@@ -227,9 +233,9 @@ clone_or_copy_model(){
     git clone ${GITLINK} ${TESTROOT}/${MODELNAME}/base > $TEMPFL 2>&1
     [ $? -ne 0 ] && {
       rm $TEMPFL
-      echo -ne "<p><b><font color=\"crimson\">${modelname} model git clone failed. check script parameters.</font></b></p>\n" >> $htmllog
-      finalize_html $htmllog ""
-      echo -ne "git clone \e[31mfailed\e[m. check script parameters.\n"
+      echo -ne "<p><b><font color=\"crimson\">${MODELNAME} model git clone failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+      finalize_html $HTMLLOG ""
+      echo -ne "git clone \e[31mfailed\e[m. Check script parameters.\n"
       do_abort
     } 
     # Extract model revision number

@@ -33,10 +33,10 @@ ORIG_LOGROOT=${LOGROOT}
 ORIG_HTMLLOG=${HTMLLOG}
 
 ### This lines override the variables defined by $CONFIGFILE to a local path in Condor Machine
-TESTROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)"    
-LOGROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)_public_html/"
-HTMLINDEX="${LOGROOT}/$(basename $HTMLINDEX)"
-HTMLLOG="${LOGROOT}/${HTMLPREFIX}-index.htm"
+export TESTROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)"    
+export LOGROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)_public_html/"
+export HTMLINDEX="${LOGROOT}/$(basename $HTMLINDEX)"
+export HTMLLOG="${LOGROOT}/${HTMLPREFIX}-index.htm"
 
 ### Copy the Archc compiled and installed to local machine
 cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
@@ -46,9 +46,8 @@ mkdir ${LOGROOT} &> /dev/null
 cd ${TESTROOT}/acsim
 
 ###########################################
-echo -ne "\n*** Job Started ***\n\n"
+echo -ne "\n*** Job Started ***\n"
 create_test_env $MODEL $RUN_MODEL $CROSS_MODEL $ORIG_HTMLLOG
-
 acsim_test  $MODEL  $RUN_MODEL  $REV_MODEL  $LINK_MODEL  $CROSS_MODEL   $ENDIAN
 sed -i "s@__${MODEL}_acsim_replace__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
 rm ${HTMLLOG}
@@ -65,4 +64,7 @@ rm -rf $TESTROOT &> /dev/null
 ### Restoring the modified variables
 . ${SCRIPTROOT}/${CONFIGFILE}
 TESTROOT="$TESTFOLDER"
+
+chmod 777 ${CONDOR_FOLDER} -R
+rm -rf ${CONDOR_FOLDER} 
 

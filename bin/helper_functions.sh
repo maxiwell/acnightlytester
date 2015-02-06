@@ -254,8 +254,10 @@ create_test_env() {
     local RUN_MODEL=$2
     CROSS_MODEL=$3
     local HTMLLOG=$4
+
+    cd ${TESTROOT}/acsim
     if [ "$RUN_MODEL" != "no" ]; then   
-        echo -ne "Uncompressing Mibench from source to ${MODEL} cross compiling...\n"
+        echo -ne "\nUncompressing Mibench from source to ${MODEL} cross compiling...\n"
         cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 .
         tar -xjf SourceMibench.tar.bz2
         [ $? -ne 0 ] && do_abort
@@ -273,14 +275,15 @@ create_test_env() {
         cd ${TESTROOT}/cross
         if [[ $CROSS_MODEL == *"http"* ]]; then
             wget ${CROSS_MODEL} &> /dev/null
-            TARFILE=$(basename $CROSS_MODEL)
-            tar -xf ${TARFILE}
-            export CROSS_MODEL=${TESTROOT}/cross/$(tar -tf ${TARFILE} | head -n1)/bin
-            RETCODE=$?
         else
-            tar -xf ${CROSS_MODEL}
-            RETCODE=$?
+            cp ${CROSS_MODEL} . &> /dev/null
         fi
+        TARFILE=$(basename $CROSS_MODEL)
+        tar -xf ${TARFILE}
+        RETCODE=$?
+        CROSS_ROOT=${TESTROOT}/cross/$(tar -tf ${TARFILE} | head -n1)
+        export CROSS_MODEL=$CROSS_ROOT/bin
+        chmod 777 $CROSS_ROOT -R 
         if [ $RETCODE -ne 0 ]; then
             sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
             do_abort

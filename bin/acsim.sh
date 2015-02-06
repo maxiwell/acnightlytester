@@ -118,9 +118,9 @@ acsim_run() {
   FAILED=`grep -ne "Failed" ${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
 
   if [ -z "$FAILED" ]; then
-      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td></tr>\n" >> $HTMLLOG
+      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG
   else
-      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>)</td></tr>\n" >> $HTMLLOG
+      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>)</td>" >> $HTMLLOG
   fi
    
 
@@ -132,7 +132,7 @@ acsim_prologue(){
     echo -ne "<p>Command used to build ACSIM models: <b> ./acsim model.ac ${ACSIM_PARAMS} </b> </p>\n" >> $HTMLLOG
 
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">\n" >> $HTMLLOG
-    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th><th>Tested in</th></tr>\n" >> $HTMLLOG
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
@@ -195,6 +195,13 @@ acsim_test(){
     export ENDIAN
     export LOGROOT
     export HTMLPREFIX
-    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim"  
+    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim" 
+
+    CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
+    MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
+    cat /proc/cpuinfo > ${LOGROOT}/$CPUINFOFILE
+    cat /proc/meminfo > ${LOGROOT}/$MEMINFOFILE
+    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
+
 }
 

@@ -12,7 +12,7 @@ powersc_prologue(){
     echo -ne "<p> <b>Note: </b> ARM and PowerPC models don't have POWERSC table files.</p>\n" >> $HTMLLOG 
  
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th></tr>\n" >> $HTMLLOG
+    echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th><th>Tested in</th></tr>\n" >> $HTMLLOG
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
@@ -75,5 +75,11 @@ powersc_test() {
     export LOGROOT
     export HTMLPREFIX
     acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "powersc" 
+
+    CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
+    MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
+    cat /proc/cpuinfo > ${LOGROOT}/$CPUINFOFILE
+    cat /proc/meminfo > ${LOGROOT}/$MEMINFOFILE
+    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
 }
 

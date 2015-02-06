@@ -177,42 +177,54 @@ fi
 ##########################################
 ### SystemC, untar, configure and install
 ##########################################
-#if is_acsim_enabled || is_accsim_enabled; then
-#    echo -ne "<tr><td>SystemC</td><td>${SYSTEMCSRC}</td><td>-</td>" >> $HTMLLOG
-#    echo -ne "Building/Installing SystemC...\n"
-#
-#    TEMPFL=${RANDOM}.out
-#    mkdir ${TESTROOT}/systemc
-#    cd ${TESTROOT}/systemc
-#    tar -xvf ${SYSTEMCSRC} &> /dev/null
-#    cd systemc*
-#    ./configure --prefix=${TESTROOT}/systemc/install  >> $TEMPFL 2>&1 
-#    make  >> $TEMPFL 2>&1 
-#    make install  >> $TEMPFL 2>&1 
-#    RETCODE=$?
-#    HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
-#    initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
-#    format_html_output $TEMPFL $HTMLBUILDLOG
-#    finalize_html $HTMLBUILDLOG ""
-#    rm $TEMPFL
-#    if [ $RETCODE -ne 0 ]; then
-#        echo -ne "<td> <b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
-#        echo -ne "</table></p>\n" >> $HTMLLOG
-#        finalize_html $HTMLLOG ""
-#        echo -ne "ArchC build \e[31mfailed\e[m.\n"
-#        do_abort
-#    else
-#        echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
-#    fi
-#    export SYSTEMCPATH=${TESTROOT}/systemc/install
-#    export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
-#fi
+if is_acsim_enabled || is_accsim_enabled; then
+    if [ -z ${SYSTEMCPATH} ]; then
+        echo -ne "<tr><td>SystemC</td><td>${SYSTEMCSRC}</td><td>-</td>" >> $HTMLLOG
+        echo -ne "Building/Installing SystemC...\n"
 
-    export SYSTEMCPATH=/home/max/ArchC/tools/systemc-2.3.1
-    export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+        TEMPFL=${RANDOM}.out
+        mkdir ${TESTROOT}/systemc
+        cd ${TESTROOT}/systemc
+        tar -xvf ${SYSTEMCSRC} &> /dev/null
+        cd systemc*
+        ./configure --prefix=${TESTROOT}/systemc/install  >> $TEMPFL 2>&1 
+        make  >> $TEMPFL 2>&1 
+        make install  >> $TEMPFL 2>&1 
+        RETCODE=$?
+        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
+        initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
+        format_html_output $TEMPFL $HTMLBUILDLOG
+        finalize_html $HTMLBUILDLOG ""
+        rm $TEMPFL
+        if [ $RETCODE -ne 0 ]; then
+            echo -ne "<td> <b><font color=\"crimson\">Failed </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+            echo -ne "</table></p>\n" >> $HTMLLOG
+            finalize_html $HTMLLOG ""
+            echo -ne "SystemC build \e[31mfailed\e[m.\n"
+            do_abort
+        else
+            echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
+        fi
+        export SYSTEMCPATH=${TESTROOT}/systemc/install
+        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+    else
+        echo -ne "<tr><td>SystemC</td><td>${SYSTEMCPATH}</td><td>-</td>" >> $HTMLLOG
+        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+        if [ -d $LD_LIBRARY_PATH ]; then
+            echo -ne "<td> <b><font color=\"green\">OK </font></b> </td></tr>" >> $HTMLLOG
+        else
+            echo -ne "<td> <b><font color=\"crimson\">Failed </font></b></td></tr>" >> $HTMLLOG
+            echo -ne "</table></p>\n" >> $HTMLLOG
+            finalize_html $HTMLLOG
+            echo -ne "SystemC build \e[31mfailed\e[m.\n"
+            do_abort
+        fi
+    fi
+fi
+
 
 ##############################################
-# Cross-compiler, reserving space in the table
+# Cross-compiler, reserving space in HTML table
 #############################################
 if [ ${COMPILE} == "yes" ]; then
     if [ ${RUN_ARM_ACSIM} == "yes" ]; then
@@ -314,10 +326,10 @@ if [ "$CONDOR" == "yes" ]; then
     ${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
     ${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
 
-   # powersc_html_table "sparc" "mips"
+    powersc_html_table "sparc" "mips"
 
-    #${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
+    ${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
 
     #mkdir ${TESTROOT}/condor_folder && cd  ${TESTROOT}/condor_folder
 
@@ -325,9 +337,9 @@ if [ "$CONDOR" == "yes" ]; then
     #sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
     #sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
     #sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
-    #sed -i "s@LOG@exec1.log@g" exec1.condor
+    #sed -i "s@PREFIX@exec1@g" exec1.condor
 
- #   condor_submit exec1.condor
+    #condor_submit exec1.condor
 
     finalize_nightly_tester
     exit 0
@@ -335,10 +347,15 @@ fi
 
 # The code below is the Nightly sequential
 
+
 create_test_env "arm"     $RUN_ARM_ACSIM  $CROSS_ARM $HTMLLOG
+CROSS_ARM=$CROSS_MODEL
 create_test_env "sparc"   $RUN_SPARC_ACSIM $CROSS_SPARC $HTMLLOG
+CROSS_SPARC=$CROSS_MODEL
 create_test_env "mips"    $RUN_MIPS_ACSIM  $CROSS_MIPS $HTMLLOG
+CROSS_MIPS=$CROSS_MODEL
 create_test_env "powerpc" $RUN_POWERPC_ACSIM  $CROSS_POWERPC $HTMLLOG
+CROSS_POWERPC=$CROSS_MODEL
 
 if [ "$LOCALSIMULATOR" != "no" ]; then
 

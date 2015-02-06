@@ -12,7 +12,7 @@ CROSS_MODEL=$5
 ENDIAN=$6
 TESTFOLDER=$7
 
-CONDOR_FOLDER=/tmp/condor
+CONDOR_FOLDER=/tmp/condor/
 
 mkdir -p ${CONDOR_FOLDER}
 if [ $? -ne 0 ]; then
@@ -22,12 +22,13 @@ fi
 
 ### Get env
 ### SCRIPTROOT must be in NFS (like /home/lsc/...)
+SAVE_ENV=$PWD
 cd ${SCRIPTROOT}
 . bin/helper_functions.sh
 . bin/acsim.sh
 . bin/powersc.sh
 . $CONFIGFILE
-cd -  &> /dev/null
+cd $SAVE_ENV  &> /dev/null
 
 ORIG_LOGROOT=${LOGROOT}
 ORIG_HTMLLOG=${HTMLLOG}
@@ -39,7 +40,7 @@ export HTMLINDEX="${LOGROOT}/$(basename $HTMLINDEX)"
 export HTMLLOG="${LOGROOT}/${HTMLPREFIX}-index.htm"
 
 ### Copy the Archc compiled and installed to local machine
-cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
+cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
 
 ### change the env from original TESTROOT to local TESTROOT
 mkdir ${LOGROOT} &> /dev/null
@@ -56,7 +57,7 @@ echo -ne "\n*** Job Concluded ***\n"
 ###########################################
 
 ### Get generates files
-cp $LOGROOT/* $ORIG_LOGROOT 
+#cp $LOGROOT/* $ORIG_LOGROOT 
 
 rm -rf $LOGROOT &> /dev/null
 rm -rf $TESTROOT &> /dev/null

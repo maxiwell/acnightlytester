@@ -19,7 +19,7 @@ acsim_build_model() {
         if [ -e Makefile.archc ]; then
             make -f Makefile.archc distclean &> /dev/null
         fi
-        ${TESTROOT}/install/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
+        ${TESTROOT}/acinstall/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
         BUILD_RETCODE=$?
         HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
         initialize_html $HTMLBUILDLOG "${MODELNAME} rev $MODELREV build output"

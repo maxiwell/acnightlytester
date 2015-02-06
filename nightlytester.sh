@@ -247,7 +247,8 @@ fi
 ######################################
 ### ArchC, configure & install
 ######################################
-mkdir ${TESTROOT}/install
+cd ${TESTROOT}/acsrc
+mkdir ${TESTROOT}/acinstall
 
 echo -ne "Building/Installing ArchC...\n"
 TEMPFL=${RANDOM}.out
@@ -267,7 +268,7 @@ fi
 if [ "$RUN_ACSTONE" != "no" ]; then
     ACSTONE_STRING=" --with-gdb=${GDBPATH}"
 fi
-./configure --prefix=${TESTROOT}/install $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
+./configure --prefix=${TESTROOT}/acinstall $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
 
 # Compile ArchC
 make >> $TEMPFL 2>&1 &&
@@ -333,7 +334,7 @@ if [ "$CONDOR" == "yes" ]; then
 
     cp ${SCRIPTROOT}/condor.config exec1.condor
     sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
-    sed -i "s@ARGUMENTS@\"arm\"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     \"little\"  $TESTROOT@g" exec1.condor
+    sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" exec1.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
     sed -i "s@PREFIX@exec1@g" exec1.condor
 

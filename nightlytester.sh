@@ -347,7 +347,8 @@ if [ "$CONDOR" == "yes" ]; then
     mkdir ${TESTROOT}/condor && cd  ${TESTROOT}/condor
 
     cp ${SCRIPTROOT}/condor.config exec1.condor
-    sed -i "s@EXECUTABLE@${SCRIPTROOT}/bin/acsim_condor.sh@g" exec1.condor
+    cp ${SCRIPTROOT}/bin/*_condor.sh .
+    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" exec1.condor
     sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" exec1.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
     sed -i "s@PREFIX@exec1@g" exec1.condor

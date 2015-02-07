@@ -28,7 +28,7 @@ acsim_build_model() {
         rm $TEMPFL
 
         if [ $BUILD_RETCODE -ne 0 ]; then
-            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td></th>" >> $HTMLLOG
+            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>$HOSTNAME</td></th>" >> $HTMLLOG
             echo -ne "ACSIM \e[31mfailed\e[m to build $MODELNAME model.\n"
             BUILD_FAULT="yes"
             do_abort

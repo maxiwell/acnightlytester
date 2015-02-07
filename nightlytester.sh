@@ -66,8 +66,12 @@ initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
 export DATE=`LANG=en_US date '+%a %D %T'`
 echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
-echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Compilation</th></tr>\n" >> $HTMLLOG
+echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Status</th></tr>\n" >> $HTMLLOG
 
+if [[ $CONDOR == "yes" ]] && [[ $TESTROOT != "/tmp"* ]]; then
+    echo -ne "When CONDOR is enabled, the TESTROOT must be in /tmp\n"
+    do_abort
+fi
 
 ######################################
 ### Archc, git clone
@@ -450,8 +454,10 @@ fi
 # FIXME ----------- 
 
 #########################
+
+
 # Copy the HTML generates by Jobs to HTMLLOG final.
-# Put this line in 'finalize_nightly_tester' difficults the CONDOR finalization
+# Put this line in 'finalize_nightly_tester' affects the CONDOR finalization
 cp -r ${LOGTMP}/* ${LOGROOT}  &> /dev/null
 
 finalize_nightly_tester

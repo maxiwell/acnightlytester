@@ -147,6 +147,26 @@ finalize_startup(){
     mv ${LOGTMP}/* ${LOGROOT}/
 }
 
+initialize_condor(){
+    echo -ne "\n*** Job Started ***\n"
+
+}
+
+
+
+finalize_condor(){
+    [[ ! -a $HTMLLOG ]] && touch $HTMLLOG
+
+    sed -i "s@__${MODEL}_${DIRSIMULATOR}_replace__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
+    rm ${HTMLLOG}
+    echo -ne "\n*** Job Concluded ***\n"
+    
+    ### Get generates files
+    cp -r ${LOGTMP}/* ${LOGROOT}/ 
+    rm -f /tmp/nightly-token
+}
+
+
 finalize_nightly_tester() {
   TEMPFL=${RANDOM}.out
 
@@ -168,15 +188,16 @@ finalize_nightly_tester() {
   else
     echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
   fi
-
   rm -f /tmp/nightly-token
-
 }
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-#  finalize_nightly_tester
-  rm -f /tmp/nightly-token
+  if [ $CONDOR != "yes" ]; then
+    finalize_nightly_tester
+  else
+    finalize_condor
+  fi
   exit 1
 }
 
@@ -254,15 +275,15 @@ clone_or_copy_model(){
 }
 
 create_test_env() {
-    local MODEL=$1
-    local RUN_MODEL=$2
+    MODEL=$1
+    RUN_MODEL=$2
     CROSS_MODEL=$3
-    local HTMLLOG=$4
+    LOCAL_HTMLLOG=$4
 
     cd ${TESTROOT}/acsim
     if [ "$RUN_MODEL" != "no" ]; then   
         echo -ne "\nUncompressing Mibench from source to ${MODEL} cross compiling...\n"
-        cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 .
+        cp ${SCRIPTROOT}/sources/SourceMibench.tar.bz2 . 
         tar -xjf SourceMibench.tar.bz2
         [ $? -ne 0 ] && do_abort
         mv SourceMibench ${MODEL}_mibench
@@ -289,10 +310,10 @@ create_test_env() {
         export CROSS_MODEL=$CROSS_ROOT/bin
         chmod 777 $CROSS_ROOT -R 
         if [ $RETCODE -ne 0 ]; then
-            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
+            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${LOCAL_HTMLLOG}
             do_abort
         else
-            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${HTMLLOG}
+            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${LOCAL_HTMLLOG}
         fi
     fi
 }

@@ -13,61 +13,38 @@ ENDIAN=$6
 TESTFOLDER=$7
 STARTUP_MACHINE=$8
 
-### Copy the all files compiled and installed by startup machine 
-###n(archc2.lsc.ic.unicamp.br) to local machine (nodeX)
-
-# If the startup machine is the same that execute the jobs (local testing, without CONDOR)
-if [ ${STARTUP_MACHINE} == ${HOSTNAME} ]; then
-    # Folder that I will copy the $TESTROOT to execute locally. 
-    CONDOR_FOLDER=/tmp/condor/
-    mkdir -p ${CONDOR_FOLDER}
-    if [ $? -ne 0 ]; then
-        echo -ne "Create file ${CONDOR_FOLDER} failed\n"
-        return 1
-    fi
-    cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
-else
-    # Folder that I will copy the $TESTROOT to execute locally. 
-    CONDOR_FOLDER=/tmp/
-    mkdir -p ${CONDOR_FOLDER}
-    if [ $? -ne 0 ]; then
-        echo -ne "Create file ${CONDOR_FOLDER} failed\n"
-        return 1
-    fi
-    cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
-fi
-
-### Get ENV. $SCRIPTROOT must be in NFS (like /home/lsc/...)
-SAVE_ENV=$PWD
+#Get env: $SCRIPTROOT must be in NFS (like /home/lsc/...)
+_PWD=${PWD}
 cd ${SCRIPTROOT}
 . bin/helper_functions.sh
 . bin/acsim.sh
-. bin/powersc.sh
 . $CONFIGFILE
-cd $SAVE_ENV  &> /dev/null
+cd $_PWD
 
-ORIG_HTMLLOG=${HTMLLOG}
+initialize_condor
 
-### This lines override the variables defined by $CONFIGFILE to a local path in Condor Machine
-export TESTROOT="${CONDOR_FOLDER}/$(basename $TESTFOLDER)"    
+# Used in 'finalize_condor' 
+export DIRSIMULATOR="acsim"
+export ORIG_HTMLLOG=${HTMLLOG}
+
+# Used in 'create_test_env' and 'acsim_test'
+export TESTROOT="${PWD}/$(basename $TESTFOLDER)"    
 export LOGTMP="${TESTROOT}/public_html/"
 export HTMLLOG="${LOGTMP}/${HTMLPREFIX}-index.htm"
+
+# ArchC must be moved to the PATH set in the PREFIX instalation (FIXME: the ./etc/archc.config was fixed, but have more issues.
+# I assume, here, that $TESTFOLDER is a valid folder in Condor node (e.g. /tmp)
+if [ ! -d $TESTFOLDER ]; then
+	mkdir -p $TESTFOLDER
+	cp -r ${TESTROOT}/acinstall ${TESTFOLDER}
+fi
 
 # Enter in local TESTROOT
 cd ${TESTROOT}/acsim
 
-###########################################
-echo -ne "\n*** Job Started ***\n"
 create_test_env $MODEL $RUN_MODEL $CROSS_MODEL $ORIG_HTMLLOG
 acsim_test  $MODEL  $RUN_MODEL  $REV_MODEL  $LINK_MODEL  $CROSS_MODEL   $ENDIAN
 sed -i "s@__${MODEL}_acsim_replace__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
-rm ${HTMLLOG}
 
-echo -ne "\n*** Job Concluded ***\n"
-###########################################
+finalize_condor
 
-### Get generates files
-cp -r ${LOGTMP}/* ${LOGROOT}/ 
-
-chmod 777 ${CONDOR_FOLDER} -R
-rm -rf ${CONDOR_FOLDER} 

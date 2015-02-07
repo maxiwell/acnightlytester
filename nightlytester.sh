@@ -333,27 +333,66 @@ POWERPCLINK="${POWERPCGITLINK}${POWERPCWORKINGCOPY}"
 if [ "$CONDOR" == "yes" ]; then
     export SCRIPTROOT
     export CONFIGFILE
-
+    
+    # Uncomment this lines to testing the "condor.sh" in the same machine that startup (without condor)
     #acsim_html_table "arm" "sparc" "mips" "powerpc"
     #${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
     #${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
     #${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
     #${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
-
     #powersc_html_table "sparc" "mips"
     #${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
     #${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
 
+    # Real CONDOR dispatch jobs
     mkdir ${TESTROOT}/condor && cd  ${TESTROOT}/condor
-
-    cp ${SCRIPTROOT}/condor.config exec1.condor
     cp ${SCRIPTROOT}/bin/*_condor.sh .
-    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" exec1.condor
-    sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" exec1.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" exec1.condor
-    sed -i "s@PREFIX@exec1@g" exec1.condor
 
-    condor_submit exec1.condor
+    acsim_html_table "arm" "sparc" "mips" "powerpc" 
+
+    cp ${SCRIPTROOT}/condor.config arm-acsim.condor
+    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" arm-acsim.condor
+    sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT $HOSTNAME@g" arm-acsim.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsim.condor
+    sed -i "s@PREFIX@arm-acsim@g" arm-acsim.condor
+    condor_submit arm-acsim.condor
+
+    cp ${SCRIPTROOT}/condor.config sparc-acsim.condor
+    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" sparc-acsim.condor
+    sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT $HOSTNAME@g" sparc-acsim.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsim.condor
+    sed -i "s@PREFIX@sparc-acsim@g" sparc-acsim.condor
+    condor_submit sparc-acsim.condor
+
+    cp ${SCRIPTROOT}/condor.config mips-acsim.condor
+    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" mips-acsim.condor
+    sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT $HOSTNAME@g" mips-acsim.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsim.condor
+    sed -i "s@PREFIX@mips-acsim@g" mips-acsim.condor
+    condor_submit mips-acsim.condor
+
+    cp ${SCRIPTROOT}/condor.config powerpc-acsim.condor
+    sed -i "s@EXECUTABLE@./acsim_condor.sh@g" powerpc-acsim.condor
+    sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT $HOSTNAME@g" powerpc-acsim.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsim.condor
+    sed -i "s@PREFIX@powerpc-acsim@g" powerpc-acsim.condor
+    condor_submit powerpc-acsim.condor
+
+    powersc_html_table "sparc" "mips"
+
+    cp ${SCRIPTROOT}/condor.config sparc-powersc.condor
+    sed -i "s@EXECUTABLE@./powersc_condor.sh@g" sparc-powersc.condor
+    sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT $HOSTNAME@g" sparc-powersc.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" sparc-powersc.condor
+    sed -i "s@PREFIX@sparc-powersc@g" sparc-powersc.condor
+    condor_submit sparc-powersc.condor
+
+    cp ${SCRIPTROOT}/condor.config mips-powersc.condor
+    sed -i "s@EXECUTABLE@./powersc_condor.sh@g" mips-powersc.condor
+    sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT $HOSTNAME@g" mips-powersc.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" mips-powersc.condor
+    sed -i "s@PREFIX@mips-powersc@g" mips-powersc.condor
+    condor_submit mips-powersc.condor
 
     finalize_nightly_tester
     exit 0
@@ -410,8 +449,10 @@ if [ $RUN_ACSTONE != "no" ]; then
 fi
 # FIXME ----------- 
 
-
 #########################
+# Copy the HTML generates by Jobs to HTMLLOG final.
+# Put this line in 'finalize_nightly_tester' difficults the CONDOR finalization
+cp -r ${LOGTMP}/* ${LOGROOT}  &> /dev/null
 
 finalize_nightly_tester
 

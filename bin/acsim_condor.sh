@@ -11,23 +11,31 @@ LINK_MODEL=$4
 CROSS_MODEL=$5 
 ENDIAN=$6
 TESTFOLDER=$7
+STARTUP_MACHINE=$8
 
-echo "Oii"
-exit
+### Copy the all files compiled and installed by startup machine 
+###n(archc2.lsc.ic.unicamp.br) to local machine (nodeX)
 
-# Folder that I will copy the $TESTROOT to execute locally. 
-CONDOR_FOLDER=/tmp/condor/
-mkdir -p ${CONDOR_FOLDER}
-if [ $? -ne 0 ]; then
-    echo -ne "Create file ${CONDOR_FOLDER} failed\n"
-    return 1
+# If the startup machine is the same that execute the jobs (local testing, without CONDOR)
+if [ ${STARTUP_MACHINE} == ${HOSTNAME} ]; then
+    # Folder that I will copy the $TESTROOT to execute locally. 
+    CONDOR_FOLDER=/tmp/condor/
+    mkdir -p ${CONDOR_FOLDER}
+    if [ $? -ne 0 ]; then
+        echo -ne "Create file ${CONDOR_FOLDER} failed\n"
+        return 1
+    fi
+    cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
+else
+    # Folder that I will copy the $TESTROOT to execute locally. 
+    CONDOR_FOLDER=/tmp/
+    mkdir -p ${CONDOR_FOLDER}
+    if [ $? -ne 0 ]; then
+        echo -ne "Create file ${CONDOR_FOLDER} failed\n"
+        return 1
+    fi
+    cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
 fi
-
-### Copy the all files compiled and installed by startup machine (archc2.lsc.ic.unicamp.br) to local machine (nodeX)
-# Line to test in a same machine, before send to condor
-cp -r ${TESTFOLDER} ${CONDOR_FOLDER}
-# Line to use in real condor machine
-#cp -r $(basename $TESTFOLDER) ${CONDOR_FOLDER}
 
 ### Get ENV. $SCRIPTROOT must be in NFS (like /home/lsc/...)
 SAVE_ENV=$PWD

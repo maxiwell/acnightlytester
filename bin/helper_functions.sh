@@ -162,9 +162,6 @@ finalize_nightly_tester() {
       mv ${TEMPFL} $HTMLINDEX
   fi
 
-  # Copy the HTML generates by Jobs to HTMLLOG final.
-  # Use the $LOGROOT in all code, degrades the Network bandwidth 
-  cp -r ${LOGTMP}/* ${LOGROOT}  &> /dev/null
 
   if [ "$DELETEWHENDONE" != "no" ]; then
     rm -rf $TESTROOT
@@ -178,7 +175,8 @@ finalize_nightly_tester() {
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-  finalize_nightly_tester
+#  finalize_nightly_tester
+  rm -f /tmp/nightly-token
   exit 1
 }
 

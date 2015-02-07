@@ -72,14 +72,14 @@ powersc_test() {
     export TESTRANLIB="${CROSS_MODEL}/${TUPLE}-ranlib"
     export TESTFLAG="-specs=archc -static"
     export ENDIAN
-    export LOGROOT
+    export LOGTMP
     export HTMLPREFIX
     acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "powersc" 
 
     CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
     MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
-    cat /proc/cpuinfo > ${LOGROOT}/$CPUINFOFILE
-    cat /proc/meminfo > ${LOGROOT}/$MEMINFOFILE
+    cat /proc/cpuinfo > ${LOGTMP}/$CPUINFOFILE
+    cat /proc/meminfo > ${LOGTMP}/$MEMINFOFILE
     echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
 }
 

@@ -33,8 +33,9 @@ export TESTROOT="${PWD}/$(basename $TESTFOLDER)"
 export LOGTMP="${TESTROOT}/public_html/"
 export HTMLLOG="${LOGTMP}/${HTMLPREFIX}-index.htm"
 
-# ArchC must be moved to the PATH set in the PREFIX instalation (FIXME: the ./etc/archc.config was fixed, but have more issues.
-# I assume, here, that $TESTFOLDER is a valid folder in Condor node (e.g. /tmp)
+# ArchC must be moved to the PATH set in the PREFIX instalation in Startup Machine
+# I assume that the Condor Nodes have the PATH used by Startup Machine (like /tmp/...)
+# If the Folder exists, so the ArchC already been installed by other Job. 
 if [ ! -d $TESTFOLDER ]; then
 	mkdir -p $TESTFOLDER
 	cp -r ${TESTROOT}/acinstall ${TESTFOLDER}

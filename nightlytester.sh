@@ -211,7 +211,7 @@ if is_acsim_enabled || is_accsim_enabled; then
         make  >> $TEMPFL 2>&1 
         make install  >> $TEMPFL 2>&1 
         RETCODE=$?
-        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
+        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-systemc-build-log.htm
         initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
@@ -294,7 +294,7 @@ fi
 make >> $TEMPFL 2>&1 &&
 make install >> $TEMPFL 2>&1
 RETCODE=$?
-HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
+HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-archc-build-log.htm
 initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
 format_html_output $TEMPFL $HTMLBUILDLOG
 finalize_html $HTMLBUILDLOG ""
@@ -459,11 +459,6 @@ fi
 # FIXME ----------- 
 
 #########################
-
-
-# Copy the HTML generates by Jobs to HTMLLOG final.
-# Put this line in 'finalize_nightly_tester' affects the CONDOR finalization
-cp -r ${LOGTMP}/* ${LOGROOT}  &> /dev/null
 
 finalize_nightly_tester
 

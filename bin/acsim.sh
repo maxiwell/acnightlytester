@@ -147,7 +147,7 @@ acsim_html_table() {
     acsim_prologue
 
     for ARG in "$@"; do
-        echo -ne "__${ARG}_REPLACELINE_acsim__\n" >> $HTMLLOG
+        echo -ne "__REPLACELINE_${ARG}_acsim__\n" >> $HTMLLOG
     done
 
     acsim_epilogue

@@ -45,7 +45,7 @@ cd ${TESTROOT}/acsim
 
 create_test_env $MODEL $RUN_MODEL $CROSS_MODEL $ORIG_HTMLLOG
 acsim_test  $MODEL  $RUN_MODEL  $REV_MODEL  $LINK_MODEL  $CROSS_MODEL   $ENDIAN
-sed -i "s@__${MODEL}_acsim_replace__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
+sed -i "s@__REPLACELINE_${MODEL}_acsim__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
 
 finalize_condor
 

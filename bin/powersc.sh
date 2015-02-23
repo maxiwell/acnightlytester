@@ -26,7 +26,7 @@ powersc_html_table() {
     powersc_prologue
 
     for ARG in "$@"; do
-        echo -ne "__${ARG}_powersc_replace__\n" >> $HTMLLOG
+        echo -ne "__REPLACELINE_${ARG}_powersc__\n" >> $HTMLLOG
     done
 
     powersc_epilogue

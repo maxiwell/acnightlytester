@@ -32,6 +32,8 @@ else
     touch /tmp/nightly-token
 fi
 
+export START_MACHINE=$HOSTNAME
+
 mkdir -p ${TESTROOT}
 
 # Initializing HTML log files
@@ -104,6 +106,7 @@ else
   # Extract revision number
   cd ${TESTROOT}/acsrc &> /dev/null
   #ARCHCREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
+  ARCHREVFULL=$(git log | head -n1 | cut -d\  -f2)
   ARCHCREV=$(git log | head -n1 | cut -c8-15)".."
   if [ ${ARCHCREV} != ${LASTARCHCREV} ]; then
         LASTEQCURRENT="no"
@@ -113,7 +116,12 @@ fi
 
 ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
 echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
-echo -ne "<td> ${ARCHCREV} </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
+
+if [ -z "$ARCHCGITLINK" ]; then
+  echo -ne "<td> ${ARCHCREV} </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
+else
+  echo -ne "<td> <a href=http://git.archc.lsc.ic.unicamp.br/?p=archc.git;a=commit;h=${ARCHREVFULL}> ${ARCHCREV} </a> </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
+fi
 
 ################################
 ### Get ArchC Models
@@ -203,7 +211,7 @@ if is_acsim_enabled || is_accsim_enabled; then
         make  >> $TEMPFL 2>&1 
         make install  >> $TEMPFL 2>&1 
         RETCODE=$?
-        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-systemc-build-log.htm
+        HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-systemc-build-log.htm
         initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
@@ -240,16 +248,16 @@ fi
 #############################################
 if [ ${COMPILE} == "yes" ]; then
     if [ ${RUN_ARM_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__STATUS_CROSS_arm__</td>" >> $HTMLLOG
+        echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__REPLACELINE_CROSS_arm__</td>" >> $HTMLLOG
     fi
     if [ ${RUN_SPARC_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__STATUS_CROSS_sparc__</td>" >> $HTMLLOG
+        echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__REPLACELINE_CROSS_sparc__</td>" >> $HTMLLOG
     fi
     if [ ${RUN_MIPS_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__STATUS_CROSS_mips__</td>" >> $HTMLLOG
+        echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__REPLACELINE_CROSS_mips__</td>" >> $HTMLLOG
     fi
     if [ ${RUN_POWERPC_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__STATUS_CROSS_powerpc__</td>" >> $HTMLLOG
+        echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__REPLACELINE_CROSS_powerpc__</td>" >> $HTMLLOG
     fi
 else
     echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
@@ -286,7 +294,7 @@ fi
 make >> $TEMPFL 2>&1 &&
 make install >> $TEMPFL 2>&1
 RETCODE=$?
-HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-archc-build-log.htm
+HTMLBUILDLOG=${LOGROOT}/${HTMLPREFIX}-archc-build-log.htm
 initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
 format_html_output $TEMPFL $HTMLBUILDLOG
 finalize_html $HTMLBUILDLOG ""
@@ -321,13 +329,10 @@ if is_acsim_enabled; then
     fi
 fi
 
-finalize_startup   
-
 ##############################################################
 # Here, the condor machine dispatch jobs. 
 # If is no --condor option, works sequentially, don't worry. 
 ##############################################################
-
 
 ARMLINK="${ARMGITLINK}${ARMWORKINGCOPY}"
 SPARCLINK="${SPARCGITLINK}${SPARCWORKINGCOPY}"

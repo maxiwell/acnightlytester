@@ -142,22 +142,17 @@ have_workingcopy() {
    fi
 }
 
-
-finalize_startup(){
-    mv ${LOGTMP}/* ${LOGROOT}/
-}
-
 initialize_condor(){
     echo -ne "\n*** Job Started ***\n"
 
 }
 
-
-
 finalize_condor(){
     [[ ! -a $HTMLLOG ]] && touch $HTMLLOG
 
-    sed -i "s@__${MODEL}_${DIRSIMULATOR}_replace__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG 
+    sed -i "s@__REPLACELINE_${MODEL}_${DIRSIMULATOR}__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG  
+    sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@-@g" $HTMLLOG
+
     rm ${HTMLLOG}
     echo -ne "\n*** Job Concluded ***\n"
     
@@ -182,6 +177,7 @@ finalize_nightly_tester() {
       mv ${TEMPFL} $HTMLINDEX
   fi
 
+  sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@-@g" $HTMLLOG
 
   if [ "$DELETEWHENDONE" != "no" ]; then
     rm -rf $TESTROOT
@@ -193,9 +189,11 @@ finalize_nightly_tester() {
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-  if [ $CONDOR != "yes" ]; then
+  if [ $START_MACHINE == $HOSTNAME ]; then
+    # Local mode, just one machine is used by now. 
     finalize_nightly_tester
   else
+    # Condor mode, many machines in use.
     finalize_condor
   fi
   exit 1

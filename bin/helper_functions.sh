@@ -309,10 +309,10 @@ create_test_env() {
         export CROSS_MODEL=$CROSS_ROOT/bin
         chmod 777 $CROSS_ROOT -R 
         if [ $RETCODE -ne 0 ]; then
-            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${LOCAL_HTMLLOG}
+            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${LOCAL_HTMLLOG}
             do_abort
         else
-            sed -i "s@__STATUS_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${LOCAL_HTMLLOG}
+            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${LOCAL_HTMLLOG}
         fi
     fi
 }

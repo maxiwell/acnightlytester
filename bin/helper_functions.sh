@@ -16,6 +16,8 @@ usage(){
 }
 
 command_line_handler() {
+    CONDOR="no"
+    FORCENIGHTLY="no"
     if [ $# -eq 0 ]; then
         usage
         exit

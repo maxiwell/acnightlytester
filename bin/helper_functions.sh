@@ -142,21 +142,17 @@ have_workingcopy() {
    fi
 }
 
-initialize_condor(){
-    echo -ne "\n*** Job Started ***\n"
+finalize_test(){
+    DIRSIMULATOR=$1
 
-}
+    [[ ! -a $HTMLLOG_TESTROOT ]] && touch $HTMLLOG_TESTROOT
 
-finalize_condor(){
-    [[ ! -a $HTMLLOG ]] && touch $HTMLLOG
-
-    sed -i "s@__REPLACELINE_${MODEL}_${DIRSIMULATOR}__@$(cat $HTMLLOG)@g" $ORIG_HTMLLOG  
+    sed -i "s@__REPLACELINE_${MODEL}_${DIRSIMULATOR}__@$(cat $HTMLLOG_TESTROOT)@g" $HTMLLOG  
     
-    rm ${HTMLLOG}
-    echo -ne "\n*** Job Concluded ***\n"
+    rm ${HTMLLOG_TESTROOT}
     
     ### Get generates files
-    cp -r ${LOGTMP}/* ${LOGROOT}/
+    cp -r ${HTML_TESTROOT}/* ${HTMLROOT}/
     rm -f /tmp/nightly-token
 }
 
@@ -169,33 +165,28 @@ finalize_nightly_tester() {
   mv TMPFILE ${HTMLINDEX}
   rm -f TMPFILE
 
-
   if [ "$FORCENIGHTLY" == "yes" -o "$LASTEQCURRENT" == "no" ]; then
       HTMLLINE="<tr><td>${HTMLPREFIX}</td><td>${DATE}</td><td>${ARCHCREV}</td><td><a href=\"${HTMLPREFIX}-index.htm\">Here</a></td><td>${REVMESSAGE}</td><td>${HOSTNAME}</td></tr>"
       sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
       mv ${TEMPFL} $HTMLINDEX
   fi
 
-  ### Get generates files
-  cp -r ${LOGTMP}/* ${LOGROOT}/ 
-  rm -f /tmp/nightly-token
-
-#  if [ "$DELETEWHENDONE" != "no" ]; then
-#    rm -rf $TESTROOT
-#  else
-#    echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
-#  fi
+  if [ $CONDOR != "yes" ]; then
+      if   [ "$DELETEWHENDONE" != "no" ]; then
+          rm -rf $TESTROOT
+      else
+          echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
+      fi
+  fi
 }
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-  sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@-@g" $HTMLLOG
-  if [ $START_MACHINE == $HOSTNAME ]; then
-    # Local mode, just one machine is used by now. 
-    finalize_nightly_tester
-  else
-    # Condor mode, many machines in use.
-    finalize_condor
+  sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@@g" $HTMLLOG
+  finalize_test
+  if [ $SUBMIT_MACHINE == $HOSTNAME ]; then
+      # Only submit machine execute this Function or when CONDOR = "no"
+      finalize_nightly_tester
   fi
   exit 1
 }
@@ -261,7 +252,7 @@ clone_or_copy_model(){
     #MODELREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
     MODELREV=$(git log | head -n1 | cut -c8-15)".."
     if [ "$LASTHTMLPREFIX" != "0" ]; then
-        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${LOGROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
+        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${HTMLROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
         if [ "$MODELREV" != "$LASTMODELREV" ]; then
             LASTEQCURRENT="no"
         fi
@@ -277,7 +268,7 @@ create_test_env() {
     MODEL=$1
     RUN_MODEL=$2
     CROSS_MODEL=$3
-    LOCAL_HTMLLOG=$4
+    HTMLLOG=$4
 
     cd ${TESTROOT}/acsim
     if [ "$RUN_MODEL" != "no" ]; then   
@@ -309,10 +300,10 @@ create_test_env() {
         export CROSS_MODEL=$CROSS_ROOT/bin
         chmod 777 $CROSS_ROOT -R 
         if [ $RETCODE -ne 0 ]; then
-            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${LOCAL_HTMLLOG}
+            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
             do_abort
         else
-            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${LOCAL_HTMLLOG}
+            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${HTMLLOG}
         fi
     fi
 }

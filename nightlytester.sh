@@ -7,7 +7,7 @@
 
 # Parameters adjustable by environment variables
 
-NIGHTLYVERSION=2.3
+NIGHTLYVERSION=3.0
 
 ####################################
 ### Import external funtions
@@ -32,37 +32,36 @@ else
     touch /tmp/nightly-token
 fi
 
-export START_MACHINE=$HOSTNAME
+export SUBMIT_MACHINE=$HOSTNAME
 
 mkdir -p ${TESTROOT}
 
+if [ ! -f $HTMLINDEX ]; then
+    cp htmllogs/index.htm ${HTMLROOT}
+    HTMLINDEX=${HTMLROOT}/index.htm
+fi
+
 # Initializing HTML log files
 # Discover this run's number and prefix all our HTML files with it
-
-# Temporary HTML files, necessary for condor scheme. If use $LOGROOT only (without $LOGTMP), all page 
-# generates by jobs (in many machines) would use the network. The $LOGTMP folder was a alternative
-# to save Bandwidth, creating the pages locally. The only pages that use the NFS is $HTMLINDEX and $HTMLLOG,
-# because they must be shared. 
-export LOGTMP=${TESTROOT}/public_html
-mkdir -p ${LOGTMP}
-
-if [ ! -f $HTMLINDEX ]; then
-    cp htmllogs/index.htm ${LOGROOT}
-    HTMLINDEX=${LOGROOT}/index.htm
-fi
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
 export LASTHTMLPREFIX=$HTMLPREFIX
 export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
 
 if [ -z $LASTARCHCREV ]; then
-    echo -ne "Problem in index.html file.\n"
-    do_abort
+    echo -ne "WARNING: Last ArchC Rev don't found.\n"
 fi
 
 export LASTEQCURRENT="yes"
-
 export HTMLPREFIX=$(($HTMLPREFIX + 1))
-export HTMLLOG=${LOGROOT}/${HTMLPREFIX}-index.htm
+export HTMLLOG=${HTMLROOT}/${HTMLPREFIX}-index.htm
+
+# Temporary HTML files, necessary for Condor approach. If use $HTMLROOT and HTMLLOG only (without $HTML_TESTROOT), all page 
+# generates by jobs (in many machines) would use the network. The $HTML_TESTROOT folder was a alternative
+# to save Bandwidth and avoid the Race Condition, creating the pages locally. The only pages that use the NFS is $HTMLINDEX and 
+# the 'component' table in $HTMLLOG, because they must be shared. 
+export    HTML_TESTROOT=${TESTROOT}/public_html
+export HTMLLOG_TESTROOT=${TESTROOT}/public_html/${HTMLPREFIX}-index.htm
+mkdir -p ${HTML_TESTROOT}
 
 initialize_html $HTMLLOG "NightlyTester ${NIGHTLYVERSION} Run #${HTMLPREFIX}"
 export DATE=`LANG=en_US date '+%a %D %T'`
@@ -78,8 +77,10 @@ fi
 ######################################
 ### Archc, git clone
 ######################################
-mkdir ${TESTROOT}/acsrc
+ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
+echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
 
+mkdir ${TESTROOT}/acsrc
 cd ${TESTROOT}/acsrc
 if [ -z "$ARCHCGITLINK" ]; then
   echo -ne "Copying ArchC source from a local directory...\n"
@@ -97,7 +98,7 @@ else
   echo -ne "Cloning ArchC GIT version...\n"
   git clone $ARCHCGITLINK . > /dev/null 2>&1  
   [ $? -ne 0 ] && {
-    echo -ne "<td><b><font color=\"crimson\"> Clone Failed </font></b></td><td> - </td></tr>\n" >> $HTMLLOG
+    echo -ne "<td>-</td><td><b><font color=\"crimson\"> Clone Failed </font></b></td></tr>\n" >> $HTMLLOG
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "GIT clone \e[31mfailed\e[m. Check2 script parameters.\n"
@@ -113,9 +114,6 @@ else
   fi
   cd - &> /dev/null
 fi
-
-ARCHCLINK="${ARCHCGITLINK}${ARCHCWORKINGCOPY}"
-echo -ne "<tr><td>ArchC</td><td>${ARCHCLINK}</td>" >> $HTMLLOG
 
 if [ -z "$ARCHCGITLINK" ]; then
   echo -ne "<td> ${ARCHCREV} </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
@@ -151,8 +149,8 @@ if  [ "$FORCENIGHTLY" != "yes" ] &&       # If -f args; then Execute;
     ! have_workingcopy &&            # If WorkingCopy links; then Execute;
     [ "$LASTEQCURRENT" == "yes" ]; then  # If last execution have GIT Revisions equal the current, Abort
         echo -ne "All Revisions tested in last execution\n"
-        rm ${LOGROOT}/${HTMLPREFIX}-* 
-        rm -rf ${LOGTMP}/* 
+        rm ${HTMLROOT}/${HTMLPREFIX}-* 
+        rm -rf ${HTML_TESTROOT}/* 
         do_abort
 fi
 
@@ -211,7 +209,7 @@ if is_acsim_enabled || is_accsim_enabled; then
         make  >> $TEMPFL 2>&1 
         make install  >> $TEMPFL 2>&1 
         RETCODE=$?
-        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-systemc-build-log.htm
+        HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-systemc-build-log.htm
         initialize_html $HTMLBUILDLOG "$(basename $(echo ${SYSTEMCSRC%.*})) build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
@@ -294,7 +292,7 @@ fi
 make >> $TEMPFL 2>&1 &&
 make install >> $TEMPFL 2>&1
 RETCODE=$?
-HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-archc-build-log.htm
+HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-archc-build-log.htm
 initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
 format_html_output $TEMPFL $HTMLBUILDLOG
 finalize_html $HTMLBUILDLOG ""
@@ -329,34 +327,28 @@ if is_acsim_enabled; then
     fi
 fi
 
-##############################################################
-# Here, the condor machine dispatch jobs. 
-# If is no --condor option, works sequentially, don't worry. 
-##############################################################
-
 ARMLINK="${ARMGITLINK}${ARMWORKINGCOPY}"
 SPARCLINK="${SPARCGITLINK}${SPARCWORKINGCOPY}"
 MIPSLINK="${MIPSGITLINK}${MIPSWORKINGCOPY}"
 POWERPCLINK="${POWERPCGITLINK}${POWERPCWORKINGCOPY}"
 
 if [ "$CONDOR" == "yes" ]; then
+
+    ##############################################################
+    # Here, the condor machine dispatch jobs. 
+    # If is no --condor option, works sequentially, don't worry. 
+    ##############################################################
+
     export SCRIPTROOT
     export CONFIGFILE
     
-    # Uncomment this lines to testing the "condor.sh" in the same machine that startup (without condor)
-    #acsim_html_table "arm" "sparc" "mips" "powerpc"
-    #${SCRIPTROOT}/bin/acsim_condor.sh "arm"     $RUN_ARM_ACSIM      $ARMREV     $ARMLINK     $CROSS_ARM     "little"  $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "sparc"   $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "mips"    $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/acsim_condor.sh "powerpc" $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC "big"     $TESTROOT
-    #powersc_html_table "sparc" "mips"
-    #${SCRIPTROOT}/bin/powersc_condor.sh "sparc" $RUN_SPARC_ACSIM    $SPARCREV   $SPARCLINK   $CROSS_SPARC   "big"     $TESTROOT
-    #${SCRIPTROOT}/bin/powersc_condor.sh "mips"  $RUN_MIPS_ACSIM     $MIPSREV    $MIPSLINK    $CROSS_MIPS    "big"     $TESTROOT
-
     # Real CONDOR dispatch jobs
     mkdir ${TESTROOT}/condor && cd  ${TESTROOT}/condor
     cp ${SCRIPTROOT}/bin/*_condor.sh .
 
+    ######################
+    # Testing ACSIM
+    ######################
     acsim_html_table "arm" "sparc" "mips" "powerpc" 
 
     cp ${SCRIPTROOT}/condor.config arm-acsim.condor
@@ -387,6 +379,9 @@ if [ "$CONDOR" == "yes" ]; then
     sed -i "s@PREFIX@powerpc-acsim@g" powerpc-acsim.condor
     condor_submit powerpc-acsim.condor
 
+    #########################
+    # Testing ACSIM POWERSC
+    #########################
     powersc_html_table "sparc" "mips"
 
     cp ${SCRIPTROOT}/condor.config sparc-powersc.condor
@@ -407,44 +402,40 @@ if [ "$CONDOR" == "yes" ]; then
     exit 0
 fi
 
+##############################################
 # The code below is the Nightly sequential
-create_test_env "arm"     $RUN_ARM_ACSIM  $CROSS_ARM $HTMLLOG
-CROSS_ARM=$CROSS_MODEL
-create_test_env "sparc"   $RUN_SPARC_ACSIM $CROSS_SPARC $HTMLLOG
-CROSS_SPARC=$CROSS_MODEL
-create_test_env "mips"    $RUN_MIPS_ACSIM  $CROSS_MIPS $HTMLLOG
-CROSS_MIPS=$CROSS_MODEL
-create_test_env "powerpc" $RUN_POWERPC_ACSIM  $CROSS_POWERPC $HTMLLOG
-CROSS_POWERPC=$CROSS_MODEL
+##############################################
+
+cp -r ${HTML_TESTROOT}/* ${HTMLROOT}/ 
+
+# Reset HTML_TESTROOT folder
+rm -rf ${HTML_TESTROOT}/*
 
 if [ "$LOCALSIMULATOR" != "no" ]; then
 
-    localsim_prologue
-    localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM "little"
-    localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK     $CROSS_SPARC "big"
-    localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK      $CROSS_MIPS "big"
-    localsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK   $CROSS_POWERPC "big"
-    localsim_epilogue
-
+    acsim_html_table "arm" "sparc" "mips" "powerpc"
+    localsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK       $CROSS_ARM    "little"   
+    localsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK     $CROSS_SPARC  "big"
+    localsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK      $CROSS_MIPS   "big"
+    localsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK   $CROSS_POWERPC    "big"
     finalize_nightly_tester
     exit 0
 fi
 
-acsim_prologue
-acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little"
+acsim_html_table "arm" "sparc" "mips" "powerpc"
+acsim_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little" 
 acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK      $CROSS_SPARC "big"
 acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK       $CROSS_MIPS "big"
 acsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
-acsim_epilogue
 
 if [ $RUN_POWERSC != "no" ]; then
-    powersc_prologue
+    powersc_html_table "sparc" "mips"
     powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
     powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
-    powersc_epilogue
+    powersc_finalize
 fi
 
-# FIXME DEPRECATED
+# FIXME DEPRECATED --------
 if [ "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then
     accsim_test
 fi
@@ -456,9 +447,12 @@ fi
 if [ $RUN_ACSTONE != "no" ]; then
     acstone_test
 fi
-# FIXME ----------- 
+# -------------------------
 
 #########################
+
+# Remove model untested
+sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@@g" $HTMLLOG
 
 finalize_nightly_tester
 

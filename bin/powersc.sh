@@ -6,8 +6,13 @@
 #   acsim_run        :  in 'acsim.sh'
 ##########################################
 
-powersc_prologue(){
-    echo -ne "<h3>Testing: POWERSC </h3>\n" >> $HTMLLOG
+acsim_finalize(){
+    MODEL=$1
+    sed -i "s@__REPLACELINE_${MODEL}_powersc_@$(cat $HTMLLOG_TESTROOT)@g" $HTMLLOG
+}
+
+powersc_html_table() {
+    echo -ne "<h3>Testing: ACSIM POWERSC </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
     echo -ne "<p> <b>Note: </b> ARM and PowerPC models don't have POWERSC table files.</p>\n" >> $HTMLLOG 
  
@@ -16,22 +21,13 @@ powersc_prologue(){
 
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
-}
-
-powersc_epilogue(){
-    finalize_html $HTMLLOG "</table></p>"
-}
-
-powersc_html_table() {
-    powersc_prologue
 
     for ARG in "$@"; do
         echo -ne "__REPLACELINE_${ARG}_powersc__\n" >> $HTMLLOG
     done
 
-    powersc_epilogue
+    finalize_html $HTMLLOG "</table></p>"
 }
-
 
 
 # $1: model name
@@ -52,6 +48,8 @@ powersc_test() {
         return 0
     fi
 
+    create_test_env ${MODEL}  ${RUN_MODEL}  ${CROSS_MODEL} ${HTMLLOG}
+
     # Get the cross-compiler tuple 
     TUPLE=`ls ${CROSS_MODEL} | cut -d- -f1-3 | uniq`
     if [ `echo $TUPLE | grep " " | wc -l` == "1" ]; then      
@@ -61,8 +59,8 @@ powersc_test() {
         return 1
     fi
 
-    echo -ne "\n Testing POWERSC..."
-    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
+    echo -ne "\n Testing ACSIM POWERSC..."
+    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG_TESTROOT
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -pw" "powersc" 
     echo -ne "\n Running ${MODEL}... \n"
 
@@ -72,14 +70,16 @@ powersc_test() {
     export TESTRANLIB="${CROSS_MODEL}/${TUPLE}-ranlib"
     export TESTFLAG="-specs=archc -static"
     export ENDIAN
-    export LOGTMP
+    export HTML_TESTROOT
     export HTMLPREFIX
     acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "powersc" 
 
     CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
     MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
-    cat /proc/cpuinfo > ${LOGTMP}/$CPUINFOFILE
-    cat /proc/meminfo > ${LOGTMP}/$MEMINFOFILE
-    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
+    cat /proc/cpuinfo > ${HTML_TESTROOT}/$CPUINFOFILE
+    cat /proc/meminfo > ${HTML_TESTROOT}/$MEMINFOFILE
+    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG_TESTROO
+
+    powersc_finalize ${MODEL}
 }
 

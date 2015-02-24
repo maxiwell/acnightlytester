@@ -21,19 +21,19 @@ acsim_build_model() {
         fi
         ${TESTROOT}/acinstall/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
         BUILD_RETCODE=$?
-        HTMLBUILDLOG=${LOGTMP}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
+        HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
         initialize_html $HTMLBUILDLOG "${MODELNAME} rev $MODELREV build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
         rm $TEMPFL
 
         if [ $BUILD_RETCODE -ne 0 ]; then
-            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>$HOSTNAME</td></th>" >> $HTMLLOG
+            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>$HOSTNAME</td></th>" >>$HTMLLOG_TESTROOT
             echo -ne "ACSIM \e[31mfailed\e[m to build $MODELNAME model.\n"
             BUILD_FAULT="yes"
             do_abort
         else
-            echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG
+            echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG_TESTROOT
         fi
     fi
 }
@@ -115,19 +115,17 @@ acsim_run() {
   cd ${TESTROOT}/acsim
   ./acsim_validation.sh
   
-  FAILED=`grep -ne "Failed" ${LOGTMP}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
+  FAILED=`grep -ne "Failed" ${HTML_TESTROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
 
   if [ -z "$FAILED" ]; then
-      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG
+      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG_TESTROOT
   else
-      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>)</td>" >> $HTMLLOG
+      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>)</td>" >> $HTMLLOG_TESTROOT
   fi
-   
-
-
 }
 
-acsim_prologue(){
+
+acsim_html_table() {
     echo -ne "<h3>Testing: ACSIM </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build ACSIM models: <b> ./acsim model.ac ${ACSIM_PARAMS} </b> </p>\n" >> $HTMLLOG
 
@@ -137,20 +135,11 @@ acsim_prologue(){
     cp ${SCRIPTROOT}/bin/acsim_validation.sh ${TESTROOT}/acsim/acsim_validation.sh
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
 
-}
-
-acsim_epilogue(){
-    finalize_html $HTMLLOG "</table></p>"
-}
-
-acsim_html_table() {
-    acsim_prologue
-
     for ARG in "$@"; do
         echo -ne "__REPLACELINE_${ARG}_acsim__\n" >> $HTMLLOG
     done
 
-    acsim_epilogue
+    finalize_html $HTMLLOG "</table></p>"
 }
 
 
@@ -173,6 +162,8 @@ acsim_test(){
         return 0
     fi
 
+    create_test_env ${MODEL}  ${RUN_MODEL}  ${CROSS_MODEL} ${HTMLLOG}
+
     # Get the cross-compiler tuple 
     TUPLE=`ls ${CROSS_MODEL} | cut -d- -f1-3 | uniq`
     if [ `echo $TUPLE | grep " " | wc -l` == "1" ]; then      
@@ -183,7 +174,7 @@ acsim_test(){
     fi
 
     echo -ne "\n Testing ACSIM..."
-    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG
+    echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG_TESTROOT
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS}" "acsim" 
     echo -ne "\n Running ${MODEL}... \n"
 
@@ -193,15 +184,16 @@ acsim_test(){
     export TESTRANLIB="${CROSS_MODEL}/${TUPLE}-ranlib"
     export TESTFLAG="-specs=archc -static"
     export ENDIAN
-    export LOGTMP
+    export HTML_TESTROOT
     export HTMLPREFIX
     acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim" 
 
     CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
     MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
-    cat /proc/cpuinfo > ${LOGTMP}/$CPUINFOFILE
-    cat /proc/meminfo > ${LOGTMP}/$MEMINFOFILE
-    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG
+    cat /proc/cpuinfo > ${HTML_TESTROOT}/$CPUINFOFILE
+    cat /proc/meminfo > ${HTML_TESTROOT}/$MEMINFOFILE
+    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG_TESTROOT
 
+    finalize_test "acsim" 
 }
 

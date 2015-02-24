@@ -143,6 +143,7 @@ run_test() {
 	RUNFILTER=$4
 	CONDITION=$5
 	TESTNAME=$6
+    BINARYNAME=$7
 	if [ "$CONDITION" != "no" ]; then
         for RESULTFILE in $COMPLIST 
 		do
@@ -158,6 +159,10 @@ run_test() {
         if [ $DIRSIMULATOR == "powersc" ]; then
             mv window_power_report_${ARCH}.csv ${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
         fi
+        if [ $DIRSIMULATOR == "acsimhlt" ]; then
+            mv ${ARCH}_${BINARYNAME}.hltrace ${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt
+        fi
+
 		if [ "$COLLECT_STATS" != "no" ]; then
 		  # Copy output to stats folder, to be later processed by collect_stats.py
 		  cp $TEMPFL ${STATSROOT}/${TESTNAME}.${ARCH}.stats
@@ -195,6 +200,10 @@ run_test() {
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
     	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
             echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt\">power report</a>)</td>" >> $HTMLMAIN
+        elif [ $DIRSIMULATOR == "acsimhlt" ]; then
+    	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
+    	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
+            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt\">high level trace</a>)</td>" >> $HTMLMAIN
         else
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
             echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN
@@ -239,8 +248,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/automotive/basicmath
 	compile_mibench "basicmath"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/automotive/basicmath" "output_small.txt" "no" "$RUNSMALL" "basicmath-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/automotive/basicmath" "output_large_softfloat.txt" "no" "$RUNLARGE" "basicmath-large"	
+	run_test "runme_small.sh" "${GOLDENROOT}/automotive/basicmath" "output_small.txt" "no" "$RUNSMALL" "basicmath-small" "basicmath_small"
+	run_test "runme_large.sh" "${GOLDENROOT}/automotive/basicmath" "output_large_softfloat.txt" "no" "$RUNLARGE" "basicmath-large" "basicmath_large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -251,8 +260,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/automotive/bitcount
 	compile_mibench "bitcount"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/automotive/bitcount" "output_small.txt" "yes" "$RUNSMALL" "bitcount-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/automotive/bitcount" "output_large.txt" "yes" "$RUNLARGE" "bitcount-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/automotive/bitcount" "output_small.txt" "yes" "$RUNSMALL" "bitcount-small" "bitcnts"
+	run_test "runme_large.sh" "${GOLDENROOT}/automotive/bitcount" "output_large.txt" "yes" "$RUNLARGE" "bitcount-large" "bitcnts"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -264,8 +273,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/automotive/qsort
 	compile_mibench "quicksort"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/automotive/qsort" "output_small.txt" "yes" "$RUNSMALL" "qsort-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/automotive/qsort" "output_large.txt" "yes" "$RUNLARGE" "qsort-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/automotive/qsort" "output_small.txt" "yes" "$RUNSMALL" "qsort-small" "qsort_small"
+	run_test "runme_large.sh" "${GOLDENROOT}/automotive/qsort" "output_large.txt" "yes" "$RUNLARGE" "qsort-large" "qsort_large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -277,8 +286,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/automotive/susan
 	compile_mibench "susan"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/automotive/susan" "output_small.smoothing.pgm output_small.edges.pgm output_small.corners.pgm" "no" "$RUNSMALL" "susan-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/automotive/susan" "output_large.smoothing.pgm output_large.edges.pgm output_large.corners.pgm" "no" "$RUNLARGE" "susan-large"	
+	run_test "runme_small.sh" "${GOLDENROOT}/automotive/susan" "output_small.smoothing.pgm output_small.edges.pgm output_small.corners.pgm" "no" "$RUNSMALL" "susan-small" "susan"
+	run_test "runme_large.sh" "${GOLDENROOT}/automotive/susan" "output_large.smoothing.pgm output_large.edges.pgm output_large.corners.pgm" "no" "$RUNLARGE" "susan-large" "susan"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- telecomm ---
@@ -293,11 +302,11 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ..
 	chmod u+x *.sh
     if [ "$ENDIAN" == "big" ]; then
-    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm BIG_ENDIAN_output_small.pcm" "no" "$RUNSMALL" "adpcm-small"
-	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm BIG_ENDIAN_output_large.pcm" "no" "$RUNLARGE" "adpcm-large"
+    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm BIG_ENDIAN_output_small.pcm" "no" "$RUNSMALL" "adpcm-small" "rawcaudio"
+	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm BIG_ENDIAN_output_large.pcm" "no" "$RUNLARGE" "adpcm-large" "rawcaudio"
     else
-    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm output_small.pcm" "no" "$RUNSMALL" "adpcm-small"
-	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm output_large.pcm" "no" "$RUNLARGE" "adpcm-large"
+    	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/adpcm" "output_small.adpcm output_small.pcm" "no" "$RUNSMALL" "adpcm-small" "rawcaudio"
+	    run_test "runme_large.sh" "${GOLDENROOT}/telecomm/adpcm" "output_large.adpcm output_large.pcm" "no" "$RUNLARGE" "adpcm-large" "rawcaudio"
     fi
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
@@ -308,8 +317,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/CRC32
 	compile_mibench "crc"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/CRC32" "output_small.txt" "no" "$RUNSMALL" "crc32-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/CRC32" "output_large.txt" "no" "$RUNLARGE" "crc32-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/CRC32" "output_small.txt" "no" "$RUNSMALL" "crc32-small" "crc"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/CRC32" "output_large.txt" "no" "$RUNLARGE" "crc32-large" "crc"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 #FFT
@@ -319,8 +328,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/FFT
 	compile_mibench "fft"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/FFT" "output_small.txt output_small.inv.txt" "no" "$RUNSMALL" "fft-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/FFT" "output_large.txt output_large.inv.txt" "no" "$RUNLARGE" "fft-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/FFT" "output_small.txt output_small.inv.txt" "no" "$RUNSMALL" "fft-small" "fft"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/FFT" "output_large.txt output_large.inv.txt" "no" "$RUNLARGE" "fft-large" "fft"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -331,8 +340,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/telecomm/gsm
 	compile_mibench "gsm"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/gsm" "output_small.encode.gsm output_small.decode.run" "no" "$RUNSMALL" "gsm-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/gsm" "output_large.encode.gsm output_large.decode.run" "no" "$RUNLARGE" "gsm-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/telecomm/gsm" "output_small.encode.gsm output_small.decode.run" "no" "$RUNSMALL" "gsm-small" "toast"
+	run_test "runme_large.sh" "${GOLDENROOT}/telecomm/gsm" "output_large.encode.gsm output_large.decode.run" "no" "$RUNLARGE" "gsm-large" "toast"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- network ---
@@ -345,8 +354,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/network/dijkstra
 	compile_mibench "dijkstra"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/network/dijkstra" "output_small.dat" "no" "$RUNSMALL" "dijkstra-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/network/dijkstra" "output_large.dat" "no" "$RUNLARGE" "dijkstra-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/network/dijkstra" "output_small.dat" "no" "$RUNSMALL" "dijkstra-small" "dijkstra_small"
+	run_test "runme_large.sh" "${GOLDENROOT}/network/dijkstra" "output_large.dat" "no" "$RUNLARGE" "dijkstra-large" "dijkstra_large"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -357,8 +366,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/network/patricia
 	compile_mibench "patricia"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/network/patricia" "output_small.txt" "no" "$RUNSMALL" "patricia-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/network/patricia" "output_large.txt" "no" "$RUNLARGE" "patricia-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/network/patricia" "output_small.txt" "no" "$RUNSMALL" "patricia-small" "patricia"
+	run_test "runme_large.sh" "${GOLDENROOT}/network/patricia" "output_large.txt" "no" "$RUNLARGE" "patricia-large" "patricia"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 # --- security ---
@@ -373,11 +382,11 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	chmod u+x *.sh
 
     if [ "$ENDIAN" == "little" ]; then
-	    run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small"
-    	run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large"
+	    run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small" "rijndael"
+    	run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "LITTLE_ENDIAN_output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large" "rijndael"
     else
-    	run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small"
-	    run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large"
+    	run_test "runme_small.sh" "${GOLDENROOT}/security/rijndael" "output_small.enc output_small.dec" "no" "$RUNSMALL" "rijndael-small" "rijndael"
+	    run_test "runme_large.sh" "${GOLDENROOT}/security/rijndael" "output_large.enc output_large.dec" "no" "$RUNLARGE" "rijndael-large" "rijndael"
     fi
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }	
@@ -389,8 +398,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	cd ${MIBENCHROOT}/security/sha
 	compile_mibench "sha"
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/security/sha" "output_small.txt" "yes" "$RUNSMALL" "sha-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/security/sha" "output_large.txt" "yes" "$RUNLARGE" "sha-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/security/sha" "output_small.txt" "yes" "$RUNSMALL" "sha-small" "sha"
+	run_test "runme_large.sh" "${GOLDENROOT}/security/sha" "output_large.txt" "yes" "$RUNLARGE" "sha-large" "sha"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -405,8 +414,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	compile_mibench "jpeg"
 	cd ..
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/consumer/jpeg" "output_small_encode.jpeg output_small_decode.ppm" "no" "$RUNSMALL" "jpeg-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/consumer/jpeg" "output_large_encode.jpeg output_large_decode.ppm" "no" "$RUNLARGE" "jpeg-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/consumer/jpeg" "output_small_encode.jpeg output_small_decode.ppm" "no" "$RUNSMALL" "jpeg-small" "cjpeg"
+	run_test "runme_large.sh" "${GOLDENROOT}/consumer/jpeg" "output_large_encode.jpeg output_large_decode.ppm" "no" "$RUNLARGE" "jpeg-large" "cjpeg"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 
@@ -418,8 +427,8 @@ echo -ne "<tr><th>MiBench</th><th>Compilation</th><th>Simulation (small)</th><th
 	compile_mibench "lame"
 	cd ..
 	chmod u+x *.sh
-	run_test "runme_small.sh" "${GOLDENROOT}/consumer/lame" "output_small.mp3" "no" "$RUNSMALL" "lame-small"
-	run_test "runme_large.sh" "${GOLDENROOT}/consumer/lame" "output_large.mp3" "no" "$RUNLARGE" "lame-large"
+	run_test "runme_small.sh" "${GOLDENROOT}/consumer/lame" "output_small.mp3" "no" "$RUNSMALL" "lame-small" "lame"
+	run_test "runme_large.sh" "${GOLDENROOT}/consumer/lame" "output_large.mp3" "no" "$RUNLARGE" "lame-large" "lame"
 	echo -ne "</tr>\n" >> $HTMLMAIN
 }
 

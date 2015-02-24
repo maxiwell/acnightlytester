@@ -16,7 +16,7 @@ NIGHTLYVERSION=3.0
 . bin/acsim.sh
 . bin/powersc.sh
 . bin/localsim.sh
-
+. bin/acsimhlt.sh
 
 ####################################
 ### ENTRY POINT
@@ -384,6 +384,40 @@ if [ "$CONDOR" == "yes" ]; then
     sed -i "s@PREFIX@powerpc-acsim@g" powerpc-acsim.condor
     condor_submit powerpc-acsim.condor
 
+    ######################
+    # Testing ACSIM
+    ######################
+    acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
+
+    cp ${SCRIPTROOT}/condor.config arm-acsimhlt.condor
+    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" arm-acsimhlt.condor
+    sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" arm-acsimhlt.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsimhlt.condor
+    sed -i "s@PREFIX@arm-acsimhlt@g" arm-acsimhlt.condor
+    condor_submit arm-acsimhlt.condor
+
+    cp ${SCRIPTROOT}/condor.config sparc-acsimhlt.condor
+    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" sparc-acsimhlt.condor
+    sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-acsimhlt.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsimhlt.condor
+    sed -i "s@PREFIX@sparc-acsimhlt@g" sparc-acsimhlt.condor
+    condor_submit sparc-acsimhlt.condor
+
+    cp ${SCRIPTROOT}/condor.config mips-acsimhlt.condor
+    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" mips-acsimhlt.condor
+    sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-acsimhlt.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsimhlt.condor
+    sed -i "s@PREFIX@mips-acsimhlt@g" mips-acsimhlt.condor
+    condor_submit mips-acsimhlt.condor
+
+    cp ${SCRIPTROOT}/condor.config powerpc-acsimhlt.condor
+    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" powerpc-acsimhlt.condor
+    sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT @g" powerpc-acsimhlt.condor
+    sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsimhlt.condor
+    sed -i "s@PREFIX@powerpc-acsimhlt@g" powerpc-acsimhlt.condor
+    condor_submit powerpc-acsimhlt.condor
+
+
     #########################
     # Testing ACSIM POWERSC
     #########################
@@ -432,8 +466,17 @@ if [ $RUN_POWERSC != "no" ]; then
     powersc_html_table "sparc" "mips"
     powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
     powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
-    powersc_finalize
 fi
+
+if [ $RUN_HLTRACE != "no" ]; then
+    acsimhlt_html_table "arm" "sparc" "mips" "powerpc"
+    acsimhlt_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little" 
+    acsimhlt_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
+    acsimhlt_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
+    acsimhlt_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
+fi
+
+
 
 # FIXME DEPRECATED --------
 if [ "$RUN_ARM_ACCSIM" != "no" -o "$RUN_MIPS_ACCSIM" != "no" -o "$RUN_SPARC_ACCSIM" != "no" -o "$RUN_POWERPC_ACCSIM" != "no" ]; then

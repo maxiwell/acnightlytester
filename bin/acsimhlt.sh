@@ -6,10 +6,9 @@
 #   acsim_run        :  in 'acsim.sh'
 ##########################################
 
-powersc_html_table() {
-    echo -ne "<h3>Testing: ACSIM PowerSC </h3>\n" >> $HTMLLOG
-    echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
-    echo -ne "<p> <b>Note: </b> ARM and PowerPC models don't have POWERSC table files.</p>\n" >> $HTMLLOG 
+acsimhlt_html_table() {
+    echo -ne "<h3>Testing: ACSIM High Level Trace </h3>\n" >> $HTMLLOG
+    echo -ne "<p>Command used to build High Level Trace models: <b> ./acsim model.ac ${ACSIM_PARAMS} -hlt </b> </p>\n" >> $HTMLLOG
  
     echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
     echo -ne "<tr><th>Model</th><th>Link/Path</th><th>Version</th><th>Compilation</th><th>Benchmark</th><th>Tested in</th></tr>\n" >> $HTMLLOG
@@ -18,7 +17,7 @@ powersc_html_table() {
     chmod u+x ${TESTROOT}/acsim/acsim_validation.sh
 
     for ARG in "$@"; do
-        echo -ne "__REPLACELINE_${ARG}_powersc__\n" >> $HTMLLOG
+        echo -ne "__REPLACELINE_${ARG}_acsimhlt__\n" >> $HTMLLOG
     done
 
     finalize_html $HTMLLOG "</table></p>"
@@ -31,7 +30,7 @@ powersc_html_table() {
 # $4: link source code
 # $5: cross-compiler path of the model
 # $6: endian
-powersc_test() {
+acsimhlt_test() {
     MODEL=$1
     RUN_MODEL=$2
     REV_MODEL=$3
@@ -39,7 +38,7 @@ powersc_test() {
     CROSS_MODEL=$5
     ENDIAN=$6
     
-    DIRSIMULATOR="powersc"
+    DIRSIMULATOR="acsimhlt"
 
     if [ $RUN_MODEL == "no" ]; then
         return 0
@@ -56,10 +55,10 @@ powersc_test() {
         return 1
     fi
 
-    echo -ne "\n Testing ACSIM POWERSC..."
+    echo -ne "\n Testing ACSIM HLTRACE..."
     echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG_TESTROOT
 
-    acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -pw" "powersc" 
+    acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -hlt" "acsimhlt" 
     echo -ne "\n Running ${MODEL}... \n"
 
     export TESTCOMPILER="${CROSS_MODEL}/${TUPLE}-gcc" 

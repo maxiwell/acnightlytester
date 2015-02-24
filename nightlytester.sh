@@ -462,12 +462,6 @@ acsim_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK      $CROSS_SPARC
 acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK       $CROSS_MIPS "big"
 acsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
 
-if [ $RUN_POWERSC != "no" ]; then
-    powersc_html_table "sparc" "mips"
-    powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
-    powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
-fi
-
 if [ $RUN_HLTRACE != "no" ]; then
     acsimhlt_html_table "arm" "sparc" "mips" "powerpc"
     acsimhlt_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little" 
@@ -476,6 +470,11 @@ if [ $RUN_HLTRACE != "no" ]; then
     acsimhlt_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
 fi
 
+if [ $RUN_POWERSC != "no" ]; then
+    powersc_html_table "sparc" "mips"
+    powersc_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"
+    powersc_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK     $CROSS_MIPS "big"
+fi
 
 
 # FIXME DEPRECATED --------

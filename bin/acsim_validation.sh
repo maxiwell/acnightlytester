@@ -198,12 +198,20 @@ run_test() {
 		fi
         if [ $DIRSIMULATOR == "powersc" ]; then
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
-    	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
-            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt\">power report</a>)</td>" >> $HTMLMAIN
+            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
+            if [ -a ${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt ]; then
+                echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt\">power report</a>)</td>" >> $HTMLMAIN
+            else
+                echo -ne ", <b><font color=\"crimson\"> Failed </font></b>)</td>" >> $HTMLMAIN
+            fi
         elif [ $DIRSIMULATOR == "acsimhlt" ]; then
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
     	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
-            echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt\">high level trace</a>)</td>" >> $HTMLMAIN
+            if [ -a ${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt ]; then
+                echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt\">high level trace</a>)</td>" >> $HTMLMAIN
+            else
+                echo -ne ", <b><font color=\"crimson\"> Failed </font></b>)</td>" >> $HTMLMAIN
+            fi
         else
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
             echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>)</td>" >> $HTMLMAIN

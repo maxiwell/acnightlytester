@@ -1,7 +1,7 @@
 #!/bin/bash
 
 acsim_build_model() {
-    MODELNAME=$1
+    MODEL=$1
     MODELREV=$2
     USEACSIM=$3
     LOCAL_PARAMS=$4  # Each test have a specific set of params
@@ -11,43 +11,43 @@ acsim_build_model() {
 
     BUILD_RETCODE="false"
     if [ "$USEACSIM" != "no" ]; then    
-        cd ${TESTROOT}/${MODELNAME}
+        cd ${TESTROOT}/${MODEL}
         cp -r base $DIRSIMULATOR
         cd $DIRSIMULATOR
         TEMPFL=${RANDOM}.out
-        echo -ne "\n Building ${MODELNAME} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
+        echo -ne "\n Building ${MODEL} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
         if [ -e Makefile.archc ]; then
             make -f Makefile.archc distclean &> /dev/null
         fi
-        ${TESTROOT}/acinstall/bin/acsim ${MODELNAME}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
+        ${TESTROOT}/acinstall/bin/acsim ${MODEL}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
         BUILD_RETCODE=$?
-        HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm
-        initialize_html $HTMLBUILDLOG "${MODELNAME} rev $MODELREV build output"
+        HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-build-log.htm
+        initialize_html $HTMLBUILDLOG "${MODEL} rev $MODELREV build output"
         format_html_output $TEMPFL $HTMLBUILDLOG
         finalize_html $HTMLBUILDLOG ""
         rm $TEMPFL
 
         if [ $BUILD_RETCODE -ne 0 ]; then
-            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>$HOSTNAME</td></th>" >>$HTMLLOG_TESTROOT
-            echo -ne "ACSIM \e[31mfailed\e[m to build $MODELNAME model.\n"
+            echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td><td>-</td><td>$HOSTNAME</td></th>" >> $HTMLLOG_TESTROOT
+            echo -ne "ACSIM \e[31mfailed\e[m to build $MODEL model.\n"
             BUILD_FAULT="yes"
             do_abort
         else
-            echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG_TESTROOT
+            echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-build-log.htm\">log</a>)</td>" >> $HTMLLOG_TESTROOT
         fi
     fi
 }
 
 acsim_run() {
-  MODELNAME=$1
+  MODEL=$1
   MODELBENCHROOT=$2
   MODELSPECROOT=$3
   MODELREV=$4
   DIRSIMULATOR=$5  # Each test have simulators with a specific set of params (e.g. arm/acsim, arm/acstone, arm/powersc)
 
   # Preparing test script
-  ARCH="${MODELNAME}"
-  SIMULATOR="${TESTROOT}/${MODELNAME}/$DIRSIMULATOR/${MODELNAME}.x --load="
+  ARCH="${MODEL}"
+  SIMULATOR="${TESTROOT}/${MODEL}/$DIRSIMULATOR/${MODEL}.x --load="
   GOLDENROOT=${TESTROOT}/acsim/GoldenMibench
   GOLDENSPECROOT=${TESTROOT}/acsim/GoldenSpec
   MIBENCHROOT=${MODELBENCHROOT} 
@@ -115,12 +115,12 @@ acsim_run() {
   cd ${TESTROOT}/acsim
   ./acsim_validation.sh
   
-  FAILED=`grep -ne "Failed" ${HTML_TESTROOT}/${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm`
+  FAILED=`grep -ne "Failed" ${HTML_TESTROOT}/${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}.htm`
 
   if [ -z "$FAILED" ]; then
-      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG_TESTROOT
+      echo -ne "<td><b><font color="green"> OK </font></b>(<a href=\"${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}.htm\">Report</a>) </td>" >> $HTMLLOG_TESTROOT
   else
-      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}.htm\">Report</a>)</td>" >> $HTMLLOG_TESTROOT
+      echo -ne "<td><b><font color="crimson"> Failed </font></b>(<a href=\"${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}.htm\">Report</a>)</td>" >> $HTMLLOG_TESTROOT
   fi
 }
 
@@ -158,6 +158,8 @@ acsim_test(){
     CROSS_MODEL=$5
     ENDIAN=$6
 
+    DIRSIMULATOR="acsim"
+
     if [ $RUN_MODEL == "no" ]; then
         return 0
     fi
@@ -175,6 +177,7 @@ acsim_test(){
 
     echo -ne "\n Testing ACSIM..."
     echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG_TESTROOT
+
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS}" "acsim" 
     echo -ne "\n Running ${MODEL}... \n"
 
@@ -186,14 +189,14 @@ acsim_test(){
     export ENDIAN
     export HTML_TESTROOT
     export HTMLPREFIX
-    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "acsim" 
+    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" ${DIRSIMULATOR}
 
-    CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
-    MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
+    CPUINFOFILE=${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-cpuinfo.txt
+    MEMINFOFILE=${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-meminfo.txt
     cat /proc/cpuinfo > ${HTML_TESTROOT}/$CPUINFOFILE
     cat /proc/meminfo > ${HTML_TESTROOT}/$MEMINFOFILE
     echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG_TESTROOT
 
-    finalize_test "acsim" 
+    finalize_test
 }
 

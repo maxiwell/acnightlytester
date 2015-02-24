@@ -10,7 +10,7 @@ REV_MODEL=$3
 LINK_MODEL=$4       
 CROSS_MODEL=$5 
 ENDIAN=$6
-TESTROOT_LINK=$6
+TESTROOT_LINK=$7
 
 #Get env: $SCRIPTROOT must be in NFS (like /home/lsc/...)
 _PWD=${PWD}

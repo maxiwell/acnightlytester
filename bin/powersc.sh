@@ -6,11 +6,6 @@
 #   acsim_run        :  in 'acsim.sh'
 ##########################################
 
-acsim_finalize(){
-    MODEL=$1
-    sed -i "s@__REPLACELINE_${MODEL}_powersc_@$(cat $HTMLLOG_TESTROOT)@g" $HTMLLOG
-}
-
 powersc_html_table() {
     echo -ne "<h3>Testing: ACSIM POWERSC </h3>\n" >> $HTMLLOG
     echo -ne "<p>Command used to build PowerSC models: <b> ./acsim model.ac ${ACSIM_PARAMS} -pw </b> </p>\n" >> $HTMLLOG
@@ -43,6 +38,8 @@ powersc_test() {
     LINK_MODEL=$4
     CROSS_MODEL=$5
     ENDIAN=$6
+    
+    DIRSIMULATOR="powersc"
 
     if [ $RUN_MODEL == "no" ]; then
         return 0
@@ -61,6 +58,7 @@ powersc_test() {
 
     echo -ne "\n Testing ACSIM POWERSC..."
     echo -ne "<tr><td>${MODEL} </td><td>${LINK_MODEL}</td><td>${REV_MODEL}</td>" >> $HTMLLOG_TESTROOT
+
     acsim_build_model "${MODEL}" "${REV_MODEL}" "${RUN_MODEL}" "${ACSIM_PARAMS} -pw" "powersc" 
     echo -ne "\n Running ${MODEL}... \n"
 
@@ -72,14 +70,14 @@ powersc_test() {
     export ENDIAN
     export HTML_TESTROOT
     export HTMLPREFIX
-    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" "powersc" 
+    acsim_run ${MODEL} "${TESTROOT}/acsim/${MODEL}_mibench" "${TESTROOT}/acsim/${MODEL}_spec" "${REV_MODEL}" ${DIRSIMULATOR}
 
-    CPUINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-cpuinfo.txt
-    MEMINFOFILE=${HTMLPREFIX}-${MODELNAME}-${DIRSIMULATOR}-meminfo.txt
+    CPUINFOFILE=${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-cpuinfo.txt
+    MEMINFOFILE=${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-meminfo.txt
     cat /proc/cpuinfo > ${HTML_TESTROOT}/$CPUINFOFILE
     cat /proc/meminfo > ${HTML_TESTROOT}/$MEMINFOFILE
-    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG_TESTROO
+    echo -ne "<td> ${HOSTNAME} (<a href=\"${CPUINFOFILE}\">cpuinfo</a>, <a href=\"${MEMINFOFILE}\">meminfo</a>) </td></tr>\n" >> $HTMLLOG_TESTROOT
 
-    powersc_finalize ${MODEL}
+    finalize_test
 }
 

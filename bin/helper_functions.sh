@@ -143,10 +143,8 @@ have_workingcopy() {
 }
 
 finalize_test(){
-    DIRSIMULATOR=$1
-
     [[ ! -a $HTMLLOG_TESTROOT ]] && touch $HTMLLOG_TESTROOT
-
+    
     sed -i "s@__REPLACELINE_${MODEL}_${DIRSIMULATOR}__@$(cat $HTMLLOG_TESTROOT)@g" $HTMLLOG  
     
     rm ${HTMLLOG_TESTROOT}
@@ -178,15 +176,19 @@ finalize_nightly_tester() {
           echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
       fi
   fi
+
+  rm -f /tmp/nightly-token
 }
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-  sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@@g" $HTMLLOG
-  finalize_test
+  finalize_test $MODEL $DIRSIMULATOR
   if [ $SUBMIT_MACHINE == $HOSTNAME ]; then
       # Only submit machine execute this Function or when CONDOR = "no"
       finalize_nightly_tester
+      sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@@g" $HTMLLOG
+  else
+      sed -i "s@__REPLACELINE_${MODEL}\(_[a-zA-Z]*\)*@@g" $HTMLLOG
   fi
   exit 1
 }
@@ -218,41 +220,41 @@ format_html_output() {
 
 # This function is used to get source model, in GIT repository or local Working Copy
 clone_or_copy_model(){
-  MODELNAME=$1
+  MODEL=$1
   GITLINK=$2
   MODELWORKINGCOPY=$3
 
-  mkdir -p ${TESTROOT}/${MODELNAME}/base
+  mkdir -p ${TESTROOT}/${MODEL}/base
   if [ -z "$GITLINK" ]; then
-    echo -ne "Copying $MODELNAME source from a local directory...\n"
-    cp -a ${MODELWORKINGCOPY} ${TESTROOT}/${MODELNAME}/modelbase &> /dev/null
+    echo -ne "Copying $MODEL source from a local directory...\n"
+    cp -a ${MODELWORKINGCOPY} ${TESTROOT}/${MODEL}/modelbase &> /dev/null
     [ $? -ne 0 ] && {
-      echo -ne "<p><b><font color=\"crimson\">${MODELNAME} source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+      echo -ne "<p><b><font color=\"crimson\">${MODEL} source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
       finalize_html $HTMLLOG ""
       echo -ne "Local directory copy \e[31mfailed\e[m. Check script parameters.\n"
       do_abort
     }
-    cd ${TESTROOT}/${MODELNAME}/base
+    cd ${TESTROOT}/${MODEL}/base
     MODELREV="N/A"
     cd - &> /dev/null
   else
-    echo -ne "Cloning ${MODELNAME} ArchC Model GIT...\n"
+    echo -ne "Cloning ${MODEL} ArchC Model GIT...\n"
     TEMPFL=${RANDOM}.out
-    #svn co ${SVNLINK} ${TESTROOT}/${MODELNAME} > $TEMPFL 3>&2
-    git clone ${GITLINK} ${TESTROOT}/${MODELNAME}/base > $TEMPFL 2>&1
+    #svn co ${SVNLINK} ${TESTROOT}/${MODEL} > $TEMPFL 3>&2
+    git clone ${GITLINK} ${TESTROOT}/${MODEL}/base > $TEMPFL 2>&1
     [ $? -ne 0 ] && {
       rm $TEMPFL
-      echo -ne "<p><b><font color=\"crimson\">${MODELNAME} model git clone failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
+      echo -ne "<p><b><font color=\"crimson\">${MODEL} model git clone failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
       finalize_html $HTMLLOG ""
       echo -ne "git clone \e[31mfailed\e[m. Check script parameters.\n"
       do_abort
     } 
     # Extract model revision number
-    cd ${TESTROOT}/${MODELNAME}/base
+    cd ${TESTROOT}/${MODEL}/base
     #MODELREV=$(git log | head -n1 | cut -c8-13)"..."$(git log | head -n1 | cut -c42-)
     MODELREV=$(git log | head -n1 | cut -c8-15)".."
     if [ "$LASTHTMLPREFIX" != "0" ]; then
-        LASTMODELREV=`grep -e "<td>$MODELNAME" < ${HTMLROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
+        LASTMODELREV=`grep -e "<td>$MODEL" < ${HTMLROOT}/${LASTHTMLPREFIX}-index.htm | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
         if [ "$MODELREV" != "$LASTMODELREV" ]; then
             LASTEQCURRENT="no"
         fi
@@ -300,10 +302,10 @@ create_test_env() {
         export CROSS_MODEL=$CROSS_ROOT/bin
         chmod 777 $CROSS_ROOT -R 
         if [ $RETCODE -ne 0 ]; then
-            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
+            sed -i "s@__REPLACELINE_${MODEL}_cross__@<b><font color=\"crimson\">Failed </font></b>@g"  ${HTMLLOG}
             do_abort
         else
-            sed -i "s@__REPLACELINE_CROSS_${MODEL}__@<b><font color=\"green\">OK </font></b>@g" ${HTMLLOG}
+            sed -i "s@__REPLACELINE_${MODEL}_cross__@<b><font color=\"green\">OK </font></b>@g" ${HTMLLOG}
         fi
     fi
 }

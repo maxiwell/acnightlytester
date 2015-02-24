@@ -78,7 +78,6 @@ acsimhlt_run() {
   export LAME
 
   # Salve original values
-  _CRC=$CRC
   _BZIP_2=$BZIP_2
   _GCC=$GCC
   _MCF=$MCF
@@ -93,7 +92,6 @@ acsimhlt_run() {
   _RUNTEST=$RUNTEST
 
   # Remove slowly tests
-  export CRC="no"
   export BZIP_2="no"
   export GCC="no"
   export MCF="no"
@@ -130,7 +128,6 @@ acsimhlt_run() {
   fi
 
   # restore original Values
-  CRC=$_CRC
   BZIP_2=$_BZIP_2
   GCC=$_GCC
   MCF=$_MCF

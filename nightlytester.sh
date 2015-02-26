@@ -398,7 +398,7 @@ if [ "$CONDOR" == "yes" ]; then
     ######################
 
     # High Level Trace: Clean the older log because they are large (>2Gb)
-    rm -rf "${HTMLROOT}/*-hltrace-report.txt"
+    rm -rf ${HTMLROOT}/*-hltrace-report.txt
 
     acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
 
@@ -478,7 +478,7 @@ acsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_P
 if [ $RUN_HLTRACE != "no" ]; then
 
     # High Level Trace: Clean the older log because they are large (>2Gb)
-    rm -rf "${HTMLROOT}/*-hltrace-report.txt"
+    rm -rf ${HTMLROOT}/*-hltrace-report.txt
 
     acsimhlt_html_table "arm" "sparc" "mips" "powerpc"
     acsimhlt_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little" 

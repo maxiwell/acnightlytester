@@ -160,7 +160,7 @@ run_test() {
             mv window_power_report_${ARCH}.csv ${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-win-pw-report.txt
         fi
         if [ $DIRSIMULATOR == "acsimhlt" ]; then
-            mv ${ARCH}_${BINARYNAME}.hltrace ${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt
+	    tar -jcvf ${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.tar.bz2 ${ARCH}_${BINARYNAME}.hltrace
         fi
 
 		if [ "$COLLECT_STATS" != "no" ]; then
@@ -207,8 +207,8 @@ run_test() {
         elif [ $DIRSIMULATOR == "acsimhlt" ]; then
     	    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-run.htm\">simulator output</a>" >> $HTMLMAIN
     	    echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-diff.htm\">diff output</a>" >> $HTMLMAIN
-            if [ -a "${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt" ]; then
-                echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.txt\">high level trace</a>)</td>" >> $HTMLMAIN
+            if [ -a "${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.tar.bz2" ]; then
+                echo -ne ", <a href=\"${HTMLPREFIX}-${ARCH}-${DIRSIMULATOR}-${TESTNAME}-hltrace-report.tar.bz2\">high level trace</a>)</td>" >> $HTMLMAIN
             else
                 echo -ne ", <b><font color=\"crimson\"> Failed </font></b>)</td>" >> $HTMLMAIN
             fi

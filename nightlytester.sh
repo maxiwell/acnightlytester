@@ -32,6 +32,20 @@ else
     touch /tmp/nightly-token
 fi
 
+# Asserts when CONDOR mode on
+if [[ $CONDOR == "yes" ]]; then
+    if [[ $TESTROOT != "/tmp"* ]]; then
+        echo -ne "When CONDOR is enabled, the TESTROOT must be into /tmp\n"
+        do_abort
+    fi
+
+    # Check if condor is running LSC jobs. Probably is a Nightly execution.
+    if [ `condor_q | grep lsc | wc -l` != "0" ]; then
+        echo -ne "Condor is running LSC jobs. Is Nightly?\n"
+        do_abort
+    fi
+fi
+
 export SUBMIT_MACHINE=$HOSTNAME
 
 mkdir -p ${TESTROOT}
@@ -69,20 +83,6 @@ echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
 echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Status</th></tr>\n" >> $HTMLLOG
 
-# Asserts when CONDOR mode on
-if [[ $CONDOR == "yes" ]]; then
-    if [[ $TESTROOT != "/tmp"* ]]; then
-        echo -ne "When CONDOR is enabled, the TESTROOT must be into /tmp\n"
-        do_abort
-    fi
-
-    # Check if condor is running LSC jobs. Probably is a Nightly execution.
-    if [ `condor_q | grep lsc | wc -l` == "0" ]; then
-        echo -ne "Condor is running LSC jobs. Is Nightly?\n"
-        do_abort
-    fi
-fi
-
 ######################################
 ### Archc, git clone
 ######################################
@@ -100,7 +100,7 @@ if [ -z "$ARCHCGITLINK" ]; then
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "Local directory copy \e[31mfailed\e[m. Check script parameters.\n"
-    do_abort
+
   }
   ARCHCREV="N/A"
 else
@@ -348,15 +348,13 @@ rm -rf ${HTML_TESTROOT}/*
 
 if [ "$CONDOR" == "yes" ]; then
 
-    ##############################################################
+    ###################################################################
     # Here, the condor machine dispatch jobs. 
-    # If is no --condor option, works sequentially, don't worry. 
-    ##############################################################
+    ###################################################################
 
     export SCRIPTROOT
     export CONFIGFILE
     
-    # Real CONDOR dispatch jobs
     mkdir ${TESTROOT}/condor && cd  ${TESTROOT}/condor
     cp ${SCRIPTROOT}/bin/*_condor.sh .
 
@@ -397,66 +395,75 @@ if [ "$CONDOR" == "yes" ]; then
     # Testing ACSIM HLT
     ######################
 
-    # High Level Trace: Clean the older log because they are large (>2Gb)
-    rm -rf ${HTMLROOT}/*-hltrace-report.txt
+    if [ $RUN_HLTRACE != "no" ]; then
 
-    acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
+        # High Level Trace: Clean the older log because they are large (>2Gb)
+        rm -rf ${HTMLROOT}/*-hltrace-report.txt
 
-    cp ${SCRIPTROOT}/condor.config arm-acsimhlt.condor
-    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" arm-acsimhlt.condor
-    sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" arm-acsimhlt.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsimhlt.condor
-    sed -i "s@PREFIX@arm-acsimhlt@g" arm-acsimhlt.condor
-    condor_submit arm-acsimhlt.condor
+        acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
 
-    cp ${SCRIPTROOT}/condor.config sparc-acsimhlt.condor
-    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" sparc-acsimhlt.condor
-    sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-acsimhlt.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsimhlt.condor
-    sed -i "s@PREFIX@sparc-acsimhlt@g" sparc-acsimhlt.condor
-    condor_submit sparc-acsimhlt.condor
+        cp ${SCRIPTROOT}/condor.config arm-acsimhlt.condor
+        sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" arm-acsimhlt.condor
+        sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" arm-acsimhlt.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsimhlt.condor
+        sed -i "s@PREFIX@arm-acsimhlt@g" arm-acsimhlt.condor
+        condor_submit arm-acsimhlt.condor
 
-    cp ${SCRIPTROOT}/condor.config mips-acsimhlt.condor
-    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" mips-acsimhlt.condor
-    sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-acsimhlt.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsimhlt.condor
-    sed -i "s@PREFIX@mips-acsimhlt@g" mips-acsimhlt.condor
-    condor_submit mips-acsimhlt.condor
+        cp ${SCRIPTROOT}/condor.config sparc-acsimhlt.condor
+        sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" sparc-acsimhlt.condor
+        sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-acsimhlt.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsimhlt.condor
+        sed -i "s@PREFIX@sparc-acsimhlt@g" sparc-acsimhlt.condor
+        condor_submit sparc-acsimhlt.condor
 
-    cp ${SCRIPTROOT}/condor.config powerpc-acsimhlt.condor
-    sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" powerpc-acsimhlt.condor
-    sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT @g" powerpc-acsimhlt.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsimhlt.condor
-    sed -i "s@PREFIX@powerpc-acsimhlt@g" powerpc-acsimhlt.condor
-    condor_submit powerpc-acsimhlt.condor
+        cp ${SCRIPTROOT}/condor.config mips-acsimhlt.condor
+        sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" mips-acsimhlt.condor
+        sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-acsimhlt.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsimhlt.condor
+        sed -i "s@PREFIX@mips-acsimhlt@g" mips-acsimhlt.condor
+        condor_submit mips-acsimhlt.condor
 
+        cp ${SCRIPTROOT}/condor.config powerpc-acsimhlt.condor
+        sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" powerpc-acsimhlt.condor
+        sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT @g" powerpc-acsimhlt.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsimhlt.condor
+        sed -i "s@PREFIX@powerpc-acsimhlt@g" powerpc-acsimhlt.condor
+        condor_submit powerpc-acsimhlt.condor
+
+    fi
 
     #########################
     # Testing ACSIM POWERSC
     #########################
-    powersc_html_table "sparc" "mips"
 
-    cp ${SCRIPTROOT}/condor.config sparc-powersc.condor
-    sed -i "s@EXECUTABLE@./powersc_condor.sh@g" sparc-powersc.condor
-    sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-powersc.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" sparc-powersc.condor
-    sed -i "s@PREFIX@sparc-powersc@g" sparc-powersc.condor
-    condor_submit sparc-powersc.condor
+    if [ $RUN_POWERSC != "no" ]; then
 
-    cp ${SCRIPTROOT}/condor.config mips-powersc.condor
-    sed -i "s@EXECUTABLE@./powersc_condor.sh@g" mips-powersc.condor
-    sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-powersc.condor
-    sed -i "s@TESTROOT@${TESTROOT}@g" mips-powersc.condor
-    sed -i "s@PREFIX@mips-powersc@g" mips-powersc.condor
-    condor_submit mips-powersc.condor
+        powersc_html_table "sparc" "mips"
+
+        cp ${SCRIPTROOT}/condor.config sparc-powersc.condor
+        sed -i "s@EXECUTABLE@./powersc_condor.sh@g" sparc-powersc.condor
+        sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-powersc.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" sparc-powersc.condor
+        sed -i "s@PREFIX@sparc-powersc@g" sparc-powersc.condor
+        condor_submit sparc-powersc.condor
+
+        cp ${SCRIPTROOT}/condor.config mips-powersc.condor
+        sed -i "s@EXECUTABLE@./powersc_condor.sh@g" mips-powersc.condor
+        sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-powersc.condor
+        sed -i "s@TESTROOT@${TESTROOT}@g" mips-powersc.condor
+        sed -i "s@PREFIX@mips-powersc@g" mips-powersc.condor
+        condor_submit mips-powersc.condor
+
+    fi
 
     finalize_nightly_tester
     exit 0
 fi
 
-##############################################
+#####################################################################
+# If is no --condor option, it will run sequentially, don't worry. 
 # The code below is the Nightly sequential
-##############################################
+####################################################################
 
 if [ "$LOCALSIMULATOR" != "no" ]; then
 

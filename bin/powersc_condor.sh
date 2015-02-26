@@ -26,8 +26,8 @@ export TESTROOT="${PWD}/$(basename $TESTROOT_LINK)"
 export HTML_TESTROOT="${TESTROOT}/public_html/"
 export HTMLLOG_TESTROOT="${HTML_TESTROOT}/${HTMLPREFIX}-index.htm"
 
-# ArchC must be moved to the PATH set in the PREFIX instalation in Startup Machine
-# I assume that the Condor Nodes have the PATH used by Startup Machine (like /tmp/...)
+# ArchC must be moved to the PATH set in the PREFIX instalation in Submit Machine
+# I assume that the Condor Nodes have the PATH used by Submit Machine (usually /tmp/...)
 # If the Folder exists, so the ArchC already been installed by other Job. 
 if [ ! -d $TESTROOT_LINK ]; then
 	mkdir -p $TESTROOT_LINK
@@ -38,4 +38,7 @@ fi
 cd ${TESTROOT}/acsim
 
 powersc_test  $MODEL  $RUN_MODEL  $REV_MODEL  $LINK_MODEL  $CROSS_MODEL   $ENDIAN
+
+# Remove the ArchC installation
+rm -r ${TESTROOT_LINK}
 

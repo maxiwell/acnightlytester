@@ -184,7 +184,7 @@ finalize_nightly_tester() {
 
 do_abort() {
   echo -ne "Aborting...\n\n"
-  finalize_test $MODEL $DIRSIMULATOR
+  finalize_test 
   if [ $SUBMIT_MACHINE == $HOSTNAME ]; then
       # Only submit machine execute this Function or when CONDOR = "no"
       finalize_nightly_tester

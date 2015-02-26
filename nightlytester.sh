@@ -45,6 +45,7 @@ fi
 # Discover this run's number and prefix all our HTML files with it
 export HTMLPREFIX=`sed -n -e '/<tr><td>[0-9]\+/{s/<tr><td>\([0-9]\+\).*/\1/;p;q}' <${HTMLINDEX}`
 export LASTHTMLPREFIX=$HTMLPREFIX
+export HTMLPREFIX=$(($HTMLPREFIX + 1))
 export LASTARCHCREV=`grep -e "<tr><td>" < ${HTMLINDEX} | head -n 1 | cut -d\> -f 7 | cut -d\< -f 1`
 
 if [ -z $LASTARCHCREV ]; then
@@ -52,7 +53,6 @@ if [ -z $LASTARCHCREV ]; then
 fi
 
 export LASTEQCURRENT="yes"
-export HTMLPREFIX=$(($HTMLPREFIX + 1))
 export HTMLLOG=${HTMLROOT}/${HTMLPREFIX}-index.htm
 
 # Temporary HTML files, necessary for Condor approach. If use $HTMLROOT and HTMLLOG only (without $HTML_TESTROOT), all page 
@@ -69,9 +69,18 @@ echo -ne "<p>Produced by NightlyTester @ ${DATE}</p>"   >> $HTMLLOG
 echo -ne "<p><table border=\"1\" cellspacing=\"1\" cellpadding=\"5\">" >> $HTMLLOG
 echo -ne "<tr><th>Component</th><th>Link/Path</th><th>Version</th><th>Status</th></tr>\n" >> $HTMLLOG
 
-if [[ $CONDOR == "yes" ]] && [[ $TESTROOT != "/tmp"* ]]; then
-    echo -ne "When CONDOR is enabled, the TESTROOT must be in /tmp\n"
-    do_abort
+# Asserts when CONDOR mode on
+if [[ $CONDOR == "yes" ]]; then
+    if [[ $TESTROOT != "/tmp"* ]]; then
+        echo -ne "When CONDOR is enabled, the TESTROOT must be into /tmp\n"
+        do_abort
+    fi
+
+    # Check if condor is running LSC jobs. Probably is a Nightly execution.
+    if [ `condor_q | grep lsc | wc -l` == "0" ]; then
+        echo -ne "Condor is running LSC jobs. Is Nightly?\n"
+        do_abort
+    fi
 fi
 
 ######################################
@@ -385,8 +394,12 @@ if [ "$CONDOR" == "yes" ]; then
     condor_submit powerpc-acsim.condor
 
     ######################
-    # Testing ACSIM
+    # Testing ACSIM HLT
     ######################
+
+    # High Level Trace: Clean the older log because they are large (>2Gb)
+    rm -rf "${HTMLROOT}/*-hltrace-report.txt"
+
     acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
 
     cp ${SCRIPTROOT}/condor.config arm-acsimhlt.condor
@@ -463,6 +476,10 @@ acsim_test "mips"    $RUN_MIPS_ACSIM    $MIPSREV    $MIPSLINK       $CROSS_MIPS 
 acsim_test "powerpc" $RUN_POWERPC_ACSIM $POWERPCREV     $POWERPCLINK    $CROSS_POWERPC "big"
 
 if [ $RUN_HLTRACE != "no" ]; then
+
+    # High Level Trace: Clean the older log because they are large (>2Gb)
+    rm -rf "${HTMLROOT}/*-hltrace-report.txt"
+
     acsimhlt_html_table "arm" "sparc" "mips" "powerpc"
     acsimhlt_test "arm"     $RUN_ARM_ACSIM     $ARMREV     $ARMLINK        $CROSS_ARM "little" 
     acsimhlt_test "sparc"   $RUN_SPARC_ACSIM   $SPARCREV   $SPARCLINK    $CROSS_SPARC "big"

@@ -163,6 +163,7 @@ acsimhlt_test() {
         return 0
     fi
 
+
     create_test_env ${MODEL}  ${RUN_MODEL}  ${CROSS_MODEL} ${HTMLLOG}
 
     # Get the cross-compiler tuple 

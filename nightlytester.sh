@@ -363,28 +363,28 @@ if [ "$CONDOR" == "yes" ]; then
     ######################
     acsim_html_table "arm" "sparc" "mips" "powerpc" 
 
-    cp ${SCRIPTROOT}/condor.config arm-acsim.condor
+    cp ${SCRIPTROOT}/template.condor arm-acsim.condor
     sed -i "s@EXECUTABLE@./acsim_condor.sh@g" arm-acsim.condor
     sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" arm-acsim.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsim.condor
     sed -i "s@PREFIX@arm-acsim@g" arm-acsim.condor
     condor_submit arm-acsim.condor
 
-    cp ${SCRIPTROOT}/condor.config sparc-acsim.condor
+    cp ${SCRIPTROOT}/template.condor sparc-acsim.condor
     sed -i "s@EXECUTABLE@./acsim_condor.sh@g" sparc-acsim.condor
     sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-acsim.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsim.condor
     sed -i "s@PREFIX@sparc-acsim@g" sparc-acsim.condor
     condor_submit sparc-acsim.condor
 
-    cp ${SCRIPTROOT}/condor.config mips-acsim.condor
+    cp ${SCRIPTROOT}/template.condor mips-acsim.condor
     sed -i "s@EXECUTABLE@./acsim_condor.sh@g" mips-acsim.condor
     sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-acsim.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsim.condor
     sed -i "s@PREFIX@mips-acsim@g" mips-acsim.condor
     condor_submit mips-acsim.condor
 
-    cp ${SCRIPTROOT}/condor.config powerpc-acsim.condor
+    cp ${SCRIPTROOT}/template.condor powerpc-acsim.condor
     sed -i "s@EXECUTABLE@./acsim_condor.sh@g" powerpc-acsim.condor
     sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT @g" powerpc-acsim.condor
     sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsim.condor
@@ -402,28 +402,28 @@ if [ "$CONDOR" == "yes" ]; then
 
         acsimhlt_html_table "arm" "sparc" "mips" "powerpc" 
 
-        cp ${SCRIPTROOT}/condor.config arm-acsimhlt.condor
+        cp ${SCRIPTROOT}/template.condor arm-acsimhlt.condor
         sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" arm-acsimhlt.condor
         sed -i "s@ARGUMENTS@arm $RUN_ARM_ACSIM  $ARMREV $ARMLINK $CROSS_ARM little $TESTROOT@g" arm-acsimhlt.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" arm-acsimhlt.condor
         sed -i "s@PREFIX@arm-acsimhlt@g" arm-acsimhlt.condor
         condor_submit arm-acsimhlt.condor
 
-        cp ${SCRIPTROOT}/condor.config sparc-acsimhlt.condor
+        cp ${SCRIPTROOT}/template.condor sparc-acsimhlt.condor
         sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" sparc-acsimhlt.condor
         sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-acsimhlt.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" sparc-acsimhlt.condor
         sed -i "s@PREFIX@sparc-acsimhlt@g" sparc-acsimhlt.condor
         condor_submit sparc-acsimhlt.condor
 
-        cp ${SCRIPTROOT}/condor.config mips-acsimhlt.condor
+        cp ${SCRIPTROOT}/template.condor mips-acsimhlt.condor
         sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" mips-acsimhlt.condor
         sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-acsimhlt.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" mips-acsimhlt.condor
         sed -i "s@PREFIX@mips-acsimhlt@g" mips-acsimhlt.condor
         condor_submit mips-acsimhlt.condor
 
-        cp ${SCRIPTROOT}/condor.config powerpc-acsimhlt.condor
+        cp ${SCRIPTROOT}/template.condor powerpc-acsimhlt.condor
         sed -i "s@EXECUTABLE@./acsimhlt_condor.sh@g" powerpc-acsimhlt.condor
         sed -i "s@ARGUMENTS@powerpc $RUN_POWERPC_ACSIM  $POWERPCREV $POWERPCLINK $CROSS_POWERPC big $TESTROOT @g" powerpc-acsimhlt.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" powerpc-acsimhlt.condor
@@ -440,14 +440,14 @@ if [ "$CONDOR" == "yes" ]; then
 
         powersc_html_table "sparc" "mips"
 
-        cp ${SCRIPTROOT}/condor.config sparc-powersc.condor
+        cp ${SCRIPTROOT}/template.condor sparc-powersc.condor
         sed -i "s@EXECUTABLE@./powersc_condor.sh@g" sparc-powersc.condor
         sed -i "s@ARGUMENTS@sparc $RUN_SPARC_ACSIM  $SPARCREV $SPARCLINK $CROSS_SPARC big $TESTROOT @g" sparc-powersc.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" sparc-powersc.condor
         sed -i "s@PREFIX@sparc-powersc@g" sparc-powersc.condor
         condor_submit sparc-powersc.condor
 
-        cp ${SCRIPTROOT}/condor.config mips-powersc.condor
+        cp ${SCRIPTROOT}/template.condor mips-powersc.condor
         sed -i "s@EXECUTABLE@./powersc_condor.sh@g" mips-powersc.condor
         sed -i "s@ARGUMENTS@mips $RUN_MIPS_ACSIM  $MIPSREV $MIPSLINK $CROSS_MIPS big $TESTROOT @g" mips-powersc.condor
         sed -i "s@TESTROOT@${TESTROOT}@g" mips-powersc.condor

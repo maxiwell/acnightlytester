@@ -24,26 +24,27 @@ NIGHTLYVERSION=3.0
 
 command_line_handler $@
 
-# Check if other instance of Nightly is running (LOCK file)
-if [ -a /tmp/nightly-token ]; then
-    echo -ne "A instance of Nightly is running...\n"
-    exit 0
-else
-    touch /tmp/nightly-token
-fi
-
 # Asserts when CONDOR mode on
 if [[ $CONDOR == "yes" ]]; then
     if [[ $TESTROOT != "/tmp"* ]]; then
         echo -ne "When CONDOR is enabled, the TESTROOT must be into /tmp\n"
-        do_abort
+        exit 0
     fi
 
     # Check if condor is running LSC jobs. Probably is a Nightly execution.
     if [ `condor_q | grep lsc | wc -l` != "0" ]; then
         echo -ne "Condor is running LSC jobs. Is Nightly?\n"
-        do_abort
+        exit 0
     fi
+fi
+
+# Checks if other instance of Nightly is running in Sumit Machine
+# If no --condor option, just checks if other instance of Nightly is running on local Machine
+if [ -a /tmp/nightly-token ]; then
+    echo -ne "A instance of Nightly is running...\n"
+    exit 0
+else
+    touch /tmp/nightly-token
 fi
 
 export SUBMIT_MACHINE=$HOSTNAME

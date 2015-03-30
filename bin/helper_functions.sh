@@ -165,6 +165,7 @@ finalize_nightly_tester() {
   mv TMPFILE ${HTMLINDEX}
   rm -f TMPFILE
 
+  echo ${HTMLINDEX}
   if [ "$FORCENIGHTLY" == "yes" -o "$LASTEQCURRENT" == "no" ]; then
       HTMLLINE="<tr><td>${HTMLPREFIX}</td><td>${DATE}</td><td>${ARCHCREV}</td><td><a href=\"${HTMLPREFIX}-index.htm\">Here</a></td><td>${REVMESSAGE}</td><td>${HOSTNAME}</td></tr>"
       sed -e "/<tr><td>${LASTHTMLPREFIX}/i${HTMLLINE}" $HTMLINDEX > $TEMPFL
@@ -177,6 +178,8 @@ finalize_nightly_tester() {
       else
           echo -ne "${TESTROOT} folder with all the tests won't be deleted because \$DELETEWHENDONE is set to \"no\".\n"
       fi
+
+      sed -i "s@__REPLACELINE\(_[a-zA-Z]*\)*@@g" $HTMLLOG
   fi
 
   rm -f /tmp/nightly-token
@@ -229,7 +232,7 @@ clone_or_copy_model(){
   mkdir -p ${TESTROOT}/${MODEL}/base
   if [ -z "$GITLINK" ]; then
     echo -ne "Copying $MODEL source from a local directory...\n"
-    cp -a ${MODELWORKINGCOPY} ${TESTROOT}/${MODEL}/modelbase &> /dev/null
+    cp -ar ${MODELWORKINGCOPY}/* ${TESTROOT}/${MODEL}/base &> /dev/null
     [ $? -ne 0 ] && {
       echo -ne "<p><b><font color=\"crimson\">${MODEL} source copy failed. Check script parameters.</font></b></p>\n" >> $HTMLLOG
       finalize_html $HTMLLOG ""

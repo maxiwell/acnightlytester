@@ -129,7 +129,7 @@ fi
 if [ -z "$ARCHCGITLINK" ]; then
   echo -ne "<td> ${ARCHCREV} </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
 else
-  echo -ne "<td> <a href=http://git.archc.lsc.ic.unicamp.br/?p=archc.git;a=commit;h=${ARCHREVFULL}> ${ARCHCREV} </a> </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
+  echo -ne "<td> <a href=https://github.com/ArchC/ArchC/commit/${ARCHREVFULL}> ${ARCHCREV} </a> </td><td>__ARCHC_LOG__</td></tr>" >> $HTMLLOG
 fi
 
 ################################

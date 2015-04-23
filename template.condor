@@ -14,9 +14,9 @@ transfer_input_files = TESTROOT
 #requirements = ((Machine == "n01.lsc.ic.unicamp.br") || (Machine == "n02.lsc.ic.unicamp.br") || (Machine == "n03.lsc.ic.unicamp.br") || (Machine == "n04.lsc.ic.unicamp.br"))
 
 request_cpus = 1
-request_memory = 4096
+request_memory = 1024
 #priority = 20
-request_disk = 20000
+request_disk = 30000000
 
 
 

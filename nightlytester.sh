@@ -290,7 +290,7 @@ if [ "$LOCALSIMULATOR" == "no" ]; then
     ACASM_STRING=""
     ACSTONE_STRING=""
     POWERSC_STRING=""
-    ./boot.sh > $TEMPFL 2>&1
+    ./autogen.sh > $TEMPFL 2>&1
     if is_acsim_enabled || is_accsim_enabled; then
         ACSIM_STRING="--with-systemc=${SYSTEMCPATH}"
     fi
@@ -305,6 +305,7 @@ if [ "$LOCALSIMULATOR" == "no" ]; then
     # Compile ArchC
     make >> $TEMPFL 2>&1 &&
     make install >> $TEMPFL 2>&1
+    . ./env.sh
     RETCODE=$?
     HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-archc-build-log.htm
     initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"

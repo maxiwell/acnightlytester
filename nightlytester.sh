@@ -24,6 +24,13 @@ NIGHTLYVERSION=3.0
 
 command_line_handler $@
 
+
+if [ ! -d $HTMLROOT ]; then
+    echo -ne "\nERROR: The output path $HTMLROOT not exist\n\n"
+    exit 1
+fi
+
+
 # Asserts when CONDOR mode on
 if [[ $CONDOR == "yes" ]]; then
     if [[ $TESTROOT != "/tmp"* ]]; then
@@ -302,11 +309,15 @@ if [ "$LOCALSIMULATOR" == "no" ]; then
     fi
     ./configure --prefix=${TESTROOT}/acinstall $ACSIM_STRING $ACASM_STRING $ACSTONE_STRING >> $TEMPFL 2>&1    
     
+    RETCODE=0
+
     # Compile ArchC
-    make >> $TEMPFL 2>&1 &&
+    make >> $TEMPFL 2>&1 
+    RETCODE=$(( $RETCODE + $? ))
     make install >> $TEMPFL 2>&1
+
     . ./env.sh
-    RETCODE=$?
+    RETCODE=$(( $RETCODE + $? ))
     HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-archc-build-log.htm
     initialize_html $HTMLBUILDLOG "ArchC rev $ARCHCREV build output"
     format_html_output $TEMPFL $HTMLBUILDLOG

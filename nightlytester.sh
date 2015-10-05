@@ -102,13 +102,14 @@ mkdir ${TESTROOT}/acsrc
 cd ${TESTROOT}/acsrc
 if [ -z "$ARCHCGITLINK" ]; then
   echo -ne "Copying ArchC source from a local directory...\n"
-  cp -a ${ARCHCWORKINGCOPY} ./ &> /dev/null
+  cp -r ${ARCHCWORKINGCOPY}/* ./ &> /dev/null
   make distclean &> /dev/null
   [ $? -ne 0 ] && {
     echo -ne "<td><b><font color=\"crimson\"> Copy Failed </font></b></td><td> - </td></tr>\n" >> $HTMLLOG
     echo -ne "</table></p>\n" >> $HTMLLOG
     finalize_html $HTMLLOG ""
     echo -ne "Local directory copy \e[31mfailed\e[m. Check script parameters.\n"
+    do_abort
 
   }
   ARCHCREV="N/A"

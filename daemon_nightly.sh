@@ -8,6 +8,6 @@
 ###########################################################################
 
 cd /home/lsc/projetos/archc/nightly/acnightlytester/
-./nightlytester.sh site.conf --condor $1
+./nightlytester.sh conf/site.conf --condor $1
 #rsync -Rrazp -v public_html /home/lsc/projetos/archc/acnightlytester/
 

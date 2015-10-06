@@ -41,7 +41,7 @@ if [[ $CONDOR == "yes" ]]; then
     fi
 
     # Check if condor is running LSC jobs. Probably is a Nightly execution.
-    if [ `condor_q | grep lsc | wc -l` != "0" ]; then
+    if [ `condor_q | grep archc | wc -l` != "0" ]; then
         echo -ne "Condor is running LSC jobs. Is Nightly?\n"
         exit 0
     fi

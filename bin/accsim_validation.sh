@@ -110,7 +110,6 @@ format_html_output() {
 
 # Param1 is the program name (to pring in log files!)
 compile_prog() {
-	if [ "$COMPILE" != "no" ]; then
 		HTML_COMP=${LOGROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${random}.out
@@ -126,9 +125,6 @@ compile_prog() {
 		format_html_output $TEMPFL $HTML_COMP
 		finalize_html $HTML_COMP ""
 		rm $TEMPFL		
-	else
-		echo -ne "<td><b><font color=\"fuchsia\"> N/A </font></b></td>" >> $HTMLMAIN
-	fi
 }
 
 # This function should run a round of test with the configure simulator

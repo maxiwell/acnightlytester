@@ -1,6 +1,6 @@
 
 localfiles/
-tools/
+tools/*.tar.bz2
 sources/older
 public_html/
 sources/*.tar.bz2

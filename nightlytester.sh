@@ -25,11 +25,13 @@ NIGHTLYVERSION=3.0
 command_line_handler $@
 
 
+get_sources
+get_crosscompilers
+
 if [ ! -d $HTMLROOT ]; then
     echo -ne "\nERROR: The output path $HTMLROOT not exist\n\n"
     exit 1
 fi
-
 
 # Asserts when CONDOR mode on
 if [[ $CONDOR == "yes" ]]; then
@@ -263,22 +265,25 @@ fi
 ##############################################
 # Cross-compiler, reserving space in HTML table
 #############################################
-if [ ${COMPILE} == "yes" ]; then
-    if [ ${RUN_ARM_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__REPLACELINE_arm_cross__</td>" >> $HTMLLOG
-    fi
-    if [ ${RUN_SPARC_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__REPLACELINE_sparc_cross__</td>" >> $HTMLLOG
-    fi
-    if [ ${RUN_MIPS_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__REPLACELINE_mips_cross__</td>" >> $HTMLLOG
-    fi
-    if [ ${RUN_POWERPC_ACSIM} == "yes" ]; then
-        echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__REPLACELINE_powerpc_cross__</td>" >> $HTMLLOG
-    fi
-else
-    echo -ne "Precompiled unavailable: use the cross-compilers from ArchC.org and set COMPILER=yes in .config file\n"
-    do_abort
+if [ ${RUN_ARM_ACSIM} == "yes" ]; then
+    echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__REPLACELINE_arm_cross__</td>" >> $HTMLLOG
+    # Change the URL to local PATH (see 'get_crosscompilers' helper function)
+    CROSS_ARM=$SCRIPTROOT/tools/$(basename $CROSS_ARM)
+fi
+if [ ${RUN_SPARC_ACSIM} == "yes" ]; then
+    echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__REPLACELINE_sparc_cross__</td>" >> $HTMLLOG
+    # Change the URL to local PATH (see 'get_crosscompilers' helper function)
+    CROSS_SPARC=$SCRIPTROOT/tools/$(basename $CROSS_SPARC)
+fi
+if [ ${RUN_MIPS_ACSIM} == "yes" ]; then
+    echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__REPLACELINE_mips_cross__</td>" >> $HTMLLOG
+    # Change the URL to local PATH (see 'get_crosscompilers' helper function)
+    CROSS_MIPS=$SCRIPTROOT/tools/$(basename $CROSS_MIPS)
+fi
+if [ ${RUN_POWERPC_ACSIM} == "yes" ]; then
+    echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__REPLACELINE_powerpc_cross__</td>" >> $HTMLLOG
+    # Change the URL to local PATH (see 'get_crosscompilers' helper function)
+    CROSS_POWERPC=$SCRIPTROOT/tools/$(basename $CROSS_POWERPC)
 fi
 
 ######################################

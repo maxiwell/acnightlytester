@@ -63,7 +63,6 @@ acsim_run() {
   export SIMULATOR 
   export RUNSMALL   # ==================================
   export RUNLARGE   # 
-  export COMPILE    # Definition in nightlytester.conf
   export RUNTEST    #
   export RUNTRAIN   # ================================== 
   export GOLDENROOT

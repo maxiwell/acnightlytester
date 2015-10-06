@@ -30,11 +30,10 @@ run_tests_accsim_mibench() {
   fi
   export ARCH
   export SIMULATOR 
-  export RUNSMALL   # ==================================
-  export RUNLARGE   # 
-  export COMPILE    # Definition in nightlytester.conf
-  export RUNTEST    #
-  export RUNTRAIN   # ================================== 
+  export RUNSMALL   
+  export RUNLARGE   
+  export RUNTEST    
+  export RUNTRAIN   
   export GOLDENROOT
   export BENCHROOT
   export STATSROOT

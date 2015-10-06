@@ -63,6 +63,62 @@ command_line_handler() {
 }
 
 
+get_sources()
+{
+    SOURCES_URL="http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
+    SOURCES_PKG="AllArchs-acstone.tar.bz2 acasm-validation.tar.bz2 GoldenMibench.tar.bz2 SourceMibench.tar.bz2"
+    for PKG in $SOURCES_PKG; do
+        if [ ! -f $SCRIPTROOT/sources/$PKG ]; then 
+            echo -ne "Getting $PKG... "
+            wget -P $SCRIPTROOT/sources/ $SOURCES_URL/$PKG &> /dev/null
+            if [ $? -ne 0 ]; then
+                echo -ne "\nERROR: Link $SOURCES_URL/$PKG invalid.\n"
+            else
+                echo -ne " OK\n"
+            fi
+        fi
+    done
+
+    SOURCES_PKG_COPYRIGHT="SourceSPEC2006.tar.bz2 GoldenSPEC2006.tar.bz2"
+    for PKG in $SOURCES_PKG_COPYRIGHT; do
+        if [ ! -f $SCRIPTROOT/sources/$PKG ]; then
+            echo -ne "Getting $PKG... FAILED\n"
+            echo -ne "SPEC2006: sources are protected by copyright. Contact us for more informations.\n"
+        fi
+    done  
+}
+
+
+export CROSS_ARM=
+export CROSS_MIPS=
+export CROSS_POWERPC=
+export CROSS_SPARC=
+get_crosscompilers()
+{
+    CROSS_URL="http://archc.lsc.ic.unicamp.br/downloads/Tools/"
+    CROSS_PKG="mips/archc_mips_toolchain_20141215_64bit.tar.bz2 
+               powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2 
+               sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+               arm/archc_arm_toolchain_20150102_64bit.tar.bz2"
+
+    for PKG in $CROSS_PKG; do
+        if [ ! -f $SCRIPTROOT/tools/$(basename $PKG) ]; then
+            echo -ne "Getting $(basename $PKG)... "
+            wget -P $SCRIPTROOT/tools/ $CROSS_URL/$PKG &> /dev/null
+            if [ $? -ne 0 ]; then
+                echo  -ne "\nERROR: Link $SOURCES_URL/$PKG invalid.\n"
+            else
+                echo -ne " OK\n"
+            fi
+        fi
+    done
+
+    CROSS_ARM="$CROSS_URL/arm/archc_arm_toolchain_20150102_64bit.tar.bz2"
+    CROSS_MIPS="$CROSS_URL/mips/archc_mips_toolchain_20141215_64bit.tar.bz2"
+    CROSS_POWERPC="$CROSS_URL/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2"
+    CROSS_SPARC="$CROSS_URL/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2" 
+}
+
 
 # ********************************
 # * Trap control                **

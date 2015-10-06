@@ -82,30 +82,25 @@ format_html_output() {
 
 # Param1 is the program name (to pring in log files!)
 compile_mibench() {
-	if [ "$COMPILE" != "no" ]; then
-		HTML_COMP=${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
-		initialize_html $HTML_COMP "${1} compilation results"
-		TEMPFL=${RANDOM}.out
-        echo -ne "Compiling...\n"
-		make clean > /dev/null 
-        make ENDIAN=${ENDIAN} > $TEMPFL 2>&1
-        EXCODE=$?
-        if [ $EXCODE -ne 0 ]; then
-            echo -ne "<td><b><font color=\"crimson\"> failed </font></b>" >> $HTMLMAIN
-        else
-            echo -ne "<td><b><font color=\"green\"> OK </font></b>" >> $HTMLMAIN
-        fi
-        echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${1}-comp.htm\">log</a>)</td>" >> $HTMLMAIN
-        format_html_output $TEMPFL $HTML_COMP
-        finalize_html $HTML_COMP ""
-        rm $TEMPFL		
+    HTML_COMP=${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
+    initialize_html $HTML_COMP "${1} compilation results"
+    TEMPFL=${RANDOM}.out
+    echo -ne "Compiling...\n"
+    make clean > /dev/null 
+    make ENDIAN=${ENDIAN} > $TEMPFL 2>&1
+    EXCODE=$?
+    if [ $EXCODE -ne 0 ]; then
+        echo -ne "<td><b><font color=\"crimson\"> failed </font></b>" >> $HTMLMAIN
     else
-		echo -ne "<td><b><font color=\"fuchsia\"> N/A </font></b></td>" >> $HTMLMAIN
-	fi
+        echo -ne "<td><b><font color=\"green\"> OK </font></b>" >> $HTMLMAIN
+    fi
+    echo -ne "(<a href=\"${HTMLPREFIX}-${ARCH}-${1}-comp.htm\">log</a>)</td>" >> $HTMLMAIN
+    format_html_output $TEMPFL $HTML_COMP
+    finalize_html $HTML_COMP ""
+    rm $TEMPFL		
 }
 
 compile_spec(){
-	if [ "$COMPILE" != "no" ]; then
 		HTML_COMP=${HTML_TESTROOT}/${HTMLPREFIX}-${ARCH}-${1}-comp.htm
 		initialize_html $HTML_COMP "${1} compilation results"
 		TEMPFL=${RANDOM}.out
@@ -122,10 +117,6 @@ compile_spec(){
         format_html_output $TEMPFL $HTML_COMP
         finalize_html $HTML_COMP ""
         rm $TEMPFL		
-	else
-		echo -ne "<td><b><font color=\"fuchsia\"> N/A </font></b></td>" >> $HTMLMAIN
-	fi
-
 }
 
 # This function should run a round of test with the configure simulator

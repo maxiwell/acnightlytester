@@ -16,10 +16,10 @@ acsim_build_model() {
         cd $DIRSIMULATOR
         TEMPFL=${RANDOM}.out
         echo -ne "\n Building ${MODEL} ArchC Model with [ ${LOCAL_PARAMS} ] params..."
-        if [ -e Makefile.archc ]; then
-            make -f Makefile.archc distclean &> /dev/null
+        if [ -e Makefile ]; then
+            make distclean &> /dev/null
         fi
-        ${TESTROOT}/acinstall/bin/acsim ${MODEL}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make -f Makefile.archc >> $TEMPFL 2>&1  
+        ${TESTROOT}/acinstall/bin/acsim ${MODEL}.ac ${LOCAL_PARAMS} > $TEMPFL 2>&1 && make >> $TEMPFL 2>&1  
         BUILD_RETCODE=$?
         HTMLBUILDLOG=${HTML_TESTROOT}/${HTMLPREFIX}-${MODEL}-${DIRSIMULATOR}-build-log.htm
         initialize_html $HTMLBUILDLOG "${MODEL} rev $MODELREV build output"

@@ -19,13 +19,13 @@ localsim_build_model() {
         cd $DIRSIMULATOR
         TEMPFL=${RANDOM}.out
         echo -ne "\n Building ${MODEL} ArchC model from a local source simulator..."
-        if [ -e Makefile.archc ]; then
-            make -f Makefile.archc clean &> /dev/null
-            make -f Makefile.archc >> $TEMPFL 2>&1
+        if [ -e Makefile ]; then
+            make clean &> /dev/null
+            make  >> $TEMPFL 2>&1
         else
-            echo -ne "<p><b><font color=\"crimson\">${MODEL} Makefile.archc not found, necessary when LOCALSIMULATOR=yes. Check script parameters.</font></b></p>\n" >> $HTMLLOG_TESTROOT
+            echo -ne "<p><b><font color=\"crimson\">${MODEL} Makefile not found, necessary when LOCALSIMULATOR=yes. Check script parameters.</font></b></p>\n" >> $HTMLLOG_TESTROOT
             finalize_html $HTMLLOG_TESTROOT ""
-            echo -ne "Local simulator \e[31mfailed\e[m. Makefile.archc not found; necessary when LOCALSIMULATOR=yes. Check script parameters.\n"
+            echo -ne "Local simulator \e[31mfailed\e[m. Makefile not found; necessary when LOCALSIMULATOR=yes. Check script parameters.\n"
             do_abort
         fi 
         BUILD_RETCODE=$?

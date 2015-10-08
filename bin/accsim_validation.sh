@@ -158,11 +158,11 @@ run_test() {
 		  echo -ne "Simulation compilation output for ${OBJFILE}\n" >> $COMPOUT
 		  cd ${SIMROOT}
 		  echo -ne "Compiling simulation for ${OBJFILE}...\n"
-		  make -f Makefile.archc distclean &> /dev/null 
+		  make distclean &> /dev/null 
 		  ${TOOLSPATH}/accsim ${ARCH}.ac ${ACCSIMFLAGS} ${PROGROOT}/${OBJFILE} >> $COMPOUT 2>&1
 		  EXCODE=$?
 		  if [ $EXCODE -eq 0 ]; then
-		    make -f Makefile.archc >> $COMPOUT 2>&1
+		    make >> $COMPOUT 2>&1
 		    EXCODE=$?
 		  fi
 		  if [ $EXCODE -ne 0 ]; then

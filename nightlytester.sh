@@ -237,10 +237,10 @@ if is_acsim_enabled || is_accsim_enabled; then
             echo -ne "<td> <b><font color=\"green\">OK </font></b> (<a href=\"${HTMLPREFIX}-systemc-build-log.htm\">log</a>) </td> </tr>" >> $HTMLLOG
         fi
         export SYSTEMCPATH=${TESTROOT}/systemc/install
-        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib/
     else
         echo -ne "<tr><td>SystemC</td><td>${SYSTEMCPATH}</td><td>-</td>" >> $HTMLLOG
-        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib-linux64/
+        export LD_LIBRARY_PATH=${SYSTEMCPATH}/lib/
         if [ -d $LD_LIBRARY_PATH ]; then
             echo -ne "<td> <b><font color=\"green\">OK </font></b> </td></tr>" >> $HTMLLOG
         else
@@ -260,22 +260,22 @@ fi
 if [ ${RUN_ARM_ACSIM} == "yes" ]; then
     echo -ne "<tr><td>Cross arm</td><td>${CROSS_ARM}</td><td>-</td><td>__REPLACELINE_arm_cross__</td>" >> $HTMLLOG
     # Change the URL to local PATH (see 'get_crosscompilers' helper function)
-    CROSS_ARM=$SCRIPTROOT/tools/$(basename $CROSS_ARM)
+    CROSS_ARM=$SCRIPTROOT/tools/$(basename "$CROSS_ARM")
 fi
 if [ ${RUN_SPARC_ACSIM} == "yes" ]; then
     echo -ne "<tr><td>Cross sparc</td><td>${CROSS_SPARC}</td><td>-</td><td>__REPLACELINE_sparc_cross__</td>" >> $HTMLLOG
     # Change the URL to local PATH (see 'get_crosscompilers' helper function)
-    CROSS_SPARC=$SCRIPTROOT/tools/$(basename $CROSS_SPARC)
+    CROSS_SPARC=$SCRIPTROOT/tools/$(basename "$CROSS_SPARC")
 fi
 if [ ${RUN_MIPS_ACSIM} == "yes" ]; then
     echo -ne "<tr><td>Cross mips</td><td>${CROSS_MIPS}</td><td>-</td><td>__REPLACELINE_mips_cross__</td>" >> $HTMLLOG
     # Change the URL to local PATH (see 'get_crosscompilers' helper function)
-    CROSS_MIPS=$SCRIPTROOT/tools/$(basename $CROSS_MIPS)
+    CROSS_MIPS=$SCRIPTROOT/tools/$(basename "$CROSS_MIPS")
 fi
 if [ ${RUN_POWERPC_ACSIM} == "yes" ]; then
     echo -ne "<tr><td>Cross powerpc</td><td>${CROSS_POWERPC}</td><td>-</td><td>__REPLACELINE_powerpc_cross__</td>" >> $HTMLLOG
     # Change the URL to local PATH (see 'get_crosscompilers' helper function)
-    CROSS_POWERPC=$SCRIPTROOT/tools/$(basename $CROSS_POWERPC)
+    CROSS_POWERPC=$SCRIPTROOT/tools/$(basename "$CROSS_POWERPC")
 fi
 
 ######################################

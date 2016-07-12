@@ -8,3 +8,4 @@ sources/SourceSPEC2006-All/
 sources/SourceSPEC2006/
 sources/older
 *.swp
+*.conf

@@ -97,17 +97,21 @@ get_crosscompilers()
 {
     CROSS_URL="http://archc.lsc.ic.unicamp.br/downloads/Tools/"
     
-    CROSS_ARM="arm/archc_arm_toolchain_20150102_64bit.tar.bz2"
-    CROSS_MIPS="mips/archc_mips_toolchain_20141215_64bit.tar.bz2"
-    CROSS_POWERPC="powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2"
-    CROSS_SPARC="sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2" 
+    CROSS_ARM="$CROSS_URL/arm/archc_arm_toolchain_20150102_64bit.tar.bz2"
+    CROSS_MIPS="$CROSS_URL/mips/archc_mips_toolchain_20141215_64bit.tar.bz2"
+    CROSS_POWERPC="$CROSS_URL/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2"
+    CROSS_SPARC="$CROSS_URL/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2" 
 
     for PKG in $CROSS_ARM $CROSS_MIPS $CROSS_POWERPC $CROSS_SPARC; do
-        if [ ! -f $SCRIPTROOT/tools/$(basename "$PKG") ]; then
-            echo -ne "Getting $(basename "$PKG")... "
-            wget -P $SCRIPTROOT/tools/ $CROSS_URL/$PKG &> /dev/null
+        if [ ! -f $SCRIPTROOT/tools/$(basename ${PKG#*//}) ]; then
+            echo -ne "Getting $PKG... "
+            if  [[ $PKG == http* ]]; then
+                wget -P $SCRIPTROOT/tools/ $PKG &> /dev/null
+            elif [[ $PKG == /* ]]; then
+                cp $PKG  $SCRIPTROOT/tools/
+            fi
             if [ $? -ne 0 ]; then
-                echo  -ne "\nERROR: Link $CROSS_URL/$PKG invalid.\n"
+                echo  -ne "\nERROR: Link $PKG invalid.\n"
             else
                 echo -ne " OK\n"
             fi

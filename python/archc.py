@@ -5,7 +5,7 @@ from .env    import Env
 
 class ArchC (DownloadHelper):
 
-    pick_from = None
+    where = None
 
     systemc   = None
     binutils  = None
@@ -13,22 +13,22 @@ class ArchC (DownloadHelper):
 
     src_folder    = "archc"
     prefix_folder = "acinstall"
-    workspace      = None
 
+    env = None
 
-    def __init__(self, env, pick_from):
-        self.pick_from = pick_from
-        self.workspace  = env.workspace
+    def set_env(self, env):
+        self.env = env;
 
-        if (self.pick_from.startswith("./")) or \
-                (self.pick_from.startswith("/")):
-                    self.get_local(pick_from, \
-                       self.workspace + self.src_folder, "ArchC")
+    def set_where(self, where):
+        self.where = where
+
+        if (self.where.startswith("./")) or         \
+                (self.where.startswith("/")):
+                    self.get_local(where, self.env.workspace + "/" \
+                                   + self.src_folder, "ArchC")
         else:
-            self.git_clone(self.pick_from, \
-                    self.workspace + self.src_folder)
-
-
+            self.git_clone(self.where, \
+                    self.env.workspace + "/" + self.src_folder)
 
     def set_systemc(self, path):
         self.systemc = path

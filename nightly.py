@@ -4,6 +4,8 @@ import argparse
 from configparser import ConfigParser
 from python.archc import ArchC
 
+def abort():
+    print("To be development")
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
@@ -23,13 +25,24 @@ def config_parser_handler(configfile):
     modules_config = ConfigParser()
     modules_config.read(modules_file)
 
-    if (config.has_option('archc','systemc')):
-        ArchC.set_systemc(config['archc']['systemc'])
-    if (config.has_option('archc','binutils')):
-        ArchC.set_binutils(config['archc']['binutils'])
-    if (config.has_option('archc','gdb')):
-        ArchC.set_gdb(config['archc']['gdb'])
-   
+
+    if (config.has_section('archc')):
+        if (config.has_option('archc','where')):
+            archc = ArchC("/tmp/python/",config.get('archc','where'))
+        else:
+            abort()
+
+        if (config.has_option('archc','systemc')):
+            archc.set_systemc(config.get('archc','systemc'))
+
+        if (config.has_option('archc','binutils')):
+            archc.set_binutils(config.get('archc','binutils'))
+
+        if (config.has_option('archc','gdb')):
+            archc.set_gdb(config.get('archc','gdb'))
+  
+    
+
     return config
 
 

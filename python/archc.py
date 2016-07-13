@@ -1,16 +1,41 @@
 
-class ArchC:
-    systemc  = None
-    binutils = None
-    gdb      = None
+import os
+from .helper import DownloadHelper
 
-    def set_systemc(path):
+class ArchC (DownloadHelper):
+
+    pick_from = None
+
+    systemc   = None
+    binutils  = None
+    gdb       = None
+
+    src_folder    = "archc"
+    prefix_folder = "acinstall"
+    testroot      = None
+
+
+    def __init__(self, testroot, pick_from):
+        self.pick_from = pick_from
+        self.testroot  = testroot
+
+        if (self.pick_from.startswith("./")) or \
+                (self.pick_from.startswith("/")):
+                    self.get_local(pick_from, \
+                       self.testroot + self.src_folder, "ArchC")
+        else:
+            self.git_clone(self.pick_from, \
+                    self.testroot + self.src_folder)
+
+
+
+    def set_systemc(self, path):
         self.systemc = path
 
-    def set_binutils(path):
+    def set_binutils(self, path):
         self.binutils = path
 
-    def set_gdb(path):
+    def set_gdb(self, path):
         self.gdb = path
 
 

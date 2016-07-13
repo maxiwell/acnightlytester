@@ -11,11 +11,10 @@ class DownloadHelper:
             os.makedirs(directory+"/")
 
     def cp(self, src, dst):
-        if ( os.system("cp -r "+src+" "+dst) == 0 ):
+        if ( os.system("cp -r "+src+" "+dst+" > /dev/null 2>&1") == 0 ):
             return True
         else:
             return False
-
 
     def get_http(self, url, dest):
         pkg = os.path.basename(url)
@@ -26,15 +25,25 @@ class DownloadHelper:
         else:
             print("FAILED")
 
-    def get_local(self, path, dest):
-        pkg = os.path.basename(path)
+    def get_local(self, path, dest, pkg = None):
+        if pkg == None:
+            pkg = os.path.basename(path)
         print("Getting " + pkg + " from Local... ", end="", flush=True)
         self.mkdir(dest)
         if ( self.cp(path, dest) ):
             print("OK");
         else:
             print("FAILED")
-       
+
+    def git_clone(self, url, dest):
+        print("Cloning "+url+"... ", end="", flush=True)
+        if (os.system("git clone "+url+" " \
+                +dest+" > /dev/null 2>&1") == 0):
+            print("OK")
+        else:
+            print("FAILED")
+
+
 
 class DownloadSource (DownloadHelper):
 
@@ -95,13 +104,16 @@ class DownloadCross (DownloadHelper):
             self.get_http(self.url_base+pkg, dest)
 
 
-dh = DownloadSource()
 
-dh.get_acasm( dest = "/tmp/python");
 
-dc = DownloadCross()
 
-dc.get_mips( dest = "/tmp/python")
+#dh = DownloadSource()
+#
+#dh.get_acasm( dest = "/tmp/python");
+#
+#dc = DownloadCross()
+#
+#dc.get_mips( dest = "/tmp/python")
 
         
 

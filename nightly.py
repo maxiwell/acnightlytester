@@ -20,9 +20,7 @@ def config_parser_setup(configfile):
     return config
 
 
-
-if __name__ == '__main__':
-  
+def main():
     args = command_line_setup()
 
     config = config_parser_setup(args.configfile)
@@ -36,6 +34,8 @@ if __name__ == '__main__':
     print (mips['acsim'])
 
 
+if __name__ == '__main__':
+    main()  
 
 
 

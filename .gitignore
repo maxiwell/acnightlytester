@@ -9,3 +9,4 @@ sources/SourceSPEC2006/
 sources/older
 *.swp
 *.conf
+__pycache__

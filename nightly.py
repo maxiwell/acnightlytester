@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-import configparser
+from configparser import ConfigParser
+from python.archc import ArchC
 
 
 def command_line_handler():
@@ -15,22 +16,34 @@ def command_line_handler():
     return parser.parse_args()
  
 def config_parser_handler(configfile):
-    config = configparser.ConfigParser()
+    config = ConfigParser()
     config.read(configfile)
+
+    modules_file   = config['nightly']['modules file']
+    modules_config = ConfigParser()
+    modules_config.read(modules_file)
+
+    if (config.has_option('archc','systemc')):
+        ArchC.set_systemc(config['archc']['systemc'])
+    if (config.has_option('archc','binutils')):
+        ArchC.set_binutils(config['archc']['binutils'])
+    if (config.has_option('archc','gdb')):
+        ArchC.set_gdb(config['archc']['gdb'])
+   
     return config
 
 
 def main():
-    args   = command_line_hanlder()
+    args   = command_line_handler()
     config = config_parser_handler(args.configfile)
 
-    print(config.sections())
-
-    for key in config['mips']:
-        print(key)
-
-    mips = config['mips']
-    print (mips['acsim'])
+#    print(config.sections())
+#
+#    for key in config['mips']:
+#        print(key)
+#
+#    mips = config['mips']
+#    print (mips['acsim'])
 
 
 if __name__ == '__main__':

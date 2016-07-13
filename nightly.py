@@ -37,8 +37,12 @@ def config_parser_handler(configfile):
             modconfig.read(modfile)
             for module in modconfig.sections():
                 mod = Module(module)
-                mod.set_generator(modconfig.get(module,'generator'))
-                mod.set_options  (modconfig.get(module,'options'))
+                if (modconfig.has_option(module, 'generator')):
+                    mod.set_generator(modconfig.get(module,'generator'))
+                if (modconfig.has_option(module, 'options')):
+                    mod.set_options  (modconfig.get(module,'options'))
+                if (modconfig.has_option(module, 'desc')):
+                    mod.set_desc     (modconfig.get(module,'desc'))
                 modules.append(mod)
         else:
             abort()

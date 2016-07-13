@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import configparser
+
 
 def command_line_setup():
     parser = argparse.ArgumentParser()
@@ -8,17 +10,34 @@ def command_line_setup():
                         help='run the Nightly even without GIT modification')
     parser.add_argument('--condor', dest='condor', action='store_true', \
                         help='run over the condor')
-    parser.add_argument('config_file', metavar='input.conf', \
+    parser.add_argument('configfile', metavar='input.conf', \
                         help='configuration file')
     return parser.parse_args()
  
+def config_parser_setup(configfile):
+    config = configparser.ConfigParser()
+    config.read(configfile)
+    return config
+
 
 
 if __name__ == '__main__':
   
     args = command_line_setup()
 
-    print(args.config_file)
+    config = config_parser_setup(args.configfile)
+
+    print(config.sections())
+
+    for key in config['mips']:
+        print(key)
+
+    mips = config['mips']
+    print (mips['acsim'])
+
+
+
+
 
 
 

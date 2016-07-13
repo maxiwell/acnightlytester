@@ -1,6 +1,7 @@
 
 import os
 from .helper import DownloadHelper
+from .env    import Env
 
 class ArchC (DownloadHelper):
 
@@ -12,20 +13,20 @@ class ArchC (DownloadHelper):
 
     src_folder    = "archc"
     prefix_folder = "acinstall"
-    testroot      = None
+    workspace      = None
 
 
-    def __init__(self, testroot, pick_from):
+    def __init__(self, env, pick_from):
         self.pick_from = pick_from
-        self.testroot  = testroot
+        self.workspace  = env.workspace
 
         if (self.pick_from.startswith("./")) or \
                 (self.pick_from.startswith("/")):
                     self.get_local(pick_from, \
-                       self.testroot + self.src_folder, "ArchC")
+                       self.workspace + self.src_folder, "ArchC")
         else:
             self.git_clone(self.pick_from, \
-                    self.testroot + self.src_folder)
+                    self.workspace + self.src_folder)
 
 
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-import argparse
+import os, re, argparse
 from configparser import ConfigParser
 from python.archc import ArchC
+from python.env   import Env
 
 def abort():
     print("To be development")
+
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
@@ -18,6 +20,8 @@ def command_line_handler():
     return parser.parse_args()
  
 def config_parser_handler(configfile):
+    env = Env()
+
     config = ConfigParser()
     config.read(configfile)
 
@@ -25,10 +29,19 @@ def config_parser_handler(configfile):
     modules_config = ConfigParser()
     modules_config.read(modules_file)
 
+    if (config.has_option('nightly', 'workspace')):
+        workspace = config.get('nightly','workspace')
+        env.set_workspace(workspace)
+
+    if (config.has_option('nightly', 'htmlroot')):
+        htmlroot  = config.get('nightly','htmlroot')
+        env.set_htmlroot(htmlroot)
+
+    env.printenv()
 
     if (config.has_section('archc')):
         if (config.has_option('archc','where')):
-            archc = ArchC("/tmp/python/",config.get('archc','where'))
+            archc = ArchC(env, config.get('archc','where'))
         else:
             abort()
 
@@ -41,8 +54,6 @@ def config_parser_handler(configfile):
         if (config.has_option('archc','gdb')):
             archc.set_gdb(config.get('archc','gdb'))
   
-    
-
     return config
 
 

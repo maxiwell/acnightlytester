@@ -4,7 +4,7 @@ import argparse
 import configparser
 
 
-def command_line_setup():
+def command_line_handler():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--force', dest='force', action='store_true', \
                         help='run the Nightly even without GIT modification')
@@ -14,16 +14,15 @@ def command_line_setup():
                         help='configuration file')
     return parser.parse_args()
  
-def config_parser_setup(configfile):
+def config_parser_handler(configfile):
     config = configparser.ConfigParser()
     config.read(configfile)
     return config
 
 
 def main():
-    args = command_line_setup()
-
-    config = config_parser_setup(args.configfile)
+    args   = command_line_hanlder()
+    config = config_parser_handler(args.configfile)
 
     print(config.sections())
 

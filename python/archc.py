@@ -41,12 +41,31 @@ class ArchC (DownloadHelper):
 
 
 
-class Models:
+class Simulator (DownloadHelper):
+    name    = ""
     modules = []
     where   = ""
 
+    src_folder = ""
+
+    env = None
+
+    def __init__(self, name, env):
+        self.name = name
+        self.env  = env
+        self.src_folder = name
+
     def set_where(self, path):
         self.where = path
+
+        if (self.where.startswith("./")) or         \
+                (self.where.startswith("/")):
+                    self.get_local(self.where, self.env.workspace + "/" \
+                                   + self.src_folder, self.name)
+        else:
+            self.git_clone(self.where, \
+                    self.env.workspace + "/" + self.src_folder)
+
 
     def add_modules(self, module):
         self.modules.append(module)

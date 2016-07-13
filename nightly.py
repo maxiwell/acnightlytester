@@ -2,7 +2,7 @@
 
 import os, re, argparse
 from configparser import ConfigParser
-from python.archc import ArchC
+from python.archc import ArchC, Simulator
 from python.env    import Env
 from python.module import Module
 
@@ -21,11 +21,11 @@ def command_line_handler():
     return parser.parse_args()
  
 def config_parser_handler(configfile):
-    env = Env()
+    env   = Env()
     archc = ArchC()
+    models  = [] 
     modules = []
-
-
+    
     config = ConfigParser()
     config.read(configfile)
 
@@ -79,6 +79,19 @@ def config_parser_handler(configfile):
             archc.set_gdb(config.get('archc','gdb'))
     else:
         abort()
+
+   
+    for model in ['mips', 'arm', 'powerpc', 'sparc']:
+        if (config.has_section(model)):
+            where = ""
+            if (config.has_option(model,'where')):
+                where = config.get(model,'where')
+            else:
+                abort()
+          
+            for module in Module.parse_module(config.get(model,'modules')):
+                sim = Simulator(model+"-"+module, env)
+                sim.set_where(where)
   
     return config
 

@@ -105,9 +105,6 @@ class DownloadCross (DownloadHelper):
             self.get_http(self.url_base+pkg, dest)
 
 
-
-
-
 #dh = DownloadSource()
 #
 #dh.get_acasm( dest = "/tmp/python");

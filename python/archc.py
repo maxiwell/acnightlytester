@@ -3,6 +3,7 @@ import os
 from .helper import DownloadHelper
 from .env    import Env
 import subprocess
+from .utils import *
 
 class ArchC (DownloadHelper):
 
@@ -23,6 +24,8 @@ class ArchC (DownloadHelper):
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
+    build_log       = "build/archc.log"
+
     env = None
 
     def set_env(self, env):
@@ -35,6 +38,8 @@ class ArchC (DownloadHelper):
         self.binutils_prefix = self.env.workspace + "/" + self.binutils_prefix
         self.gdb_src         = self.env.workspace + "/" + self.gdb_src
         self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
+        self.build_log       = self.env.workspace + "/" + self.build_log
+        mkdir(os.path.dirname(self.build_log))
 
     def set_where(self, where):
         self.archc = where
@@ -60,20 +65,22 @@ class ArchC (DownloadHelper):
                     copy_to = self.gdb_src, pkg = "GDB")
 
     def build(self):
-        cmd = "cd " + self.archc_src + " && " + \
-              "./autogen.sh && " + \
-              "./configure --prefix=" + self.archc_prefix
+
+        cmd_1 = "cd " + self.archc_src + " && "
+        cmd_2 = "./autogen.sh && " + \
+                "./configure --prefix=" + self.archc_prefix
         if self.systemc:
-            cmd += " --with-systemc=" + self.systemc_prefix
+            cmd_2 += " --with-systemc=" + self.systemc_prefix
         if self.binutils: 
-            cmd += " --with-binutils=" + self.binutils_src
+            cmd_2 += " --with-binutils=" + self.binutils_src
         if self.gdb:
-            cmd += " --with-gdb=" + self.gdb_src
-        cmd += " && make && make install"
+            cmd_2 += " --with-gdb=" + self.gdb_src
+        cmd_2 += " && make && make install"
         print("ArchC:")
-        print("| "+cmd)
-        print("| Building and Installing...", end="", flush=True)
-        if os.system( " ( " + cmd + " ) > /dev/null 2>&1" ) == 0 :
+        print("| "+cmd_2)
+        print("| Building and Installing... ", end="", flush=True)
+        cmd = cmd_1 + cmd_2
+        if exec_to_log(cmd, self.build_log) :
             print("OK")
         else:
             print("FAILED")

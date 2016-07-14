@@ -2,15 +2,13 @@
 
 import os, re, argparse
 from configparser     import ConfigParser
-from python.archc     import ArchC, Simulator
+from python.archc     import ArchC, Simulator, Module
 from python.env       import Env
-from python.module    import Module
 from python.benchmark import Benchmark, App
-from python.utils     import Utils
+from python           import utils     
 
 def abort():
     print("To be development")
-
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
@@ -25,14 +23,14 @@ def command_line_handler():
 def config_parser_handler(configfile):
     env   = Env()
     archc = ArchC()
-    models  = [] 
-    modules = []
+    simulators = []
     mibench  = Benchmark('MiBench')
     spec2006 = Benchmark('Spec2006')
 
     config = ConfigParser()
     config.read(configfile)
 
+    modules = []
     if (config.has_section('nightly')):
         if (config.has_option('nightly', 'modules file')):
             modfile   = config['nightly']['modules file']
@@ -62,19 +60,17 @@ def config_parser_handler(configfile):
         abort()
 
     env.printenv()
-    for m in modules:
-        m.print_module()
 
     for _app in config.options('mibench'):
         app = App(_app)
-        for dataset in Utils.parselist(config.get('mibench',_app)):
+        for dataset in utils.parselist(config.get('mibench',_app)):
             app.append_dataset(dataset)
         mibench.append_app(app)
     mibench.printbench()
 
     for _app in config.options('spec2006'):
         app = App(_app)
-        for dataset in Utils.parselist(config.get('spec2006',_app)):
+        for dataset in utils.parselist(config.get('spec2006',_app)):
             app.append_dataset(dataset)
         spec2006.append_app(app)
     spec2006.printbench()
@@ -105,16 +101,24 @@ def config_parser_handler(configfile):
             else:
                 abort()
           
-            for module in Utils.parselist(config.get(_model,'modules')):
+            for module in utils.parselist(config.get(_model,'modules')):
                 sim = Simulator(_model+"-"+module, env)
                 sim.set_where(where)
-  
+                for _module in modules:
+                    if _module.name == module:
+                        sim.set_module(_module)
+                simulators.append(sim)
+ 
+    for s in simulators:
+        s.printsim()
     return config
 
 
 def main():
     args   = command_line_handler()
-    config = config_parser_handler(args.configfile)
+    nightly = config_parser_handler(args.configfile)
+
+
 
 #    print(config.sections())
 #

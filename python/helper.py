@@ -3,24 +3,14 @@
 import urllib.request 
 import os
 import shutil 
-
+from python import utils
 
 class DownloadHelper:
-
-    def mkdir(self, directory):
-        if not os.path.exists(directory+"/"):
-            os.makedirs(directory+"/")
-
-    def cp(self, src, dst):
-        if ( os.system("cp -r "+src+" "+dst+" > /dev/null 2>&1") == 0 ):
-            return True
-        else:
-            return False
 
     def get_http(self, url, dest):
         pkg = os.path.basename(url)
         print("Getting " + pkg + " over HTTP... ", end="", flush=True)
-        self.mkdir(dest)
+        utils.mkdir(dest)
         if ( urllib.request.urlretrieve(url, dest + "/" + pkg) ):
             print("OK");
         else:
@@ -30,8 +20,8 @@ class DownloadHelper:
         if pkg == None:
             pkg = os.path.basename(path)
         print("Getting " + pkg + " from Local... ", end="", flush=True)
-        self.mkdir(dest)
-        if ( self.cp(path, dest) ):
+        utils.mkdir(dest)
+        if ( utils.cp(path, dest) ):
             print("OK");
         else:
             print("FAILED")

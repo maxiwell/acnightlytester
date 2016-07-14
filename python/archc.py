@@ -40,10 +40,43 @@ class ArchC (DownloadHelper):
         self.gdb = path
 
 
+class Module:
+    name      = ""
+    generator = ""
+    options   = ""
+    desc      = ""
+
+    def __init__(self, name):
+        self.name     = name
+
+    def set_generator(self, gen):
+        self.generator = gen
+
+    def set_options(self, opt):
+        self.options  = opt
+
+    def set_desc(self, desc):
+        self.desc = desc
+
+    def tostring(self):
+        string = "Module: " + self.name 
+        if (self.generator != ""):
+            string += "\n| generator: " + self.generator 
+        if (self.options != ""):
+            string += "\n| options: " + self.options 
+        if (self.desc != ""):
+            string += "\n| desc: " + self.desc 
+        return string
+
+
+
+    def print_module(self):
+        print(string)
+
 
 class Simulator (DownloadHelper):
     name    = ""
-    modules = []
+    module = None
     where   = ""
 
     src_folder = ""
@@ -52,6 +85,8 @@ class Simulator (DownloadHelper):
 
     def __init__(self, name, env):
         self.name = name
+        self.module = None
+        self.where = ""
         self.env  = env
         self.src_folder = name
 
@@ -65,10 +100,15 @@ class Simulator (DownloadHelper):
         else:
             self.git_clone(self.where, \
                     self.env.workspace + "/" + self.src_folder)
+    
+    def set_module(self, module):
+        self.module = module
 
+    def printsim(self):
+        print("Simulator: " + self.name)
+        print("| from " + self.where)
+        print("| " + self.module.tostring())
 
-    def add_modules(self, module):
-        self.modules.append(module)
 
 
 

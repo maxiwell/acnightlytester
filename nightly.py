@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import os, re, argparse
-from configparser import ConfigParser
-from python.archc import ArchC, Simulator
-from python.env    import Env
-from python.module import Module
+from configparser     import ConfigParser
+from python.archc     import ArchC, Simulator
+from python.env       import Env
+from python.module    import Module
+from python.benchmark import Benchmark, App
+from python.utils     import Utils
 
 def abort():
     print("To be development")
@@ -25,7 +27,9 @@ def config_parser_handler(configfile):
     archc = ArchC()
     models  = [] 
     modules = []
-    
+    mibench  = Benchmark('MiBench')
+    spec2006 = Benchmark('Spec2006')
+
     config = ConfigParser()
     config.read(configfile)
 
@@ -35,15 +39,15 @@ def config_parser_handler(configfile):
             modfile   = os.path.dirname(configfile)+"/"+modfile
             modconfig = ConfigParser()
             modconfig.read(modfile)
-            for module in modconfig.sections():
-                mod = Module(module)
-                if (modconfig.has_option(module, 'generator')):
-                    mod.set_generator(modconfig.get(module,'generator'))
-                if (modconfig.has_option(module, 'options')):
-                    mod.set_options  (modconfig.get(module,'options'))
-                if (modconfig.has_option(module, 'desc')):
-                    mod.set_desc     (modconfig.get(module,'desc'))
-                modules.append(mod)
+            for _module in modconfig.sections():
+                module = Module(_module)
+                if (modconfig.has_option (_module, 'generator')):
+                    module.set_generator(modconfig.get(_module,'generator'))
+                if (modconfig.has_option(_module, 'options')):
+                    module.set_options (modconfig.get(_module,'options'))
+                if (modconfig.has_option(_module, 'desc')):
+                    module.set_desc (modconfig.get(_module,'desc'))
+                modules.append(module)
         else:
             abort()
 
@@ -57,10 +61,23 @@ def config_parser_handler(configfile):
     else:
         abort()
 
+    env.printenv()
     for m in modules:
         m.print_module()
-    
-    env.printenv()
+
+    for _app in config.options('mibench'):
+        app = App(_app)
+        for dataset in Utils.parselist(config.get('mibench',_app)):
+            app.append_dataset(dataset)
+        mibench.append_app(app)
+    mibench.printbench()
+
+    for _app in config.options('spec2006'):
+        app = App(_app)
+        for dataset in Utils.parselist(config.get('spec2006',_app)):
+            app.append_dataset(dataset)
+        spec2006.append_app(app)
+    spec2006.printbench()
 
     if (config.has_section('archc')):
         if (config.has_option('archc','where')):
@@ -79,18 +96,17 @@ def config_parser_handler(configfile):
             archc.set_gdb(config.get('archc','gdb'))
     else:
         abort()
-
    
-    for model in ['mips', 'arm', 'powerpc', 'sparc']:
-        if (config.has_section(model)):
+    for _model in ['mips', 'arm', 'powerpc', 'sparc']:
+        if (config.has_section(_model)):
             where = ""
-            if (config.has_option(model,'where')):
-                where = config.get(model,'where')
+            if (config.has_option(_model,'where')):
+                where = config.get(_model,'where')
             else:
                 abort()
           
-            for module in Module.parse_module(config.get(model,'modules')):
-                sim = Simulator(model+"-"+module, env)
+            for module in Utils.parselist(config.get(_model,'modules')):
+                sim = Simulator(_model+"-"+module, env)
                 sim.set_where(where)
   
     return config

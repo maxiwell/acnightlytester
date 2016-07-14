@@ -79,16 +79,16 @@ class HTML:
 
 
 
-
-table = Table();
-table.init( ['c1', 'c2', 'c3', 'c4'] )
-table.from_csv("/tmp/teste.csv")
-table.finalize()
-
-html = HTML("/home/max/public_html/teste.html")
-html.init_page("teste")
-html.append_table(table)
-html.finalize_page()
+#
+#table = Table();
+#table.init( ['c1', 'c2', 'c3', 'c4'] )
+#table.from_csv("/tmp/teste.csv")
+#table.finalize()
+#
+#html = HTML("/home/max/public_html/teste.html")
+#html.init_page("teste")
+#html.append_table(table)
+#html.finalize_page()
 
 
 

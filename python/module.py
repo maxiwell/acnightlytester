@@ -28,13 +28,6 @@ class Module:
             print("| desc: " + self.desc)
 
 
-    @staticmethod
-    def parse_module(string):
-        _modules = string.replace(" ","")
-        _modules = _modules.replace("[","") 
-        _modules = _modules.replace("]","")
-        return _modules.split(",")
-
 
 
 

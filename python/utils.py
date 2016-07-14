@@ -7,7 +7,7 @@ def mkdir(directory):
         os.makedirs(directory+"/")
 
 def cp(src, dst):
-    if ( os.system("cp -r "+src+" "+dst+" > /dev/null 2>&1") == 0 ):
+    if ( os.system("cp -r "+src+"/* "+dst+" > /dev/null 2>&1") == 0 ):
         return True
     else:
         return False

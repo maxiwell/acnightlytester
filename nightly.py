@@ -4,6 +4,7 @@ import os, re, argparse
 from configparser     import ConfigParser
 from python.archc     import ArchC, Simulator, Module
 from python.env       import Env
+from python.nightly   import Nightly
 from python.benchmark import Benchmark, App
 from python           import utils     
 
@@ -21,8 +22,9 @@ def command_line_handler():
     return parser.parse_args()
  
 def config_parser_handler(configfile):
-    env   = Env()
-    archc = ArchC()
+    nightly = Nightly()
+    env     = Env()
+    archc   = ArchC()
     simulators = []
     mibench  = Benchmark('MiBench')
     spec2006 = Benchmark('Spec2006')
@@ -111,12 +113,22 @@ def config_parser_handler(configfile):
  
     for s in simulators:
         s.printsim()
-    return config
+
+    nightly.env = env
+    nightly.archc = archc
+    nightly.simulators = simulators
+    nightly.mibench = mibench
+    nightly.spec2006 = spec2006
+    return nightly
 
 
 def main():
     args   = command_line_handler()
     nightly = config_parser_handler(args.configfile)
+
+    nightly.archc.build()
+    
+     
 
 
 

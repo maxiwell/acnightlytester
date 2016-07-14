@@ -16,23 +16,28 @@ class DownloadHelper:
         else:
             print("FAILED")
 
-    def get_local(self, path, dest, pkg = None):
-        if pkg == None:
-            pkg = os.path.basename(path)
-        print("Getting " + pkg + " from Local... ", end="", flush=True)
+    def get_local(self, path, dest, pkg ):
+        print("Getting " + pkg + " from " + path + "... ", end="", flush=True)
         utils.mkdir(dest)
         if ( utils.cp(path, dest) ):
             print("OK");
         else:
             print("FAILED")
 
-    def git_clone(self, url, dest):
-        print("Cloning "+url+"... ", end="", flush=True)
+    def git_clone(self, url, dest, pkg ):
+        print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
         if (os.system("git clone "+url+" " \
                 +dest+" > /dev/null 2>&1") == 0):
             print("OK")
         else:
             print("FAILED")
+
+    def get_from(self, url_or_path, copy_to, pkg):
+        if (url_or_path.startswith("./")) or (url_or_path.startswith("/")):
+            self.get_local(url_or_path, copy_to, pkg)
+        else:
+            self.git_clone(url_or_path, copy_to, pkg)
+
 
 
 

@@ -1,7 +1,7 @@
 
 import os
 from .helper import DownloadHelper
-from .env    import Env
+from .nightly    import Env
 import subprocess
 from .utils import *
 
@@ -24,7 +24,7 @@ class ArchC (DownloadHelper):
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
-    build_log       = "build/archc.log"
+    build_log       = "log/archc.log"
 
     env = None
 
@@ -40,6 +40,7 @@ class ArchC (DownloadHelper):
         self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
         self.build_log       = self.env.workspace + "/" + self.build_log
         mkdir(os.path.dirname(self.build_log))
+        rm(self.build_log)
 
     def set_where(self, where):
         self.archc = where
@@ -85,73 +86,89 @@ class ArchC (DownloadHelper):
         else:
             print("FAILED")
 
-class Module:
-    name      = ""
-    generator = ""
-    options   = ""
-    desc      = ""
-
-    def __init__(self, name):
-        self.name     = name
-
-    def set_generator(self, gen):
-        self.generator = gen
-
-    def set_options(self, opt):
-        self.options  = opt
-
-    def set_desc(self, desc):
-        self.desc = desc
-
-    def tostring(self):
-        string = "Module: " + self.name 
-        if (self.generator != ""):
-            string += "\n| generator: " + self.generator 
-        if (self.options != ""):
-            string += "\n| options: " + self.options 
-        if (self.desc != ""):
-            string += "\n| desc: " + self.desc 
-        return string
-
-
-
-    def print_module(self):
-        print(string)
-
 
 class Simulator (DownloadHelper):
-    name    = ""
-    module = None
-    where   = ""
+    name        = ""
 
-    sim_src = ""
+    generator   = ""
+    options     = ""
+    desc        = ""
 
-    env = None
+    inputfile   = ""
+    where       = ""
+    sim_src     = ""
+    build_log   = ""
 
-    def __init__(self, name, env):
+    env         = None
+    benchmarks  = []
+
+    def __init__(self, name, inputfile, env):
         self.name = name
-        self.module = None
         self.where = ""
+        self.inputfile = inputfile
         self.env  = env
-        self.sim_src = name
+        self.benchmarks = []
+
+        self.generator = ""
+        self.options   = ""
+        self.desc      = ""
+
+        self.sim_src =   self.env.workspace + "/" + name
+        self.build_log = self.env.workspace + "/log/" + self.name + ".log"
+        mkdir(os.path.dirname(self.build_log))
+        rm(self.build_log)
 
     def set_where(self, where):
         self.where = where
         if (self.where.startswith("./")) or (self.where.startswith("/")):
-            self.get_local(self.where, self.env.workspace + "/" + self.sim_src, self.name)
+            self.get_local(self.where, self.sim_src, self.name)
         else:
-            self.git_clone(self.where, self.env.workspace + "/" + self.sim_src)
+            self.git_clone(self.where, self.sim_src, self.name)
+
+    def set_generator(self, generator):
+        self.generator = generator
+
+    def set_options(self, options):
+        self.options = options
+
+    def set_desc(self, desc):
+        self.desc = desc
+
+    def append_benchmark(self, benchmark):
+        self.benchmarks.append(benchmark)
 
 
+    def gen_and_build(self, archc_env_file):
+        cmd_source = 'source '+archc_env_file+' && '
+        cmd_cd     = "cd " + self.sim_src + " && "
+        cmd_acsim  = self.generator + " " + self.inputfile + " " \
+                    + self.options + " && "
+        cmd_make   = "make "
 
+        cmd = cmd_source + cmd_cd + cmd_acsim + cmd_make 
+        print(self.name + ":")
+        print("| "+cmd)
+        print("| Generating and Building... ", end="", flush=True)
 
-    def set_module(self, module):
-        self.module = module
+        if exec_to_log(cmd, self.build_log) :
+            print("OK")
+        else:
+            print("FAILED")
 
     def printsim(self):
         print("Simulator: " + self.name)
         print("| from " + self.where)
-        print("| " + self.module.tostring())
+        print("| generator: " + self.generator)
+        print("| options: " + self.options )
+        if (self.desc):
+            print("| desc: " + self.desc )
+        print("| benchmark: ", end="")
+        for b in self.benchmarks:
+            print("["+b.name+"] ", end="")
+        print()
+            
+
+
 
 
 

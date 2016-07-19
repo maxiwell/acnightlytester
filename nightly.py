@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
-import os, re, argparse
+import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
-from python.archc     import ArchC, Simulator, Module
-from python.env       import Env
-from python.nightly   import Nightly
+from python.archc     import ArchC, Simulator
+from python.nightly   import Nightly, Env
 from python.benchmark import Benchmark, App
 from python           import utils     
-
-def abort():
-    print("To be development")
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
@@ -17,130 +13,71 @@ def command_line_handler():
                         help='run the Nightly even without GIT modification')
     parser.add_argument('--condor', dest='condor', action='store_true', \
                         help='run over the condor')
-    parser.add_argument('configfile', metavar='input.conf', \
+    parser.add_argument('-dbg', '--debug', dest='debug', action='store_true', \
+                        help="don't remove the 'workspace' folder'")
+    parser.add_argument('configfile', metavar='config.yaml', \
                         help='configuration file')
     return parser.parse_args()
- 
-def config_parser_handler(configfile):
+
+def config_parser_yaml(configfile):
     nightly = Nightly()
     env     = Env()
     archc   = ArchC()
     simulators = []
-    mibench  = Benchmark('MiBench')
-    spec2006 = Benchmark('Spec2006')
 
-    config = ConfigParser()
-    config.read(configfile)
+    with open(configfile, 'r') as config:
+        try: 
+            yamls = yaml.load(config)
+            env.set_workspace(yamls['nightlysetup']['workspace'])
+            env.set_htmlroot (yamls['nightlysetup']['htmlroot'])
+            utils.workspace = env.workspace
+            env.printenv()
 
-    modules = []
-    if (config.has_section('nightly')):
-        if (config.has_option('nightly', 'modules file')):
-            modfile   = config['nightly']['modules file']
-            modfile   = os.path.dirname(configfile)+"/"+modfile
-            modconfig = ConfigParser()
-            modconfig.read(modfile)
-            for _module in modconfig.sections():
-                module = Module(_module)
-                if (modconfig.has_option (_module, 'generator')):
-                    module.set_generator(modconfig.get(_module,'generator'))
-                if (modconfig.has_option(_module, 'options')):
-                    module.set_options (modconfig.get(_module,'options'))
-                if (modconfig.has_option(_module, 'desc')):
-                    module.set_desc (modconfig.get(_module,'desc'))
-                modules.append(module)
-        else:
-            abort()
-
-        if (config.has_option('nightly', 'workspace')):
-            workspace = config.get('nightly','workspace')
-            env.set_workspace(workspace)
-
-        if (config.has_option('nightly', 'htmlroot')):
-            htmlroot  = config.get('nightly','htmlroot')
-            env.set_htmlroot(htmlroot)
-    else:
-        abort()
-
-    env.printenv()
-
-    for _app in config.options('mibench'):
-        app = App(_app)
-        for dataset in utils.parselist(config.get('mibench',_app)):
-            app.append_dataset(dataset)
-        mibench.append_app(app)
-    mibench.printbench()
-
-    for _app in config.options('spec2006'):
-        app = App(_app)
-        for dataset in utils.parselist(config.get('spec2006',_app)):
-            app.append_dataset(dataset)
-        spec2006.append_app(app)
-    spec2006.printbench()
-
-    if (config.has_section('archc')):
-        if (config.has_option('archc','where')):
             archc.set_env(env)
-            archc.set_where(config.get('archc','where'))
-        else:
-            abort()
+            archc.set_systemc(yamls['archc']['systemc'])
+            archc.set_gdb(yamls['archc']['gdb'])
+            archc.set_binutils(yamls['archc']['binutils'])
+            archc.set_where(yamls['archc']['link/path'])
 
-        if (config.has_option('archc','systemc')):
-            archc.set_systemc(config.get('archc','systemc'))
+            for _sim in yamls['nightlysetup']['simulators']:
+                inputfile = yamls['simulators'][_sim]['inputfile']
+                linkpath  = yamls['simulators'][_sim]['link/path']
+                for _module in yamls['simulators'][_sim]['modules']:
+                    sim = Simulator(_sim+"-"+_module, inputfile, env)
+                    sim.set_where(linkpath)
+                    sim.set_generator(yamls['modules'][_module]['generator'])
+                    sim.set_options(yamls['modules'][_module]['options'])
+                    sim.set_desc(yamls['modules'][_module]['desc'])
+        
+                    for _bench in yamls['simulators'][_sim]['benchmarks']:
+                        bench = Benchmark(_bench)
+                        for _app in yamls['benchmarks'][_bench] :
+                            app = App(_app)
+                            for _dataset in yamls['benchmarks'][_bench][_app]:
+                                app.append_dataset(_dataset)
+                            bench.append_app(app)
+                        sim.append_benchmark(bench)
+                    simulators.append(sim)
 
-        if (config.has_option('archc','binutils')):
-            archc.set_binutils(config.get('archc','binutils'))
+            for s in simulators:
+                s.printsim()
 
-        if (config.has_option('archc','gdb')):
-            archc.set_gdb(config.get('archc','gdb'))
-    else:
-        abort()
-   
-    for _model in ['mips', 'arm', 'powerpc', 'sparc']:
-        if (config.has_section(_model)):
-            where = ""
-            if (config.has_option(_model,'where')):
-                where = config.get(_model,'where')
-            else:
-                abort()
-          
-            for module in utils.parselist(config.get(_model,'modules')):
-                sim = Simulator(_model+"-"+module, env)
-                sim.set_where(where)
-                for _module in modules:
-                    if _module.name == module:
-                        sim.set_module(_module)
-                simulators.append(sim)
- 
-    for s in simulators:
-        s.printsim()
+            nightly.env = env
+            nightly.archc = archc
+            nightly.simulators = simulators
+            return nightly
 
-    nightly.env = env
-    nightly.archc = archc
-    nightly.simulators = simulators
-    nightly.mibench = mibench
-    nightly.spec2006 = spec2006
-    return nightly
-
-
+        except Exception as e:
+            utils.abort("[config.yaml] "+str(e))
+                
 def main():
     args   = command_line_handler()
-    nightly = config_parser_handler(args.configfile)
+    utils.debug = args.debug
+    nightly = config_parser_yaml(args.configfile)
 
-    nightly.archc.build()
-    
+    nightly.build_and_install_archc()
+    nightly.gen_and_build_simulator(nightly.simulators[0])
      
-
-
-
-#    print(config.sections())
-#
-#    for key in config['mips']:
-#        print(key)
-#
-#    mips = config['mips']
-#    print (mips['acsim'])
-
-
 if __name__ == '__main__':
     main()  
 

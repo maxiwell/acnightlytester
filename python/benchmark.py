@@ -16,8 +16,6 @@ class App:
         for d in self.dataset:
             string = string + d + " "
         print(string)
- 
-
 
     def tostring(self):
         string = self.name + " : "

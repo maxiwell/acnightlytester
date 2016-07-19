@@ -1,0 +1,82 @@
+
+nightlysetup:
+    workspace : /tmp/TEMP
+    htmlroot  : ${SCRIPTROOT}/public_html
+    simulators: [mips]
+ 
+archc:
+    systemc   : /home/max/ArchC/tools/systemc/2.3.1/
+    binutils  : 
+    gdb       : 
+    link/path : https://github.com/archc/archc.git
+
+
+simulators:
+    mips:
+        modules : [acsim, powersc, hltrace]
+        inputfile: mips.ac
+        link/path: /home/max/ArchC/processors/github/mips
+        #link/path: https://github.com/archc/mips.git
+        benchmarks: [mibench]
+    arm:
+        modules : [acsim, powersc, hltrace] 
+        inputfile: arm.ac
+        link/path: https://github.com/archc/arm.git
+        benchmarks: [mibench]
+    powerpc:
+        modules : [acsim, powersc, hltrace] 
+        inputfile: powerpc.ac
+        link/path: https://github.com/archc/powerpc.git
+        benchmarks: [mibench]
+    sparc:
+        modules : [acsim, powersc, hltrace] 
+        inputfile: sparc.ac
+        link/path: https://github.com/archc/sparc.git
+        benchmarks: [mibench]
+
+modules: 
+    acsim: 
+        generator: acsim
+        options: -abi -nw
+        desc:
+    powersc:
+        generator: acsim
+        options: -abi -nw -pw
+        desc:
+    hltrace: 
+        generator: acsim
+        options: -abi -nw -hlt
+        desc:
+   
+benchmarks:
+    mibench:
+        basicmath : [small,large]
+        bitcount  : [small,large]
+        quicksort : [small,large]
+        susan     : [small,large]
+        adpcm     : [small,large]
+        crc       : [small,large]
+        fft       : [small,large] 
+        gsm       : [small,large]
+        dijkstra  : [small,large]
+        patricia  : [small,large] 
+        rijndael  : [small,large]
+        sha       : [small,large]
+        jpeg      : [small,large]
+        lame      : [small,large]
+    spec2006:
+        gcc        : [test]
+        bzip_2     : [test]
+        gcc        : [test]
+        mcf        : [test] 
+        gobmk      : [test]
+        hmmer      : [test]
+        sjeng      : [test]
+        libquantum : [test]
+        h264       : [test] 
+
+        # apps with problems
+        #omnetpp    = [test] 
+        #astar      = [test]
+
+

@@ -22,12 +22,6 @@ def rm(dst):
     else:
         return False
 
-def parselist(_list):
-    _modules = _list.replace(" ","")
-    _modules = _modules.replace("[","") 
-    _modules = _modules.replace("]","")
-    return _modules.split(",")
-
 def exec_to_log(cmd, log):
     if (os.system ( ' ( /bin/bash -c "' + cmd + '" ) >> '+log+' 2>&1' ) == 0):
         return True

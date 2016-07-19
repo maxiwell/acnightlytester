@@ -14,7 +14,7 @@ def command_line_handler():
     parser.add_argument('--condor', dest='condor', action='store_true', \
                         help='run over the condor')
     parser.add_argument('-dbg', '--debug', dest='debug', action='store_true', \
-                        help="don't remove the 'workspace' folder'")
+                        help="don't remove the 'workspace' folder")
     parser.add_argument('configfile', metavar='config.yaml', \
                         help='configuration file')
     return parser.parse_args()
@@ -37,14 +37,14 @@ def config_parser_yaml(configfile):
             archc.set_systemc(yamls['archc']['systemc'])
             archc.set_gdb(yamls['archc']['gdb'])
             archc.set_binutils(yamls['archc']['binutils'])
-            archc.set_where(yamls['archc']['link/path'])
+            archc.set_linkpath(yamls['archc']['link/path'])
 
             for _sim in yamls['nightlysetup']['simulators']:
                 inputfile = yamls['simulators'][_sim]['inputfile']
                 linkpath  = yamls['simulators'][_sim]['link/path']
                 for _module in yamls['simulators'][_sim]['modules']:
                     sim = Simulator(_sim+"-"+_module, inputfile, env)
-                    sim.set_where(linkpath)
+                    sim.set_linkpath(linkpath)
                     sim.set_generator(yamls['modules'][_module]['generator'])
                     sim.set_options(yamls['modules'][_module]['options'])
                     sim.set_desc(yamls['modules'][_module]['desc'])

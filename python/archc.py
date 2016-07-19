@@ -42,27 +42,27 @@ class ArchC (DownloadHelper):
         mkdir(os.path.dirname(self.build_log))
         rm(self.build_log)
 
-    def set_where(self, where):
-        self.archc = where
-        self.get_from(url_or_path = where, \
+    def set_linkpath(self, linkpath):
+        self.archc = linkpath
+        self.get_from(url_or_path = linkpath, \
                 copy_to = self.archc_src, pkg = "ArchC")
 
-    def set_systemc(self, where):
-        self.systemc = where
+    def set_systemc(self, linkpath):
+        self.systemc = linkpath
         if  self.systemc  :
-            self.get_from( url_or_path = where, \
+            self.get_from( url_or_path = linkpath, \
                     copy_to = self.systemc_prefix, pkg = "SystemC")
 
-    def set_binutils(self, where):
-        self.binutils = where
+    def set_binutils(self, linkpath):
+        self.binutils = linkpath
         if self.binutils :
-            self.get_from( url_or_path = where, \
+            self.get_from( url_or_path = linkpath, \
                     copy_to = self.binutils_src, pkg = "Binutils")
 
-    def set_gdb(self, where):
-        self.gdb = where
+    def set_gdb(self, linkpath):
+        self.gdb = linkpath
         if self.gdb :
-            self.get_from( url_or_path = where, \
+            self.get_from( url_or_path = linkpath, \
                     copy_to = self.gdb_src, pkg = "GDB")
 
     def build(self):
@@ -95,8 +95,8 @@ class Simulator (DownloadHelper):
     desc        = ""
 
     inputfile   = ""
-    where       = ""
-    sim_src     = ""
+    linkpath    = ""
+    simsrc     = ""
     build_log   = ""
 
     env         = None
@@ -104,7 +104,7 @@ class Simulator (DownloadHelper):
 
     def __init__(self, name, inputfile, env):
         self.name = name
-        self.where = ""
+        self.linkpath = ""
         self.inputfile = inputfile
         self.env  = env
         self.benchmarks = []
@@ -113,17 +113,17 @@ class Simulator (DownloadHelper):
         self.options   = ""
         self.desc      = ""
 
-        self.sim_src =   self.env.workspace + "/" + name
+        self.simsrc =   self.env.workspace + "/" + name
         self.build_log = self.env.workspace + "/log/" + self.name + ".log"
         mkdir(os.path.dirname(self.build_log))
         rm(self.build_log)
 
-    def set_where(self, where):
-        self.where = where
-        if (self.where.startswith("./")) or (self.where.startswith("/")):
-            self.get_local(self.where, self.sim_src, self.name)
+    def set_linkpath(self, linkpath):
+        self.linkpath = linkpath
+        if (self.linkpath.startswith("./")) or (self.linkpath.startswith("/")):
+            self.get_local(self.linkpath, self.simsrc, self.name)
         else:
-            self.git_clone(self.where, self.sim_src, self.name)
+            self.git_clone(self.linkpath, self.simsrc, self.name)
 
     def set_generator(self, generator):
         self.generator = generator
@@ -140,7 +140,7 @@ class Simulator (DownloadHelper):
 
     def gen_and_build(self, archc_env_file):
         cmd_source = 'source '+archc_env_file+' && '
-        cmd_cd     = "cd " + self.sim_src + " && "
+        cmd_cd     = "cd " + self.simsrc + " && "
         cmd_acsim  = self.generator + " " + self.inputfile + " " \
                     + self.options + " && "
         cmd_make   = "make "
@@ -157,7 +157,7 @@ class Simulator (DownloadHelper):
 
     def printsim(self):
         print("Simulator: " + self.name)
-        print("| from " + self.where)
+        print("| from " + self.linkpath)
         print("| generator: " + self.generator)
         print("| options: " + self.options )
         if (self.desc):

@@ -12,10 +12,7 @@ class App:
         self.dataset.append(dataset)
 
     def printapp(self):
-        string = self.name + " : "
-        for d in self.dataset:
-            string = string + d + " "
-        print(string)
+        print(self.tostring())
 
     def tostring(self):
         string = self.name + " : "

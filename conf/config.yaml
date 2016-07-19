@@ -13,25 +13,25 @@ archc:
 
 simulators:
     mips:
-        modules : [acsim, powersc, hltrace]
-        inputfile: mips.ac
-        link/path: /home/max/ArchC/processors/github/mips
+        modules   : [acsim, powersc, hltrace]
+        inputfile : mips.ac
+        link/path : /home/max/ArchC/processors/github/mips
         #link/path: https://github.com/archc/mips.git
         benchmarks: [mibench]
     arm:
-        modules : [acsim, powersc, hltrace] 
-        inputfile: arm.ac
-        link/path: https://github.com/archc/arm.git
+        modules   : [acsim, powersc, hltrace] 
+        inputfile : arm.ac
+        link/path : https://github.com/archc/arm.git
         benchmarks: [mibench]
     powerpc:
-        modules : [acsim, powersc, hltrace] 
-        inputfile: powerpc.ac
-        link/path: https://github.com/archc/powerpc.git
+        modules   : [acsim, powersc, hltrace] 
+        inputfile : powerpc.ac
+        link/path : https://github.com/archc/powerpc.git
         benchmarks: [mibench]
     sparc:
-        modules : [acsim, powersc, hltrace] 
-        inputfile: sparc.ac
-        link/path: https://github.com/archc/sparc.git
+        modules   : [acsim, powersc, hltrace] 
+        inputfile : sparc.ac
+        link/path : https://github.com/archc/sparc.git
         benchmarks: [mibench]
 
 modules: 

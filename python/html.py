@@ -13,7 +13,7 @@ class Table:
         self.string += '<p><table border="1" cellspacing="1" cellpadding="5"><tr>\n'
         for col in cols:
             self.string += "<th>"+col+"</th>"
-        self.string += "</tr>"
+        self.string += "</tr>\n"
         return self.string
 
     def finalize(self):
@@ -33,6 +33,12 @@ class Table:
         self.string += table_string
         return self.string
 
+    def append_raw(self, html):
+        self.string += html
+        return self.string
+
+
+
 
 class HTML:
 
@@ -40,6 +46,19 @@ class HTML:
     
     def __init__(self, htmlfile):
         self.f = open(htmlfile, "w")
+
+    def create_index(self):
+        self.init_page("ArchC's NightlyTester Main Page")
+        self.append_raw("<p>Produced by NightlyTester @ Qui 07/31/14 20:10:31</p>")
+        
+        table = Table()
+        table.init(['Test #', 'Date', 'ArchC GIT revision', 'Report', 'Comment', 'Started by'])
+        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
+        table.finalize()
+
+        self.append_table(table)
+        self.finalize_page()
+
 
     def init_page(self, title):
         self.string += "<html>\n" 

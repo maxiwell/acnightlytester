@@ -5,7 +5,8 @@ from configparser     import ConfigParser
 from python.archc     import ArchC, Simulator
 from python.nightly   import Nightly, Env
 from python.benchmark import Benchmark, App
-from python           import utils     
+from python           import utils
+from python.html      import HTML
 
 def command_line_handler():
     parser = argparse.ArgumentParser()

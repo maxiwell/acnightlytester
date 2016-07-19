@@ -8,6 +8,7 @@ class Env:
     scriptroot = ""
     workspace  = ""
     htmlroot   = ""
+    htmlindex  = ""
 
     def __init__(self):
         self.random     = randint(0000,9999)
@@ -18,6 +19,7 @@ class Env:
 
     def set_htmlroot(self, htmlroot):
         self.htmlroot = self.resolvenv(htmlroot)
+        self.htmlindex  = self.htmlroot + "/index.html"
 
     def resolvenv(self,cmd):
         cmd = re.sub(r"\$\{RANDOM\}", str(self.random), cmd)

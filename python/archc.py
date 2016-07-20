@@ -102,6 +102,8 @@ class Simulator (DownloadHelper):
     env         = None
     benchmarks  = []
 
+    htmllog     = ""
+
     def __init__(self, name, inputfile, env):
         self.name = name
         self.linkpath = ""
@@ -112,9 +114,10 @@ class Simulator (DownloadHelper):
         self.generator = ""
         self.options   = ""
         self.desc      = ""
+        self.htmllog   = ""
 
-        self.simsrc =   self.env.workspace + "/" + name
-        self.build_log = self.env.workspace + "/log/" + self.name + ".log"
+        self.simsrc    = env.workspace + "/" + name
+        self.build_log = env.workspace + "/log/" + name + ".log"
         mkdir(os.path.dirname(self.build_log))
         rm(self.build_log)
 

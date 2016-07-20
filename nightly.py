@@ -76,8 +76,12 @@ def main():
     utils.debug = args.debug
     nightly = config_parser_yaml(args.configfile)
 
-    nightly.build_and_install_archc()
-    nightly.gen_and_build_simulator(nightly.simulators[0])
+    nightly.init_htmlindex("index.html")
+    nightly.init_htmllog()
+
+
+#    nightly.build_and_install_archc()
+#    nightly.gen_and_build_simulator(nightly.simulators[0])
      
 if __name__ == '__main__':
     main()  

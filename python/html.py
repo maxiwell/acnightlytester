@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import sys
+import sys, re
 import os
 import csv
 import string
+from . import utils
 
 class Table:
 
@@ -34,31 +35,17 @@ class Table:
         return self.string
 
     def append_raw(self, html):
-        self.string += html
+        self.string += html + '\n'
         return self.string
-
-
 
 
 class HTML:
 
     string = ""
+    htmlfile = ""
     
     def __init__(self, htmlfile):
-        self.f = open(htmlfile, "w")
-
-    def create_index(self):
-        self.init_page("ArchC's NightlyTester Main Page")
-        self.append_raw("<p>Produced by NightlyTester @ Qui 07/31/14 20:10:31</p>")
-        
-        table = Table()
-        table.init(['Test #', 'Date', 'ArchC GIT revision', 'Report', 'Comment', 'Started by'])
-        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
-        table.finalize()
-
-        self.append_table(table)
-        self.finalize_page()
-
+        self.htmlfile = htmlfile
 
     def init_page(self, title):
         self.string += "<html>\n" 
@@ -67,10 +54,12 @@ class HTML:
         self.string += "<h1>"+title+"</h1>\n"
         return self.string
 
-    def finalize_page(self):
+    def close_page(self):
         self.string += "</body>\n"
         self.string += "</html>\n"
+        self.f = open(self.htmlfile, "w")
         self.f.write (self.string);
+        self.f.close()
         return self.string
 
     def fail_string(self):
@@ -96,6 +85,78 @@ class HTML:
     def append_table(self, table):
         self.string += table.string
 
+
+
+class HTMLIndex():
+
+    index = 0
+    htmlfile = ""
+    archcrev = ""
+
+    def __init__(self, htmlfile):
+        self.htmlfile = htmlfile;
+        if not os.path.isfile(htmlfile):
+            self.create(htmlfile)
+        
+        self.index        = self.getindex(htmlfile)
+        self.archcrev     = self.getarchcrev(htmlfile)
+
+    def create(self, htmlfile):
+        html = HTML(htmlfile)
+        html.init_page("ArchC's NightlyTester Main Page")
+        html.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
+        
+        table = Table()
+        table.init(['Test #', 'Date', 'ArchC GIT revision', 'Report', 'Comment', 'Started by'])
+        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
+        table.finalize()
+
+        html.append_table(table)
+        html.close_page()
+
+    def getindex(self, htmlfile):
+        index = 0
+        with open(htmlfile, "r") as f:
+            for l in f:
+               s = re.search(r'^<tr><td>([0-9]*)</td>', l)
+               if s:
+                   index = int(s.group(1))+1
+                   break
+        return index
+
+    def getarchcrev(self, htmlfile):
+        index = 0
+        archcrev = 0
+        with open(htmlfile, "r") as f:
+            for l in f:
+                s = re.search(r'<td>([0-9a-zA-Z-]*)..</td>',l)
+                if s:
+                    archcrev = s.group(1)
+                    break
+        return archcrev
+
+
+class HTMLLog:
+
+    htmlfile = ""
+    string   = ""
+    html     = ""
+
+    def __init__(self, htmlfile, index):
+        self.string   = ""
+        self.htmlfile = htmlfile;
+        self.create(htmlfile, index)
+
+
+    def create(self, htmlfile, index):
+        self.html = HTML(htmlfile)
+        self.html.init_page("NightlyTester "+utils.version+" Run #"+str(index))
+        self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
+        self.html.close_page()
+ 
+
+
+        
 
 
 #

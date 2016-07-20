@@ -2,7 +2,9 @@
 
 import os, sys, signal
 import subprocess
+import datetime as date
 
+version = "4.0"
 workspace = ""
 debug = False
 
@@ -27,6 +29,10 @@ def exec_to_log(cmd, log):
         return True
     else:
         return False
+
+def gettime():
+    now = date.datetime.now()
+    return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
 
 def cleanup():
     if (debug == False):

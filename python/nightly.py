@@ -1,14 +1,15 @@
 
-from .utils import *
+from python import utils
 import os, re
 from random import randint
+from .html import *
 
 class Env:
     random     = ""
     scriptroot = ""
     workspace  = ""
+
     htmlroot   = ""
-    htmlindex  = ""
 
     def __init__(self):
         self.random     = randint(0000,9999)
@@ -19,7 +20,6 @@ class Env:
 
     def set_htmlroot(self, htmlroot):
         self.htmlroot = self.resolvenv(htmlroot)
-        self.htmlindex  = self.htmlroot + "/index.html"
 
     def resolvenv(self,cmd):
         cmd = re.sub(r"\$\{RANDOM\}", str(self.random), cmd)
@@ -40,6 +40,9 @@ class Nightly:
     mibench    = None
     spec2006   = None
 
+    htmlindex   = None
+    htmllog     = None
+
     def __init__(self):
         self.env        = None
         self.archc      = None
@@ -48,15 +51,22 @@ class Nightly:
         self.spec2006   = None
 
 
+    def init_htmlindex(self, indexname):
+        utils.gettime()
+        self.htmlindex  = HTMLIndex(self.env.htmlroot + "/" + indexname)
+
+    def init_htmllog(self):
+        self.htmllog = HTMLLog(self.env.htmlroot + "/" + \
+                                    str(self.htmlindex.index) + "-index.html", 
+                               self.htmlindex.index)
+
     def build_and_install_archc(self):
         self.archc.build();
-
 
     def gen_and_build_simulator (self, simulator):
         archc_env = self.archc.archc_prefix+'/etc/env.sh'
         simulator.gen_and_build(archc_env);
 
-        
 #    def execute_simulator(self, simulator):
 
     

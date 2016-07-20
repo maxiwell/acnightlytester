@@ -9,8 +9,8 @@ class Env:
     scriptroot = ""
     workspace  = ""
 
-    htmlroot   = ""
-    index      = "0"
+    htmloutput = ""
+    testnumber = "0"
 
 
     def __init__(self):
@@ -20,7 +20,7 @@ class Env:
     def set_workspace(self, workspace):
         self.workspace = self.resolvenv(workspace)
 
-    def set_htmlroot(self, htmlroot):
+    def set_htmloutput(self, htmlroot):
         self.htmlroot = self.resolvenv(htmlroot)
 
     def resolvenv(self,cmd):
@@ -32,7 +32,7 @@ class Env:
         print("Environment: ")
         print("| workspace: "+self.workspace)
         print("| scriptroot: "+self.scriptroot)
-        print("| htmlroot: "+self.htmlroot)
+        print("| htmloutput: "+self.htmloutput)
     
 class Nightly:
 
@@ -42,8 +42,8 @@ class Nightly:
     mibench    = None
     spec2006   = None
 
-    htmlindex   = None
-    htmllog     = None
+    nightlypage   = None
+    alltestspage  = None
 
     def __init__(self):
         self.env        = None
@@ -54,17 +54,15 @@ class Nightly:
 
 
     def init_htmlindex(self):
-        self.htmlindex  = HTMLIndex(self.env)
+        self.nightlypage  = NightlyPage(self.env)
 
     def init_htmllog(self):
-        self.htmllog = HTMLLog(self.env)
+        self.alltestspage = AllTestsPage(self.env)
 
     def build_and_install_archc(self):
         htmlline = self.archc.build();
-        self.htmllog.appendtable1(htmlline)
-        self.htmllog.close()
-
-
+        self.alltestspage.append_tablearchc(htmlline)
+        self.alltestspage.close()
 
     def gen_and_build_simulator (self, simulator):
         archc_env = self.archc.archc_prefix+'/etc/env.sh'

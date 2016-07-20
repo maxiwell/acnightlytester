@@ -115,7 +115,7 @@ class HTML:
         self.string += strlog
         self.string += "</font></td></tr></table>"
 
-class HTMLIndex():
+class NightlyPage():
 
     htmlfile = ""
     archcrev = ""
@@ -163,7 +163,7 @@ class HTMLIndex():
         return archcrev
 
 
-class HTMLLog:
+class AllTestsPage:
 
     htmlfile = ""
     string   = ""
@@ -171,8 +171,8 @@ class HTMLLog:
 
     env      = None
 
-    table1 = None
-    table2 = None
+    tablearchc = None
+    tabletests = None
 
     def __init__(self, env):
         self.env = env
@@ -186,26 +186,26 @@ class HTMLLog:
         self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.index)
         self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
-        self.table1 = Table()
-        self.table1.init(['Component', 'Link/Path', 'Version', 'Status'])
+        self.tablearchc = Table()
+        self.tablearchc.init(['Component', 'Link/Path', 'Version', 'Status'])
 
-        self.table2 = Table()
-        self.table2.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
+        self.tabletests = Table()
+        self.tabletests.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
                          'Compilation', 'Benchmark', 'Tested in'])
          
     def close(self):
-        self.table1.close()
-        self.table2.close()
+        self.tablearchc.close()
+        self.tabletests.close()
         
-        self.html.append_table(self.table1)
+        self.html.append_table(self.tablearchc)
         self.html.append_raw('<h3>Tests</h3>')
-        self.html.append_table(self.table2)
+        self.html.append_table(self.tabletests)
 
         self.html.close_page()
         
 
-    def appendtable1(self, strline):
-        self.table1.append_csv_line(strline)
+    def append_tablearchc(self, strline):
+        self.tablearchc.append_csv_line(strline)
 
 
 #

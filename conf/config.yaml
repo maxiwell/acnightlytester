@@ -1,8 +1,8 @@
 
-nightlysetup:
-    workspace : /tmp/TEMP
-    htmlroot  : ${SCRIPTROOT}/public_html
-    simulators: [mips]
+nightly:
+    workspace  : /tmp/TEMP
+    htmloutput : ${SCRIPTROOT}/public_html
+    simulators : [mips]
  
 archc:
     systemc   : /home/max/ArchC/tools/systemc/2.3.1/

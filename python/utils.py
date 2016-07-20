@@ -36,8 +36,7 @@ def gettime():
 
 def get_githash(git):
     l = os.popen("cd "+git+" && git log --pretty=format:'%H' -n 1").read()
-    s = l[0:7]
-    return l,s
+    return l
 
 def cleanup():
     if (debug == False):

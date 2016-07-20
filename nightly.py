@@ -29,8 +29,8 @@ def config_parser_yaml(configfile):
     with open(configfile, 'r') as config:
         try: 
             yamls = yaml.load(config)
-            env.set_workspace(yamls['nightlysetup']['workspace'])
-            env.set_htmlroot (yamls['nightlysetup']['htmlroot'])
+            env.set_workspace(yamls['nightly']['workspace'])
+            env.set_htmloutput (yamls['nightly']['htmloutput'])
             utils.workspace = env.workspace
             env.printenv()
 
@@ -40,7 +40,7 @@ def config_parser_yaml(configfile):
             archc.set_binutils(yamls['archc']['binutils'])
             archc.set_linkpath(yamls['archc']['link/path'])
 
-            for _sim in yamls['nightlysetup']['simulators']:
+            for _sim in yamls['nightly']['simulators']:
                 inputfile = yamls['simulators'][_sim]['inputfile']
                 linkpath  = yamls['simulators'][_sim]['link/path']
                 for _module in yamls['simulators'][_sim]['modules']:

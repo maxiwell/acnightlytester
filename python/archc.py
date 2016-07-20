@@ -13,13 +13,13 @@ class ArchC (DownloadHelper):
     binutils  = "" 
     gdb       = ""
 
-    githash   = {}
-
     archc_src    = "archc/src"
     archc_prefix = "archc/install"
+    archc_hash   = ""
 
     systemc_src    = "systemc/src"
     systemc_prefix = "systemc/install"
+    systemc_hash   = ""
 
     binutils_src    = "binutils/src"
     binutils_prefix = "binutils/instsall"
@@ -51,7 +51,7 @@ class ArchC (DownloadHelper):
         self.archc = linkpath
         self.get_from(url_or_path = linkpath, \
                 copy_to = self.archc_src, pkg = "ArchC")
-        self.githash['long'], self.githash['short'] = get_githash(self.archc_src)
+        self.archc_hash = get_githash(self.archc_src)
 
     def set_systemc(self, linkpath):
         self.systemc = linkpath
@@ -97,14 +97,14 @@ class ArchC (DownloadHelper):
 
         htmllog = self.env.htmlroot + "/" + self.env.index + self.htmllog
         html = HTML(htmllog)
-        html.init_page("ArchC rev "+self.githash['short']+" build output")
+        html.init_page("ArchC rev "+self.archc_hash[0:7]+" build output")
         html.append_log_formatted(self.buildlog)
         html.close_page()
 
         csvline1 = 'ArchC;' + self.archc + ';' 
-        csvline1 += HTML.href(self.githash['short'], \
+        csvline1 += HTML.href(self.archc_hash[0:7], \
                              self.archc.replace('.git','') + '/commit/' + \
-                             self.githash['long'] ) + ';'
+                             self.archc_hash ) + ';'
         if cmdret == 0:
             csvline1 += HTML.success()
         else:

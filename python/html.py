@@ -21,6 +21,16 @@ class Table:
         self.string += "</table></p>\n" 
         return self.string
 
+    def append_csv_line(self, line):
+        table_string = "<tr>"
+        cels = line.split(';')
+        for cel in cels:
+            if cel:
+                table_string += "<td>"+cel+"</td>"
+        table_string += "</tr>"
+        self.string += table_string
+
+
     def from_csv(self, csvfile):
         table_string = ""
         with open( csvfile, newline='') as cf:
@@ -62,21 +72,25 @@ class HTML:
         self.f.close()
         return self.string
 
-    def fail_string(self):
-        self.string += "<b><font color=\"crimson\"> failed </font></b>\n"
-        return self.string
+    @staticmethod    
+    def fail():
+        string = "<b><font color=\"crimson\"> failed </font></b>"
+        return string
 
-    def success_string(self):
-        self.string += "<b><font color=\"green\"> OK </font></b>\n" 
-        return self.string
+    @staticmethod
+    def success():
+        string = "<b><font color=\"green\"> OK </font></b>" 
+        return string
 
-    def fuchsia_string(self):
-        self.string += "<b><font color=\"fuchsia\"> N/A </font></b>"
-        return self.string
+    @staticmethod
+    def fuchsia_string():
+        string = "<b><font color=\"fuchsia\"> N/A </font></b>"
+        return string
 
-    def href_string(self, title, url):
-        self.string += "<a href=\""+url+"\">"+title+"</a>\n"
-        return self.string
+    @staticmethod
+    def href(title, url):
+        string = "<a href=\""+url+"\">"+title+"</a>"
+        return string
 
     def append_raw(self, html):
         self.string += html + "\n" 
@@ -155,6 +169,9 @@ class HTMLLog:
 
     env      = None
 
+    table1 = None
+    table2 = None
+
     def __init__(self, env):
         self.env = env
         self.string   = ""
@@ -167,22 +184,26 @@ class HTMLLog:
         self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.index)
         self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
-        table = Table()
-        table.init(['Component', 'Link/Path', 'Version', 'Status'])
-        table.close()
-        self.html.append_table(table)
+        self.table1 = Table()
+        self.table1.init(['Component', 'Link/Path', 'Version', 'Status'])
 
-        table = Table()
-        table.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
-                    'Compilation', 'Benchmark', 'Tested in'])
-        table.close()
-        self.html.append_table(table)
+        self.table2 = Table()
+        self.table2.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
+                         'Compilation', 'Benchmark', 'Tested in'])
+         
+    def close(self):
+        self.table1.close()
+        self.table2.close()
+        
+        self.html.append_table(self.table1)
+        self.html.append_raw('<h3>Tests</h3>')
+        self.html.append_table(self.table2)
 
         self.html.close_page()
- 
-
-
         
+
+    def appendtable1(self, strline):
+        self.table1.append_csv_line(strline)
 
 
 #

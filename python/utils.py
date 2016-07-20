@@ -35,7 +35,7 @@ def gettime():
     return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
 
 def get_githash(git):
-    l = os.popen("git log --pretty=format:'%H' -n 1").read()
+    l = os.popen("cd "+git+" && git log --pretty=format:'%H' -n 1").read()
     s = l[0:7]
     return l,s
 

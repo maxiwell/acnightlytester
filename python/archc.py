@@ -89,16 +89,30 @@ class ArchC (DownloadHelper):
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-#        if exec_to_log(cmd, self.buildlog) :
-#            print("OK")
-#        else:
-#            print("FAILED")
+#       cmdret = exec_to_log(cmd, self.buildlog) 
+        cmdret = 0
+        if cmdret == 0:
+            print("OK")
+        else:
+            print("FAILED")
 
-        html = HTML(self.env.htmlroot + "/" + self.env.index + self.htmllog)
+        htmllog = self.env.htmlroot + "/" + self.env.index + self.htmllog
+        html = HTML(htmllog)
         html.init_page("ArchC rev "+self.archchash_short+" build output")
         html.append_log_formatted(self.buildlog)
         html.close_page()
-    
+
+        strret = 'ArchC;' + self.archc + ';' \
+               + HTML.href(self.archchash_short, self.archc.replace('.git','') \
+               + '/commit/' + self.archchash_long) + ';'
+        if cmdret == 0:
+            strret += HTML.success()
+        else:
+            strret += HTML.fail()
+
+        strret += '(' + HTML.href('log', htmllog) + ');'
+        return strret
+
 
 class Simulator (DownloadHelper):
     name        = ""

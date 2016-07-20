@@ -60,7 +60,11 @@ class Nightly:
         self.htmllog = HTMLLog(self.env)
 
     def build_and_install_archc(self):
-        self.archc.build();
+        htmlline = self.archc.build();
+        self.htmllog.appendtable1(htmlline)
+        self.htmllog.close()
+
+
 
     def gen_and_build_simulator (self, simulator):
         archc_env = self.archc.archc_prefix+'/etc/env.sh'

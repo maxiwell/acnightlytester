@@ -22,12 +22,14 @@ class Table:
         return self.string
 
     def append_csv_line(self, line):
-        table_string = "<tr>"
-        cels = line.split(';')
-        for cel in cels:
-            if cel:
-                table_string += "<td>"+cel+"</td>"
-        table_string += "</tr>"
+        table_string = ""
+        for l in line.splitlines():
+            table_string += "<tr>"
+            cels = l.split(';')
+            for cel in cels:
+                if cel:
+                    table_string += "<td>"+cel+"</td>"
+            table_string += "</tr>" 
         self.string += table_string
 
 

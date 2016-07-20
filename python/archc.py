@@ -13,8 +13,7 @@ class ArchC (DownloadHelper):
     binutils  = "" 
     gdb       = ""
 
-    archchash_long  = ""
-    archchash_short = ""
+    githash   = {}
 
     archc_src    = "archc/src"
     archc_prefix = "archc/install"
@@ -52,7 +51,7 @@ class ArchC (DownloadHelper):
         self.archc = linkpath
         self.get_from(url_or_path = linkpath, \
                 copy_to = self.archc_src, pkg = "ArchC")
-        self.archchash_long, self.archchash_short = get_githash(self.archc_src)
+        self.githash['long'], self.githash['short'] = get_githash(self.archc_src)
 
     def set_systemc(self, linkpath):
         self.systemc = linkpath
@@ -89,7 +88,7 @@ class ArchC (DownloadHelper):
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-#       cmdret = exec_to_log(cmd, self.buildlog) 
+       # cmdret = exec_to_log(cmd, self.buildlog) 
         cmdret = 0
         if cmdret == 0:
             print("OK")
@@ -98,20 +97,23 @@ class ArchC (DownloadHelper):
 
         htmllog = self.env.htmlroot + "/" + self.env.index + self.htmllog
         html = HTML(htmllog)
-        html.init_page("ArchC rev "+self.archchash_short+" build output")
+        html.init_page("ArchC rev "+self.githash['short']+" build output")
         html.append_log_formatted(self.buildlog)
         html.close_page()
 
-        strret = 'ArchC;' + self.archc + ';' \
-               + HTML.href(self.archchash_short, self.archc.replace('.git','') \
-               + '/commit/' + self.archchash_long) + ';'
+        csvline1 = 'ArchC;' + self.archc + ';' 
+        csvline1 += HTML.href(self.githash['short'], \
+                             self.archc.replace('.git','') + '/commit/' + \
+                             self.githash['long'] ) + ';'
         if cmdret == 0:
-            strret += HTML.success()
+            csvline1 += HTML.success()
         else:
-            strret += HTML.fail()
+            csvline1 += HTML.fail()
+        csvline1 += '(' + HTML.href('log', htmllog) + ')'
 
-        strret += '(' + HTML.href('log', htmllog) + ');'
-        return strret
+        csvline2 = 'SystemC;' + self.systemc + ";-;" + HTML.success() 
+
+        return csvline1 + '\n' + csvline2
 
 
 class Simulator (DownloadHelper):

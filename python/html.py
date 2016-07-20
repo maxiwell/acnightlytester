@@ -121,11 +121,11 @@ class NightlyPage():
     archcrev = ""
 
     def __init__(self, env):
-        self.htmlfile = env.htmlroot + "/index.html" 
+        self.htmlfile = env.htmloutput + "/index.html" 
         if not os.path.isfile(self.htmlfile):
             self.create()
         
-        env.index         = str(self.getindex())
+        env.testnumber    = str(self.gettestnumber())
         self.archcrev     = self.getarchcrev()
 
     def create(self):
@@ -141,18 +141,17 @@ class NightlyPage():
         html.append_table(table)
         html.close_page()
 
-    def getindex(self):
-        index = 0
+    def gettestnumber(self):
+        testnumber = 0
         with open(self.htmlfile, "r") as f:
             for l in f:
                s = re.search(r'^<tr><td>([0-9]*)</td>', l)
                if s:
-                   index = int(s.group(1))+1
+                   testnumber = int(s.group(1))+1
                    break
-        return index
+        return testnumber
 
     def getarchcrev(self):
-        index = 0
         archcrev = 0
         with open(self.htmlfile, "r") as f:
             for l in f:
@@ -177,13 +176,13 @@ class AllTestsPage:
     def __init__(self, env):
         self.env = env
         self.string   = ""
-        self.htmlfile = env.htmlroot + "/" + env.index + "-index.html";
+        self.htmlfile = env.htmloutput + "/" + env.testnumber + "-index.html";
         self.create()
 
 
     def create(self):
         self.html = HTML(self.htmlfile)
-        self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.index)
+        self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.testnumber)
         self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
         self.tablearchc = Table()

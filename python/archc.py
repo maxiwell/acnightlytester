@@ -5,6 +5,8 @@ from .nightly    import Env
 import subprocess
 from .utils import *
 from .html import *
+import tarfile
+import hashlib
 
 class ArchC (DownloadHelper):
 
@@ -27,9 +29,11 @@ class ArchC (DownloadHelper):
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
-    buildlog        = "log/archc.log"
-    
-    htmllog         = "-archc-build-log.html"
+    archcbuildlog   = "log/archc.log"
+    systemcbuildlog = "log/systemc.log"
+
+    archchtmllog    = "-archc-build-log.html"
+    systemchtmllog   = "-systemc-build-log.html"
 
     env = None
 
@@ -43,9 +47,10 @@ class ArchC (DownloadHelper):
         self.binutils_prefix = self.env.workspace + "/" + self.binutils_prefix
         self.gdb_src         = self.env.workspace + "/" + self.gdb_src
         self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
-        self.buildlog        = self.env.workspace + "/" + self.buildlog
-        mkdir(os.path.dirname(self.buildlog))
-        #rm(self.buildlog)
+        self.archcbuildlog   = self.env.workspace + "/" + self.archcbuildlog
+        self.systemcbuildlog = self.env.workspace + "/" + self.systemcbuildlog
+        mkdir(os.path.dirname(self.archcbuildlog))
+        #rm(self.archcbuildlog)
 
     def set_linkpath(self, linkpath):
         self.archc = linkpath
@@ -57,7 +62,8 @@ class ArchC (DownloadHelper):
         self.systemc = linkpath
         if  self.systemc  :
             self.get_from( url_or_path = linkpath, \
-                    copy_to = self.systemc_prefix, pkg = "SystemC")
+                    copy_to = self.systemc_src, pkg = "SystemC")
+            self.systemc_hash = get_githash(self.systemc_src)
 
     def set_binutils(self, linkpath):
         self.binutils = linkpath
@@ -71,7 +77,51 @@ class ArchC (DownloadHelper):
             self.get_from( url_or_path = linkpath, \
                     copy_to = self.gdb_src, pkg = "GDB")
 
-    def build(self):
+    def build_systemc(self):
+        if os.path.isdir(self.systemc_src+"/lib"):
+            cp (self.systemc_src, self.systemc_prefix)
+            csvline = 'SystemC;' + self.systemc + ";-;" + HTML.success() 
+            return csvline
+        else:
+            cmd_1 = "cd "+self.systemc_src + " && " 
+            cmd_2 = ""
+            if (self.systemc_src+"/autogen.sh"):
+                cmd_2 += "./autogen.sh && " 
+            cmd_2 += "./configure --prefix=" + self.systemc_prefix 
+            cmd_2 += " && make && make install"
+            print("SystemC:")
+            print("| " + cmd_2)
+            print("| Building and Installing...", end="", flush=True)
+            cmd = cmd_1 + cmd_2
+
+            cmdret = exec_to_log(cmd, self.systemcbuildlog)
+            if cmdret:
+                print("OK")
+            else:
+                print("FAILED")
+
+            htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.systemchtmllog
+            html = HTML(htmllog)
+            html.init_page("SystemC rev " + self.systemc_hash[0:7] + " build output")
+            html.append_log_formatted(self.systemcbuildlog)
+            html.close_page()
+
+            csvline = 'SystemC;' + self.systemc + ';'
+            csvline += HTML.href(self.systemc_hash[0:7], \
+                                self.systemc.replace('.git','') + '/commit/' + \
+                                self.systemc_hash) + ';'
+            if cmdret:
+                csvline += HTML.success()
+            else:
+                csvline += HTML.fail()
+            csvline += '(' + HTML.href('log', htmllog) + ')'
+            return csvline
+
+    def build_archc(self):
+
+        systemc_csvline = ""
+        if self.systemc:
+            systemc_csvline = self.build_systemc()
 
         cmd_1 = "cd " + self.archc_src + " && "
         cmd_2 = "./autogen.sh && " + \
@@ -88,32 +138,30 @@ class ArchC (DownloadHelper):
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-       # cmdret = exec_to_log(cmd, self.buildlog) 
-        cmdret = 0
-        if cmdret == 0:
+        #cmdret = exec_to_log(cmd, self.archcbuildlog)
+        cmdret = True
+        if cmdret:
             print("OK")
         else:
             print("FAILED")
 
-        htmllog = self.env.htmlroot + "/" + self.env.index + self.htmllog
+        htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.archchtmllog
         html = HTML(htmllog)
         html.init_page("ArchC rev "+self.archc_hash[0:7]+" build output")
-        html.append_log_formatted(self.buildlog)
+        html.append_log_formatted(self.archcbuildlog)
         html.close_page()
 
-        csvline1 = 'ArchC;' + self.archc + ';' 
-        csvline1 += HTML.href(self.archc_hash[0:7], \
+        csvline = 'ArchC;' + self.archc + ';' 
+        csvline += HTML.href(self.archc_hash[0:7], \
                              self.archc.replace('.git','') + '/commit/' + \
                              self.archc_hash ) + ';'
-        if cmdret == 0:
-            csvline1 += HTML.success()
+        if cmdret:
+            csvline += HTML.success()
         else:
-            csvline1 += HTML.fail()
-        csvline1 += '(' + HTML.href('log', htmllog) + ')'
+            csvline += HTML.fail()
+        csvline += '(' + HTML.href('log', htmllog) + ')'
 
-        csvline2 = 'SystemC;' + self.systemc + ";-;" + HTML.success() 
-
-        return csvline1 + '\n' + csvline2
+        return csvline + '\n' + systemc_csvline
 
 
 class Simulator (DownloadHelper):
@@ -123,10 +171,12 @@ class Simulator (DownloadHelper):
     options     = ""
     desc        = ""
 
+    cross_prefix = ""
+
     inputfile   = ""
     linkpath    = ""
-    simsrc     = ""
-    buildlog   = ""
+    simsrc      = ""
+    buildlog    = ""
 
     env         = None
     benchmarks  = []
@@ -146,6 +196,8 @@ class Simulator (DownloadHelper):
         self.htmllog   = ""
 
         self.simsrc    = env.workspace + "/" + name
+
+
         self.buildlog = env.workspace + "/log/" + name + ".log"
         mkdir(os.path.dirname(self.buildlog))
         rm(self.buildlog)
@@ -169,7 +221,6 @@ class Simulator (DownloadHelper):
     def append_benchmark(self, benchmark):
         self.benchmarks.append(benchmark)
 
-
     def gen_and_build(self, archc_env_file):
         cmd_source = 'source '+archc_env_file+' && '
         cmd_cd     = "cd " + self.simsrc + " && "
@@ -187,6 +238,7 @@ class Simulator (DownloadHelper):
         else:
             print("FAILED")
 
+
     def printsim(self):
         print("Simulator: " + self.name)
         print("| from " + self.linkpath)
@@ -200,9 +252,34 @@ class Simulator (DownloadHelper):
         print()
             
 
+class CrossCompilers(DownloadHelper):
 
+    cross = {}
+    prefix = "/xtools/"
 
+    def add_cross(self, env, cross, model):
+        if model in self.cross:
+            return self.cross[model]
+        prefix = env.workspace + self.prefix + "/"
+        mkdir(prefix)
+        if (cross.startswith("./")) or (cross.startswith("/")):
+            prefix += os.path.basename(cross)
+            if not os.path.isdir(prefix+'/bin'):
+                self.get_local(cross, prefix, ' Cross')
+            self.cross[model] = {'src' : cross, 'prefix' : prefix}
+        else:
+            self.get_http(cross, prefix)
+            tarname = os.path.basename(cross)
+            tar = tarfile.open(prefix+"/"+tarname)
+            tar.extractall(prefix)
+            prefix += tar.getnames()[0]
+            tar.close()
+            self.cross[model] = { 'src' : cross, 'prefix' : prefix}
 
-
+    def get_crosscsvline(self):
+        csvline = ""
+        for key in self.cross:
+            csvline += 'Cross '+key+';'+self.cross[key]['src']+';-;'+HTML.success()+'\n' 
+        return csvline
 
 

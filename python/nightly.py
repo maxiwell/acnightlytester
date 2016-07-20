@@ -20,8 +20,8 @@ class Env:
     def set_workspace(self, workspace):
         self.workspace = self.resolvenv(workspace)
 
-    def set_htmloutput(self, htmlroot):
-        self.htmlroot = self.resolvenv(htmlroot)
+    def set_htmloutput(self, htmloutput):
+        self.htmloutput = self.resolvenv(htmloutput)
 
     def resolvenv(self,cmd):
         cmd = re.sub(r"\$\{RANDOM\}", str(self.random), cmd)
@@ -41,6 +41,7 @@ class Nightly:
     simulators = []
     mibench    = None
     spec2006   = None
+    cross      = None
 
     nightlypage   = None
     alltestspage  = None
@@ -51,7 +52,7 @@ class Nightly:
         self.simulators = []
         self.mibench    = None
         self.spec2006   = None
-
+        self.cross      = None
 
     def init_htmlindex(self):
         self.nightlypage  = NightlyPage(self.env)
@@ -60,8 +61,9 @@ class Nightly:
         self.alltestspage = AllTestsPage(self.env)
 
     def build_and_install_archc(self):
-        htmlline = self.archc.build();
+        htmlline = self.archc.build_archc();
         self.alltestspage.append_tablearchc(htmlline)
+        self.alltestspage.append_tablearchc(self.cross.get_crosscsvline())
         self.alltestspage.close()
 
     def gen_and_build_simulator (self, simulator):

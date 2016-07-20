@@ -2,7 +2,7 @@
 
 import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
-from python.archc     import ArchC, Simulator
+from python.archc     import ArchC, Simulator, CrossCompilers
 from python.nightly   import Nightly, Env
 from python.benchmark import Benchmark, App
 from python           import utils
@@ -25,9 +25,10 @@ def config_parser_yaml(configfile):
     env     = Env()
     archc   = ArchC()
     simulators = []
+    cross = CrossCompilers()
 
     with open(configfile, 'r') as config:
-        try: 
+#        try: 
             yamls = yaml.load(config)
             env.set_workspace(yamls['nightly']['workspace'])
             env.set_htmloutput (yamls['nightly']['htmloutput'])
@@ -43,6 +44,7 @@ def config_parser_yaml(configfile):
             for _sim in yamls['nightly']['simulators']:
                 inputfile = yamls['simulators'][_sim]['inputfile']
                 linkpath  = yamls['simulators'][_sim]['link/path']
+                crosslink = yamls['simulators'][_sim]['cross']
                 for _module in yamls['simulators'][_sim]['modules']:
                     sim = Simulator(_sim+"-"+_module, inputfile, env)
                     sim.set_linkpath(linkpath)
@@ -59,17 +61,19 @@ def config_parser_yaml(configfile):
                             bench.append_app(app)
                         sim.append_benchmark(bench)
                     simulators.append(sim)
-
+                    cross.add_cross(env, crosslink, _sim)
+            
             for s in simulators:
                 s.printsim()
 
             nightly.env = env
             nightly.archc = archc
             nightly.simulators = simulators
+            nightly.cross = cross
             return nightly
 
-        except Exception as e:
-            utils.abort("[config.yaml] "+str(e))
+#        except Exception as e:
+#            utils.abort("[config.yaml] "+str(e))
                 
 def main():
     args   = command_line_handler()

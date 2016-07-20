@@ -13,6 +13,7 @@ def mkdir(directory):
         os.makedirs(directory+"/")
 
 def cp(src, dst):
+    mkdir(dst)
     if ( os.system("cp -r "+src+"/* "+dst+" > /dev/null 2>&1") == 0 ):
         return True
     else:
@@ -35,7 +36,9 @@ def gettime():
     return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
 
 def get_githash(git):
-    l = os.popen("cd "+git+" && git log --pretty=format:'%H' -n 1").read()
+    l = os.popen("cd "+git+" && ( git log --pretty=format:'%H' -n 1 ) 2>&1").read()
+    if not l:
+        l = '-'
     return l
 
 def cleanup():

@@ -67,37 +67,6 @@ class DownloadSource (DownloadHelper):
             print("SPEC2006: sources are protected by copyright.")
 
 
-class DownloadCross (DownloadHelper):
-    
-    url_base = "http://archc.lsc.ic.unicamp.br/downloads/Tools/"
-
-    def get_arm(self, dest, local = None):
-        if (local):
-            self.get_local(local, dest)
-        else:
-            pkg = 'arm/archc_arm_toolchain_20150102_64bit.tar.bz2'
-            self.get_http(self.url_base+pkg, dest)
-
-    def get_mips(self, dest, local = None):
-        if (local):
-            self.get_local(local, dest)
-        else:
-            pkg = '/mips/archc_mips_toolchain_20141215_64bit.tar.bz2'
-            self.get_http(self.url_base+pkg, dest)
-
-    def get_powerpc(self, dest, local = None):
-        if (local):
-            self.get_local(local, dest)
-        else:
-            pkg = '/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2'
-            self.get_http(self.url_base+pkg, dest)
-
-    def get_sparc(self, dest, local = None):
-        if (local):
-            self.get_local(local, dest)
-        else:
-            pkg = '/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2'
-            self.get_http(self.url_base+pkg, dest)
 
 
 #dh = DownloadSource()

@@ -17,7 +17,7 @@ class Table:
         self.string += "</tr>\n"
         return self.string
 
-    def finalize(self):
+    def close(self):
         self.string += "</table></p>\n" 
         return self.string
 
@@ -79,44 +79,55 @@ class HTML:
         return self.string
 
     def append_raw(self, html):
-        self.string += html
+        self.string += html + "\n" 
         return self.string
 
     def append_table(self, table):
         self.string += table.string
 
+    def append_log_formatted(self, log):
 
+        strlog = ""
+        with open(log,'r') as f:
+            for l in f:
+                tmpstr = re.sub(r'\n', r'\n<br>', l)
+                tmpstr = re.sub(r'error', r'<b><font color="crinson">error</font></b>', tmpstr)
+                tmpstr = re.sub(r'warning', r'<b><font color="fuchsia">warning</font></b>', tmpstr)
+                strlog += tmpstr
+
+        self.string += "<table><tr><td><font face=\"Courier\">\n"
+        self.string += strlog
+        self.string += "</font></td></tr></table>"
 
 class HTMLIndex():
 
-    index = 0
     htmlfile = ""
     archcrev = ""
 
-    def __init__(self, htmlfile):
-        self.htmlfile = htmlfile;
-        if not os.path.isfile(htmlfile):
-            self.create(htmlfile)
+    def __init__(self, env):
+        self.htmlfile = env.htmlroot + "/index.html" 
+        if not os.path.isfile(self.htmlfile):
+            self.create()
         
-        self.index        = self.getindex(htmlfile)
-        self.archcrev     = self.getarchcrev(htmlfile)
+        env.index         = str(self.getindex())
+        self.archcrev     = self.getarchcrev()
 
-    def create(self, htmlfile):
-        html = HTML(htmlfile)
+    def create(self):
+        html = HTML(self.htmlfile)
         html.init_page("ArchC's NightlyTester Main Page")
         html.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
         
         table = Table()
         table.init(['Test #', 'Date', 'ArchC GIT revision', 'Report', 'Comment', 'Started by'])
         table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
-        table.finalize()
+        table.close()
 
         html.append_table(table)
         html.close_page()
 
-    def getindex(self, htmlfile):
+    def getindex(self):
         index = 0
-        with open(htmlfile, "r") as f:
+        with open(self.htmlfile, "r") as f:
             for l in f:
                s = re.search(r'^<tr><td>([0-9]*)</td>', l)
                if s:
@@ -124,10 +135,10 @@ class HTMLIndex():
                    break
         return index
 
-    def getarchcrev(self, htmlfile):
+    def getarchcrev(self):
         index = 0
         archcrev = 0
-        with open(htmlfile, "r") as f:
+        with open(self.htmlfile, "r") as f:
             for l in f:
                 s = re.search(r'<td>([0-9a-zA-Z-]*)..</td>',l)
                 if s:
@@ -142,16 +153,31 @@ class HTMLLog:
     string   = ""
     html     = ""
 
-    def __init__(self, htmlfile, index):
+    env      = None
+
+    def __init__(self, env):
+        self.env = env
         self.string   = ""
-        self.htmlfile = htmlfile;
-        self.create(htmlfile, index)
+        self.htmlfile = env.htmlroot + "/" + env.index + "-index.html";
+        self.create()
 
 
-    def create(self, htmlfile, index):
-        self.html = HTML(htmlfile)
-        self.html.init_page("NightlyTester "+utils.version+" Run #"+str(index))
+    def create(self):
+        self.html = HTML(self.htmlfile)
+        self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.index)
         self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
+
+        table = Table()
+        table.init(['Component', 'Link/Path', 'Version', 'Status'])
+        table.close()
+        self.html.append_table(table)
+
+        table = Table()
+        table.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
+                    'Compilation', 'Benchmark', 'Tested in'])
+        table.close()
+        self.html.append_table(table)
+
         self.html.close_page()
  
 

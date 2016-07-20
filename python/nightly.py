@@ -10,6 +10,8 @@ class Env:
     workspace  = ""
 
     htmlroot   = ""
+    index      = "0"
+
 
     def __init__(self):
         self.random     = randint(0000,9999)
@@ -51,14 +53,11 @@ class Nightly:
         self.spec2006   = None
 
 
-    def init_htmlindex(self, indexname):
-        utils.gettime()
-        self.htmlindex  = HTMLIndex(self.env.htmlroot + "/" + indexname)
+    def init_htmlindex(self):
+        self.htmlindex  = HTMLIndex(self.env)
 
     def init_htmllog(self):
-        self.htmllog = HTMLLog(self.env.htmlroot + "/" + \
-                                    str(self.htmlindex.index) + "-index.html", 
-                               self.htmlindex.index)
+        self.htmllog = HTMLLog(self.env)
 
     def build_and_install_archc(self):
         self.archc.build();

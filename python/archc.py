@@ -4,13 +4,17 @@ from .helper import DownloadHelper
 from .nightly    import Env
 import subprocess
 from .utils import *
+from .html import *
 
 class ArchC (DownloadHelper):
 
-    archc = None
-    systemc   = None
-    binutils  = None
-    gdb       = None
+    archc     = ""
+    systemc   = ""
+    binutils  = "" 
+    gdb       = ""
+
+    archchash_long  = ""
+    archchash_short = ""
 
     archc_src    = "archc/src"
     archc_prefix = "archc/install"
@@ -24,7 +28,9 @@ class ArchC (DownloadHelper):
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
-    build_log       = "log/archc.log"
+    buildlog        = "log/archc.log"
+    
+    htmllog         = "-archc-build-log.html"
 
     env = None
 
@@ -38,14 +44,15 @@ class ArchC (DownloadHelper):
         self.binutils_prefix = self.env.workspace + "/" + self.binutils_prefix
         self.gdb_src         = self.env.workspace + "/" + self.gdb_src
         self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
-        self.build_log       = self.env.workspace + "/" + self.build_log
-        mkdir(os.path.dirname(self.build_log))
-        rm(self.build_log)
+        self.buildlog        = self.env.workspace + "/" + self.buildlog
+        mkdir(os.path.dirname(self.buildlog))
+        #rm(self.buildlog)
 
     def set_linkpath(self, linkpath):
         self.archc = linkpath
         self.get_from(url_or_path = linkpath, \
                 copy_to = self.archc_src, pkg = "ArchC")
+        self.archchash_long, self.archchash_short = get_githash(self.archc_src)
 
     def set_systemc(self, linkpath):
         self.systemc = linkpath
@@ -81,11 +88,17 @@ class ArchC (DownloadHelper):
         print("| "+cmd_2)
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
-        if exec_to_log(cmd, self.build_log) :
-            print("OK")
-        else:
-            print("FAILED")
 
+#        if exec_to_log(cmd, self.buildlog) :
+#            print("OK")
+#        else:
+#            print("FAILED")
+
+        html = HTML(self.env.htmlroot + "/" + self.env.index + self.htmllog)
+        html.init_page("ArchC rev "+self.archchash_short+" build output")
+        html.append_log_formatted(self.buildlog)
+        html.close_page()
+    
 
 class Simulator (DownloadHelper):
     name        = ""
@@ -97,7 +110,7 @@ class Simulator (DownloadHelper):
     inputfile   = ""
     linkpath    = ""
     simsrc     = ""
-    build_log   = ""
+    buildlog   = ""
 
     env         = None
     benchmarks  = []
@@ -117,9 +130,9 @@ class Simulator (DownloadHelper):
         self.htmllog   = ""
 
         self.simsrc    = env.workspace + "/" + name
-        self.build_log = env.workspace + "/log/" + name + ".log"
-        mkdir(os.path.dirname(self.build_log))
-        rm(self.build_log)
+        self.buildlog = env.workspace + "/log/" + name + ".log"
+        mkdir(os.path.dirname(self.buildlog))
+        rm(self.buildlog)
 
     def set_linkpath(self, linkpath):
         self.linkpath = linkpath
@@ -153,7 +166,7 @@ class Simulator (DownloadHelper):
         print("| "+cmd)
         print("| Generating and Building... ", end="", flush=True)
 
-        if exec_to_log(cmd, self.build_log) :
+        if exec_to_log(cmd, self.buildlog) :
             print("OK")
         else:
             print("FAILED")

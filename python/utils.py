@@ -34,6 +34,11 @@ def gettime():
     now = date.datetime.now()
     return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
 
+def get_githash(git):
+    l = os.popen("git log --pretty=format:'%H' -n 1").read()
+    s = l[0:7]
+    return l,s
+
 def cleanup():
     if (debug == False):
         rm(workspace);

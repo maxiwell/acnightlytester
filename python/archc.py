@@ -138,8 +138,8 @@ class ArchC (DownloadHelper):
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-        #cmdret = exec_to_log(cmd, self.archcbuildlog)
-        cmdret = True
+        cmdret = exec_to_log(cmd, self.archcbuildlog)
+        #cmdret = True
         if cmdret:
             print("OK")
         else:
@@ -152,9 +152,13 @@ class ArchC (DownloadHelper):
         html.close_page()
 
         csvline = 'ArchC;' + self.archc + ';' 
-        csvline += HTML.href(self.archc_hash[0:7], \
-                             self.archc.replace('.git','') + '/commit/' + \
-                             self.archc_hash ) + ';'
+        if self.archc_hash != '-' :
+            csvline += HTML.href(self.archc_hash[0:7], \
+                                 self.archc.replace('.git','') + '/commit/' + \
+                                 self.archc_hash ) + ';'
+        else:
+            csvline += self.archc_hash[0:7] + ';'
+
         if cmdret:
             csvline += HTML.success()
         else:
@@ -178,10 +182,12 @@ class Simulator (DownloadHelper):
     simsrc      = ""
     buildlog    = ""
 
+    model_hash  = ""
+
     env         = None
     benchmarks  = []
 
-    htmllog     = ""
+    htmllog    = ""
 
     def __init__(self, name, inputfile, env):
         self.name = name
@@ -193,7 +199,8 @@ class Simulator (DownloadHelper):
         self.generator = ""
         self.options   = ""
         self.desc      = ""
-        self.htmllog   = ""
+        
+        self.htmllog    = "-"+name+"-build-log.html"
 
         self.simsrc    = env.workspace + "/" + name
 
@@ -208,6 +215,7 @@ class Simulator (DownloadHelper):
             self.get_local(self.linkpath, self.simsrc, self.name)
         else:
             self.git_clone(self.linkpath, self.simsrc, self.name)
+        self.model_hash = get_githash(self.simsrc)
 
     def set_generator(self, generator):
         self.generator = generator
@@ -233,10 +241,37 @@ class Simulator (DownloadHelper):
         print("| "+cmd)
         print("| Generating and Building... ", end="", flush=True)
 
-        if exec_to_log(cmd, self.buildlog) :
+        cmdret =  exec_to_log(cmd, self.buildlog) 
+        if cmdret:
             print("OK")
         else:
             print("FAILED")
+
+        htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.htmllog
+        html = HTML(htmllog)
+        html.init_page(self.name + " rev "+self.model_hash[0:7]+" build output")
+        html.append_log_formatted(self.buildlog)
+        html.close_page()
+
+        csvline = self.name + ';' + self.linkpath + ';' ;
+
+        if self.model_hash != '-' :
+            csvline += HTML.href(self.model_hash[0:7], \
+                                 self.linkpath.replace('.git','') + '/commit/' + \
+                                 self.model_hash) + ';'
+        else:
+            csvline += '-' + ';'
+
+        csvline += self.generator + ';' + self.options + ';' 
+
+        if cmdret:
+            csvline += HTML.success()
+        else:
+            csvline += HTML.fail()
+        csvline += '(' + HTML.href('log', htmllog) + ')' + ';'
+        csvline += '-;-;'
+
+        return csvline 
 
 
     def printsim(self):

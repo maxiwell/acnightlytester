@@ -9,17 +9,18 @@ archc:
     #systemc   : https://github.com/archc/systemc.git
     binutils  : 
     gdb       : 
-    link/path : https://github.com/archc/archc.git
+    #link/path : https://github.com/archc/archc.git
+    link/path : /home/max/ArchC/archc/github/src/
 
 
 simulators:
     mips:
         modules   : [acsim, powersc, hltrace]
         inputfile : mips.ac
-        link/path : /home/max/ArchC/processors/github/mips
-        #link/path : https://github.com/archc/mips.git
-        #cross     : /home/max/x-tools/mips-newlib-elf
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        #link/path : /home/max/ArchC/processors/github/mips
+        link/path : https://github.com/archc/mips.git
+        cross     : /home/max/x-tools/mips-newlib-elf
+        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
         benchmarks: [mibench]
     arm:
         modules   : [acsim, powersc, hltrace] 

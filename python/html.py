@@ -189,7 +189,7 @@ class AllTestsPage:
         self.tablearchc.init(['Component', 'Link/Path', 'Version', 'Status'])
 
         self.tabletests = Table()
-        self.tabletests.init(['Model', 'Link/Path', 'Version', 'Generator', 'Options', \
+        self.tabletests.init(['Name', 'Link/Path', 'Version', 'Generator', 'Options', \
                          'Compilation', 'Benchmark', 'Tested in'])
          
     def close(self):
@@ -205,6 +205,10 @@ class AllTestsPage:
 
     def append_tablearchc(self, strline):
         self.tablearchc.append_csv_line(strline)
+
+    def append_tabletests(self, strline):
+        self.tabletests.append_csv_line(strline)
+
 
 
 #

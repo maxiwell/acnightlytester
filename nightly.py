@@ -84,7 +84,9 @@ def main():
     nightly.init_htmllog()
 
     nightly.build_and_install_archc()
-#    nightly.gen_and_build_simulator(nightly.simulators[0])
+    nightly.gen_and_build_simulator(nightly.simulators[0])
+
+    nightly.closeall()
      
 if __name__ == '__main__':
     main()  

@@ -64,11 +64,15 @@ class Nightly:
         htmlline = self.archc.build_archc();
         self.alltestspage.append_tablearchc(htmlline)
         self.alltestspage.append_tablearchc(self.cross.get_crosscsvline())
-        self.alltestspage.close()
 
     def gen_and_build_simulator (self, simulator):
         archc_env = self.archc.archc_prefix+'/etc/env.sh'
-        simulator.gen_and_build(archc_env);
+        htmlline = simulator.gen_and_build(archc_env);
+        self.alltestspage.append_tabletests(htmlline)
+
+    def closeall(self):
+        self.alltestspage.close()
+
 
 #    def execute_simulator(self, simulator):
 

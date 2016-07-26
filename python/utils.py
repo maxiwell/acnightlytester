@@ -3,6 +3,7 @@
 import os, sys, signal
 import subprocess
 import datetime as date
+import fileinput
 
 version = "4.0"
 workspace = ""
@@ -40,6 +41,16 @@ def get_githash(git):
     if not l:
         l = '-'
     return l
+
+def insert_line_before_once(filepath, newline, pattern):
+    repetition = 1;
+    with fileinput.input(filepath, inplace=True) as f:
+        for l in f:
+            if l.startswith(pattern):
+                if repetition > 0:
+                    print (newline + '\n')
+                    repetition -= 1
+            print ( l )
 
 def cleanup():
     if (debug == False):

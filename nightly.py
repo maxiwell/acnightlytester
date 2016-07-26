@@ -81,12 +81,17 @@ def main():
     nightly = config_parser_yaml(args.configfile)
 
     nightly.init_htmlindex()
+
+    if not nightly.git_hashes_changed() and not args.force:
+        utils.abort("All repositories have tested in the last Nightly execution")
+
     nightly.init_htmllog()
 
     nightly.build_and_install_archc()
-    nightly.gen_and_build_simulator(nightly.simulators[0])
+    for sim in nightly.simulators:
+        nightly.gen_and_build_simulator(sim)
 
-    nightly.closeall()
+    nightly.finalize()
      
 if __name__ == '__main__':
     main()  

@@ -62,19 +62,56 @@ class Nightly:
 
     def build_and_install_archc(self):
         htmlline = self.archc.build_archc();
-        self.alltestspage.append_tablearchc(htmlline)
-        self.alltestspage.append_tablearchc(self.cross.get_crosscsvline())
+        self.alltestspage.update_archc_table(htmlline)
+        self.alltestspage.update_archc_table(self.cross.get_crosscsvline())
 
     def gen_and_build_simulator (self, simulator):
         archc_env = self.archc.archc_prefix+'/etc/env.sh'
         htmlline = simulator.gen_and_build(archc_env);
-        self.alltestspage.append_tabletests(htmlline)
+        self.alltestspage.update_tests_table(htmlline)
 
-    def closeall(self):
+    def finalize(self):
         self.alltestspage.close()
 
+        test_results = ""
+        if self.alltestspage.had_failed():
+            test_results = HTML.fail()
+        else:
+            test_results = HTML.success()
 
-#    def execute_simulator(self, simulator):
+        csvline =  self.env.testnumber + ';' + utils.gettime() + ';'
+        csvline += test_results + HTML.href("(log)", self.env.htmloutput + '/' + self.env.testnumber + \
+                            AllTestsPage.htmlfile_suffix) + ';'
+        csvline += "-;-;"
+        self.nightlypage.update_table(csvline)
+
+
+    def git_hashes_changed(self):
+        last_page = self.env.htmloutput + "/" + str(int(self.env.testnumber)-1) + AllTestsPage.htmlfile_suffix;
+        if not os.path.isfile(last_page):
+            return True
+
+        if self.archc.archc_hash == '-':
+            return True
+        for sim in self.simulators:
+            if sim.model_hash == '-':
+                return True
+
+        with open(last_page, "r") as f:
+            for l in f:
+
+                # ArchC check
+                s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % self.archc.archc, l)
+                if s:
+                    if self.archc.archc_hash[0:7] != s.group(2):
+                        return True
+                # Simulators check
+                for sim in self.simulators:
+                    s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.linkpath, l)
+                    if s:
+                        if sim.model_hash[0:7] != s.group(2):
+                            return True
+        return False
 
     
 

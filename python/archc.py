@@ -54,28 +54,33 @@ class ArchC (DownloadHelper):
 
     def set_linkpath(self, linkpath):
         self.archc = linkpath
-        self.get_from(url_or_path = linkpath, \
-                copy_to = self.archc_src, pkg = "ArchC")
-        self.archc_hash = get_githash(self.archc_src)
+        if (linkpath.startswith("./")) or (linkpath.startswith("/")):
+            self.get_local(linkpath, self.archc_src, "ArchC")
+            self.archc_hash = '-'
+        else:
+            self.git_clone(linkpath, self.archc_src, "ArchC")
+            self.archc_hash = get_githash(self.archc_src)
 
     def set_systemc(self, linkpath):
         self.systemc = linkpath
-        if  self.systemc  :
-            self.get_from( url_or_path = linkpath, \
-                    copy_to = self.systemc_src, pkg = "SystemC")
+        if (linkpath.startswith("./")) or (linkpath.startswith("/")):
+            self.get_local(linkpath, self.systemc_src, "SystemC")
+            self.archc_hash = '-'
+        else:
+            self.git_clone(linkpath, self.systemc_src, "SystemC")
             self.systemc_hash = get_githash(self.systemc_src)
 
     def set_binutils(self, linkpath):
         self.binutils = linkpath
-        if self.binutils :
-            self.get_from( url_or_path = linkpath, \
-                    copy_to = self.binutils_src, pkg = "Binutils")
+#        if self.binutils :
+#            self.get_from( url_or_path = linkpath, \
+#                    copy_to = self.binutils_src, pkg = "Binutils")
 
     def set_gdb(self, linkpath):
         self.gdb = linkpath
-        if self.gdb :
-            self.get_from( url_or_path = linkpath, \
-                    copy_to = self.gdb_src, pkg = "GDB")
+#        if self.gdb :
+#            self.get_from( url_or_path = linkpath, \
+#                    copy_to = self.gdb_src, pkg = "GDB")
 
     def build_systemc(self):
         if os.path.isdir(self.systemc_src+"/lib"):
@@ -104,7 +109,7 @@ class ArchC (DownloadHelper):
             html = HTML(htmllog)
             html.init_page("SystemC rev " + self.systemc_hash[0:7] + " build output")
             html.append_log_formatted(self.systemcbuildlog)
-            html.close_page()
+            html.write_page()
 
             csvline = 'SystemC;' + self.systemc + ';'
             csvline += HTML.href(self.systemc_hash[0:7], \
@@ -149,13 +154,12 @@ class ArchC (DownloadHelper):
         html = HTML(htmllog)
         html.init_page("ArchC rev "+self.archc_hash[0:7]+" build output")
         html.append_log_formatted(self.archcbuildlog)
-        html.close_page()
+        html.write_page()
 
         csvline = 'ArchC;' + self.archc + ';' 
         if self.archc_hash != '-' :
             csvline += HTML.href(self.archc_hash[0:7], \
-                                 self.archc.replace('.git','') + '/commit/' + \
-                                 self.archc_hash ) + ';'
+                                 self.archc.replace('.git','') + '/commit/' + self.archc_hash ) + ';'
         else:
             csvline += self.archc_hash[0:7] + ';'
 
@@ -213,9 +217,10 @@ class Simulator (DownloadHelper):
         self.linkpath = linkpath
         if (self.linkpath.startswith("./")) or (self.linkpath.startswith("/")):
             self.get_local(self.linkpath, self.simsrc, self.name)
+            self.model_hash = '-'
         else:
             self.git_clone(self.linkpath, self.simsrc, self.name)
-        self.model_hash = get_githash(self.simsrc)
+            self.model_hash = get_githash(self.simsrc)
 
     def set_generator(self, generator):
         self.generator = generator
@@ -251,18 +256,17 @@ class Simulator (DownloadHelper):
         html = HTML(htmllog)
         html.init_page(self.name + " rev "+self.model_hash[0:7]+" build output")
         html.append_log_formatted(self.buildlog)
-        html.close_page()
+        html.write_page()
 
         csvline = self.name + ';' + self.linkpath + ';' ;
 
         if self.model_hash != '-' :
             csvline += HTML.href(self.model_hash[0:7], \
-                                 self.linkpath.replace('.git','') + '/commit/' + \
-                                 self.model_hash) + ';'
+                                 self.linkpath.replace('.git','') + '/commit/' + self.model_hash) + ';'
         else:
             csvline += '-' + ';'
 
-        csvline += self.generator + ';' + self.options + ';' 
+        csvline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
 
         if cmdret:
             csvline += HTML.success()
@@ -270,7 +274,6 @@ class Simulator (DownloadHelper):
             csvline += HTML.fail()
         csvline += '(' + HTML.href('log', htmllog) + ')' + ';'
         csvline += '-;-;'
-
         return csvline 
 
 

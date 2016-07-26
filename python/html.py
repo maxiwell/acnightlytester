@@ -21,6 +21,19 @@ class Table:
         self.string += "</table></p>\n" 
         return self.string
 
+    @staticmethod
+    def csvline_to_html(line):
+        table_string = ""
+        for l in line.splitlines():
+            table_string += "<tr>"
+            cels = l.split(';')
+            for cel in cels:
+                if cel:
+                    table_string += "<td>"+cel+"</td>"
+            table_string += "</tr>" 
+        return table_string
+
+
     def append_csv_line(self, line):
         table_string = ""
         for l in line.splitlines():
@@ -66,7 +79,7 @@ class HTML:
         self.string += "<h1>"+title+"</h1>\n"
         return self.string
 
-    def close_page(self):
+    def write_page(self):
         self.string += "</body>\n"
         self.string += "</html>\n"
         self.f = open(self.htmlfile, "w")
@@ -76,7 +89,7 @@ class HTML:
 
     @staticmethod    
     def fail():
-        string = "<b><font color=\"crimson\"> failed </font></b>"
+        string = "<b><font color=\"crimson\"> Failed </font></b>"
         return string
 
     @staticmethod
@@ -92,6 +105,11 @@ class HTML:
     @staticmethod
     def href(title, url):
         string = "<a href=\""+url+"\">"+title+"</a>"
+        return string
+
+    @staticmethod
+    def monospace(text):
+        string = "<font face=\"Courier New\">"+text+"</font>"
         return string
 
     def append_raw(self, html):
@@ -117,54 +135,50 @@ class HTML:
 
 class NightlyPage():
 
-    htmlfile = ""
     archcrev = ""
 
-    def __init__(self, env):
-        self.htmlfile = env.htmloutput + "/index.html" 
-        if not os.path.isfile(self.htmlfile):
-            self.create()
-        
-        env.testnumber    = str(self.gettestnumber())
-        self.archcrev     = self.getarchcrev()
+    htmlpath = ""
 
-    def create(self):
-        html = HTML(self.htmlfile)
+    def __init__(self, env):
+        self.htmlpath = env.htmloutput + "/index.html" 
+        if not os.path.isfile(self.htmlpath):
+            self.create(self.htmlpath)
+
+        env.testnumber    = str(self.gettestnumber(self.htmlpath))
+
+    def create(self, htmlfile):
+        html = HTML(htmlfile)
         html.init_page("ArchC's NightlyTester Main Page")
         html.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
         
         table = Table()
-        table.init(['Test #', 'Date', 'ArchC GIT revision', 'Report', 'Comment', 'Started by'])
-        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
+        table.init(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
+        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
         table.close()
-
+        
         html.append_table(table)
-        html.close_page()
+        html.write_page()
 
-    def gettestnumber(self):
+    def gettestnumber(self, htmlpath):
         testnumber = 0
-        with open(self.htmlfile, "r") as f:
+        with open(htmlpath, "r") as f:
             for l in f:
-               s = re.search(r'^<tr><td>([0-9]*)</td>', l)
-               if s:
-                   testnumber = int(s.group(1))+1
-                   break
+                s = re.search(r'^<tr><td>([0-9]*)</td>', l)
+                if s:
+                    testnumber = int(s.group(1))+1
+                    break
         return testnumber
 
-    def getarchcrev(self):
-        archcrev = 0
-        with open(self.htmlfile, "r") as f:
-            for l in f:
-                s = re.search(r'<td>([0-9a-zA-Z-]*)..</td>',l)
-                if s:
-                    archcrev = s.group(1)
-                    break
-        return archcrev
+    def update_table(self, strline):
+        htmlline = Table.csvline_to_html(strline)
+
+        utils.insert_line_before_once( filepath = self.htmlpath,  \
+                                       newline  = htmlline,       \
+                                       pattern  = '<tr><td>' )    
 
 
 class AllTestsPage:
 
-    htmlfile = ""
     string   = ""
     html     = ""
 
@@ -173,15 +187,18 @@ class AllTestsPage:
     tablearchc = None
     tabletests = None
 
+    htmlfile_suffix = "-index.html"
+
     def __init__(self, env):
         self.env = env
         self.string   = ""
-        self.htmlfile = env.htmloutput + "/" + env.testnumber + "-index.html";
-        self.create()
+        
+        htmlfile = env.htmloutput + "/" + env.testnumber + self.htmlfile_suffix;
+        self.create(htmlfile)
 
 
-    def create(self):
-        self.html = HTML(self.htmlfile)
+    def create(self, htmlfile):
+        self.html = HTML(htmlfile)
         self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.testnumber)
         self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
@@ -200,16 +217,22 @@ class AllTestsPage:
         self.html.append_raw('<h3>Tests</h3>')
         self.html.append_table(self.tabletests)
 
-        self.html.close_page()
+        self.html.write_page()
         
 
-    def append_tablearchc(self, strline):
+    def update_archc_table(self, strline):
         self.tablearchc.append_csv_line(strline)
 
-    def append_tabletests(self, strline):
+    def update_tests_table(self, strline):
         self.tabletests.append_csv_line(strline)
 
 
+    def had_failed(self):
+        with open(self.html.htmlfile, 'r') as f:
+            for l in f:
+                if re.search("Failed", l):
+                    return True
+        return False
 
 #
 #table = Table();

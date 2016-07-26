@@ -5,8 +5,8 @@ nightly:
     simulators : [mips]
  
 archc:
-    systemc   : /home/max/ArchC/tools/systemc/2.3.1/
     #systemc   : https://github.com/archc/systemc.git
+    systemc   : /home/max/ArchC/tools/systemc/2.3.1/
     binutils  : 
     gdb       : 
     #link/path : https://github.com/archc/archc.git
@@ -15,33 +15,34 @@ archc:
 
 simulators:
     mips:
-        modules   : [acsim, powersc, hltrace]
+        #modules   : [acsim, powersc, hltrace]
+        modules   : [acsim]
         inputfile : mips.ac
-        #link/path : /home/max/ArchC/processors/github/mips
         link/path : https://github.com/archc/mips.git
-        cross     : /home/max/x-tools/mips-newlib-elf
+        #link/path : /home/max/ArchC/processors/github/mips
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        cross     : /home/max/x-tools/mips-newlib-elf
         benchmarks: [mibench]
     arm:
         modules   : [acsim, powersc, hltrace] 
         inputfile : arm.ac
         link/path : https://github.com/archc/arm.git
-        #cross     : /home/max/x-tools/arm-newlib-eabi
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+        #cross     : /home/max/x-tools/arm-newlib-eabi
         benchmarks: [mibench]
     powerpc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : powerpc.ac
         link/path : https://github.com/archc/powerpc.git
-        #cross     : /home/max/x-tools/powerpc-newlib-elf
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+        #cross     : /home/max/x-tools/powerpc-newlib-elf
         benchmarks: [mibench]
     sparc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : sparc.ac
         link/path : https://github.com/archc/sparc.git
-        #cross     : /home/max/x-tools/sparc-newlib-elf
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+        #cross     : /home/max/x-tools/sparc-newlib-elf
         benchmarks: [mibench]
 
 modules: 

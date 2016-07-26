@@ -32,14 +32,6 @@ class DownloadHelper:
         else:
             print("FAILED")
 
-    def get_from(self, url_or_path, copy_to, pkg):
-        if (url_or_path.startswith("./")) or (url_or_path.startswith("/")):
-            self.get_local(url_or_path, copy_to, pkg)
-        else:
-            self.git_clone(url_or_path, copy_to, pkg)
-
-
-
 
 class DownloadSource (DownloadHelper):
 
@@ -65,19 +57,5 @@ class DownloadSource (DownloadHelper):
         for p in pkg:
             print("Getting "+p+" ... FAILED")
             print("SPEC2006: sources are protected by copyright.")
-
-
-
-
-#dh = DownloadSource()
-#
-#dh.get_acasm( dest = "/tmp/python");
-#
-#dc = DownloadCross()
-#
-#dc.get_mips( dest = "/tmp/python")
-
-        
-
 
 

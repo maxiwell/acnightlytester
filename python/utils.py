@@ -4,6 +4,7 @@ import os, sys, signal
 import subprocess
 import datetime as date
 import fileinput
+import urllib.request 
 
 version = "4.0"
 workspace = ""
@@ -18,7 +19,10 @@ def cp(src, dst):
     if ( os.system("cp -r "+src+"/* "+dst+" > /dev/null 2>&1") == 0 ):
         return True
     else:
-        return False
+        if ( os.system("cp -r "+src+" "+dst+" > /dev/null 2>&1") == 0 ):
+            return True
+
+    return False
 
 def rm(dst):
     if ( os.system("rm -rf "+dst+" > /dev/null 2>&1") == 0 ):
@@ -27,7 +31,7 @@ def rm(dst):
         return False
 
 def exec_to_log(cmd, log):
-    if (os.system ( ' ( /bin/bash -c "' + cmd + '" ) >> '+log+' 2>&1' ) == 0):
+    if (os.system ( ' ( /bin/bash -c "' + cmd + '" ) > '+log+' 2>&1' ) == 0):
         return True
     else:
         return False
@@ -51,6 +55,32 @@ def insert_line_before_once(filepath, newline, pattern):
                     print (newline + '\n')
                     repetition -= 1
             print ( l )
+
+def get_http(url, dest):
+    pkg = os.path.basename(url)
+    print("Getting " + pkg + " over HTTP... ", end="", flush=True)
+    mkdir(dest)
+    if ( urllib.request.urlretrieve(url, dest + "/" + pkg) ):
+        print("OK");
+    else:
+        print("FAILED")
+
+def get_local(path, dest, pkg = ""):
+    print("Getting " + pkg + " from " + path + "... ", end="", flush=True)
+    mkdir(dest)
+    if ( cp(path, dest) ):
+        print("OK");
+    else:
+        print("FAILED")
+
+def git_clone(url, dest, pkg = "" ):
+    print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
+    if (os.system("git clone "+url+" " \
+            +dest+" > /dev/null 2>&1") == 0):
+        print("OK")
+    else:
+        print("FAILED")
+
 
 def cleanup():
     if (debug == False):

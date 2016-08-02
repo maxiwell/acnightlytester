@@ -1,6 +1,5 @@
 
 import os
-from .helper import DownloadHelper
 from .nightly    import Env
 import subprocess
 from .utils import *
@@ -8,7 +7,7 @@ from .html import *
 import tarfile
 import hashlib
 
-class ArchC (DownloadHelper):
+class ArchC ():
 
     archc     = ""
     systemc   = ""
@@ -55,31 +54,31 @@ class ArchC (DownloadHelper):
     def set_linkpath(self, linkpath):
         self.archc = linkpath
         if (linkpath.startswith("./")) or (linkpath.startswith("/")):
-            self.get_local(linkpath, self.archc_src, "ArchC")
+            get_local(linkpath, self.archc_src, "ArchC")
             self.archc_hash = '-'
         else:
-            self.git_clone(linkpath, self.archc_src, "ArchC")
+            git_clone(linkpath, self.archc_src, "ArchC")
             self.archc_hash = get_githash(self.archc_src)
 
     def set_systemc(self, linkpath):
         self.systemc = linkpath
         if (linkpath.startswith("./")) or (linkpath.startswith("/")):
-            self.get_local(linkpath, self.systemc_src, "SystemC")
+            get_local(linkpath, self.systemc_src, "SystemC")
             self.archc_hash = '-'
         else:
-            self.git_clone(linkpath, self.systemc_src, "SystemC")
+            git_clone(linkpath, self.systemc_src, "SystemC")
             self.systemc_hash = get_githash(self.systemc_src)
 
     def set_binutils(self, linkpath):
         self.binutils = linkpath
 #        if self.binutils :
-#            self.get_from( url_or_path = linkpath, \
+#            get_from( url_or_path = linkpath, \
 #                    copy_to = self.binutils_src, pkg = "Binutils")
 
     def set_gdb(self, linkpath):
         self.gdb = linkpath
 #        if self.gdb :
-#            self.get_from( url_or_path = linkpath, \
+#            get_from( url_or_path = linkpath, \
 #                    copy_to = self.gdb_src, pkg = "GDB")
 
     def build_systemc(self):
@@ -143,8 +142,8 @@ class ArchC (DownloadHelper):
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-        cmdret = exec_to_log(cmd, self.archcbuildlog)
-        #cmdret = True
+        #cmdret = exec_to_log(cmd, self.archcbuildlog)
+        cmdret = True
         if cmdret:
             print("OK")
         else:
@@ -172,14 +171,14 @@ class ArchC (DownloadHelper):
         return csvline + '\n' + systemc_csvline
 
 
-class Simulator (DownloadHelper):
+class Simulator ():
     name        = ""
 
     generator   = ""
     options     = ""
     desc        = ""
 
-    cross_prefix = ""
+    cross       = ""
 
     inputfile   = ""
     linkpath    = ""
@@ -216,10 +215,10 @@ class Simulator (DownloadHelper):
     def set_linkpath(self, linkpath):
         self.linkpath = linkpath
         if (self.linkpath.startswith("./")) or (self.linkpath.startswith("/")):
-            self.get_local(self.linkpath, self.simsrc, self.name)
+            get_local(self.linkpath, self.simsrc, self.name)
             self.model_hash = '-'
         else:
-            self.git_clone(self.linkpath, self.simsrc, self.name)
+            git_clone(self.linkpath, self.simsrc, self.name)
             self.model_hash = get_githash(self.simsrc)
 
     def set_generator(self, generator):
@@ -230,6 +229,9 @@ class Simulator (DownloadHelper):
 
     def set_desc(self, desc):
         self.desc = desc
+
+    def set_cross(self, path):
+        self.cross = path
 
     def append_benchmark(self, benchmark):
         self.benchmarks.append(benchmark)
@@ -276,8 +278,12 @@ class Simulator (DownloadHelper):
         csvline += '-;-;'
         return csvline 
 
-    def run_test(self, app):
-        print("o")
+    def run_tests(self):
+
+        for bench in self.benchmarks:
+            bench.download()
+            bench.run_tests(self.cross)
+
 
 
 
@@ -294,7 +300,7 @@ class Simulator (DownloadHelper):
         print()
             
 
-class CrossCompilers(DownloadHelper):
+class CrossCompilers():
 
     cross = {}
     prefix = "/xtools/"
@@ -307,16 +313,17 @@ class CrossCompilers(DownloadHelper):
         if (cross.startswith("./")) or (cross.startswith("/")):
             prefix += os.path.basename(cross)
             if not os.path.isdir(prefix+'/bin'):
-                self.get_local(cross, prefix, ' Cross')
+                get_local(cross, prefix, ' Cross')
             self.cross[model] = {'src' : cross, 'prefix' : prefix}
         else:
-            self.get_http(cross, prefix)
+            get_http(cross, prefix)
             tarname = os.path.basename(cross)
             tar = tarfile.open(prefix+"/"+tarname)
             tar.extractall(prefix)
             prefix += tar.getnames()[0]
             tar.close()
             self.cross[model] = { 'src' : cross, 'prefix' : prefix}
+        return self.cross[model]
 
     def get_crosscsvline(self):
         csvline = ""
@@ -324,4 +331,6 @@ class CrossCompilers(DownloadHelper):
             csvline += 'Cross '+key+';'+self.cross[key]['src']+';-;'+HTML.success()+'\n' 
         return csvline
 
+    def get_cross_bin(self, model):
+        return self.cross[model]['prefix']+'/bin/'
 

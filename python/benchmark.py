@@ -1,5 +1,5 @@
 
-from python import helper
+from .utils import *
 
 
 class App:
@@ -23,25 +23,21 @@ class App:
         return string
 
 
-class Benchmark(helper.DownloadSource):
+class Benchmark():
+
+    folder     = "/benchmark/"
+    folderpath = "" 
+
     name = ""
+    env  = None
     apps = []
-    env = None
 
-    prefix = "/benchmark/"
+    cflags = "'-specs=archc -static'"
 
-    def __init__(self, name, env):
-        self.name = name
-        self.apps = []
+    def __init__(self, env):
+        self.folderpath = env.workspace + self.folder 
         self.env = env
-
-        fullprefix = env.workspace + self.prefix + "/"
         
-        if   name == "mibench":
-            self.get_mibench(fullprefix)
-        elif name == "spec2006":
-            self.get_spec(fullprefix)
-
     def append_app(self, app):
         self.apps.append(app)
 
@@ -49,5 +45,14 @@ class Benchmark(helper.DownloadSource):
         print("Benchmark: "+self.name)
         for a in self.apps:
             print ( "| "+a.tostring())
+
+    def download(self, cross):
+        raise NotImplementedError("Please Implement this method")
+
+    def run_tests(self):
+        raise NotImplementedError("Please Implement this method")
+
+
+
 
 

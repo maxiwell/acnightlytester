@@ -65,10 +65,15 @@ class Nightly:
         self.alltestspage.update_archc_table(htmlline)
         self.alltestspage.update_archc_table(self.cross.get_crosscsvline())
 
-    def gen_and_build_simulator (self, simulator):
-        archc_env = self.archc.archc_prefix+'/etc/env.sh'
-        htmlline = simulator.gen_and_build(archc_env);
-        self.alltestspage.update_tests_table(htmlline)
+    def gen_and_build_simulator (self):
+        for simulator in self.simulators:
+            archc_env = self.archc.archc_prefix+'/etc/env.sh'
+            htmlline = simulator.gen_and_build(archc_env);
+            self.alltestspage.update_tests_table(htmlline)
+
+    def run_tests(self):
+        for simulator in self.simulators:
+            simulator.run_tests()
 
     def finalize(self):
         self.alltestspage.close()

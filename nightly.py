@@ -8,6 +8,8 @@ from python.benchmark import Benchmark, App
 from python           import utils
 from python.html      import HTML
 
+from python.mibench   import mibench
+
 def command_line_handler():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--force', dest='force', action='store_true', \
@@ -53,15 +55,16 @@ def config_parser_yaml(configfile):
                     sim.set_desc(yamls['modules'][_module]['desc'])
         
                     for _bench in yamls['simulators'][_sim]['benchmarks']:
-                        bench = Benchmark(_bench, env)
+                        bench = eval(_bench)(env)
                         for _app in yamls['benchmarks'][_bench] :
                             app = App(_app)
                             for _dataset in yamls['benchmarks'][_bench][_app]:
                                 app.append_dataset(_dataset)
                             bench.append_app(app)
                         sim.append_benchmark(bench)
-                    simulators.append(sim)
                     cross.add_cross(env, crosslink, _sim)
+                    sim.set_cross( cross.get_cross_bin(_sim) ) 
+                    simulators.append(sim)
             
             for s in simulators:
                 s.printsim()
@@ -80,22 +83,20 @@ def main():
     utils.debug = args.debug
     nightly = config_parser_yaml(args.configfile)
 
-    nightly.init_htmlindex()
+#    nightly.init_htmlindex()
+#
+#    if not nightly.git_hashes_changed() and not args.force:
+#        utils.abort("All repositories have tested in the last Nightly execution")
 
-    if not nightly.git_hashes_changed() and not args.force:
-        utils.abort("All repositories have tested in the last Nightly execution")
+#    nightly.init_htmllog()
 
-    nightly.init_htmllog()
+#    nightly.build_and_install_archc()
 
-    nightly.build_and_install_archc()
+#    nightly.gen_and_build_simulator()
+    
+    nightly.run_tests()
 
-    for sim in nightly.simulators:
-        nightly.gen_and_build_simulator(sim)
-        for bench in sim.benchmarks: 
-            for app in bench:
-                sim.run_test(app)
-
-    nightly.finalize()
+#    nightly.finalize()
      
 if __name__ == '__main__':
     main()  

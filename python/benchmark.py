@@ -1,4 +1,6 @@
 
+from python import helper
+
 
 class App:
     name = ""
@@ -21,24 +23,31 @@ class App:
         return string
 
 
-class Benchmark:
+class Benchmark(helper.DownloadSource):
     name = ""
     apps = []
+    env = None
 
-    def __init__(self, name):
+    prefix = "/benchmark/"
+
+    def __init__(self, name, env):
         self.name = name
         self.apps = []
+        self.env = env
+
+        fullprefix = env.workspace + self.prefix + "/"
+        
+        if   name == "mibench":
+            self.get_mibench(fullprefix)
+        elif name == "spec2006":
+            self.get_spec(fullprefix)
 
     def append_app(self, app):
         self.apps.append(app)
-
 
     def printbench(self):
         print("Benchmark: "+self.name)
         for a in self.apps:
             print ( "| "+a.tostring())
-
-    
-
 
 

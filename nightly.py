@@ -53,7 +53,7 @@ def config_parser_yaml(configfile):
                     sim.set_desc(yamls['modules'][_module]['desc'])
         
                     for _bench in yamls['simulators'][_sim]['benchmarks']:
-                        bench = Benchmark(_bench)
+                        bench = Benchmark(_bench, env)
                         for _app in yamls['benchmarks'][_bench] :
                             app = App(_app)
                             for _dataset in yamls['benchmarks'][_bench][_app]:
@@ -88,8 +88,12 @@ def main():
     nightly.init_htmllog()
 
     nightly.build_and_install_archc()
+
     for sim in nightly.simulators:
         nightly.gen_and_build_simulator(sim)
+        for bench in sim.benchmarks: 
+            for app in bench:
+                sim.run_test(app)
 
     nightly.finalize()
      

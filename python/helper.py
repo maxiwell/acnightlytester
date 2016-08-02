@@ -4,6 +4,7 @@ import urllib.request
 import os
 import shutil 
 from python import utils
+import tarfile
 
 class DownloadHelper:
 
@@ -51,6 +52,10 @@ class DownloadSource (DownloadHelper):
         pkg = ['GoldenMibench.tar.bz2', 'SourceMibench.tar.bz2'] 
         for p in pkg:
             self.get_http(self.url_base+p, dest)
+            tar = tarfile.open(dest+"/"+p)
+            tar.extractall(dest)
+            fullprefix = dest + tar.getnames()[0]
+            tar.close()
 
     def get_spec(self, dest):
         pkg = ['SourceSPEC2006.tar.bz2', 'GoldenSPEC2006.tar.bz2']

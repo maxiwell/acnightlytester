@@ -276,6 +276,10 @@ class Simulator (DownloadHelper):
         csvline += '-;-;'
         return csvline 
 
+    def run_test(self, app):
+        print("o")
+
+
 
     def printsim(self):
         print("Simulator: " + self.name)

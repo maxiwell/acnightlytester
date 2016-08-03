@@ -28,12 +28,6 @@ class ArchC ():
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
-    archcbuildlog   = "log/archc.log"
-    systemcbuildlog = "log/systemc.log"
-
-    archchtmllog    = "-archc-build-log.html"
-    systemchtmllog   = "-systemc-build-log.html"
-
     env = None
 
     def set_env(self, env):
@@ -46,10 +40,6 @@ class ArchC ():
         self.binutils_prefix = self.env.workspace + "/" + self.binutils_prefix
         self.gdb_src         = self.env.workspace + "/" + self.gdb_src
         self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
-        self.archcbuildlog   = self.env.workspace + "/" + self.archcbuildlog
-        self.systemcbuildlog = self.env.workspace + "/" + self.systemcbuildlog
-        mkdir(os.path.dirname(self.archcbuildlog))
-        #rm(self.archcbuildlog)
 
     def set_linkpath(self, linkpath):
         self.archc = linkpath
@@ -98,18 +88,20 @@ class ArchC ():
             print("| Building and Installing...", end="", flush=True)
             cmd = cmd_1 + cmd_2
 
-            cmdret = exec_to_log(cmd, self.systemcbuildlog)
+            cmdret = exec_to_log(cmd, self.env.logfolder + "systemc.log" )
             if cmdret:
                 print("OK")
             else:
                 print("FAILED")
 
-            htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.systemchtmllog
-            html = HTML(htmllog)
+            # Creating the Build Page
+            htmllog = self.env.htmloutput + "/" + self.env.testnumber + "-systemc-build-log.html"
+            html = HTMLPage(htmllog)
             html.init_page("SystemC rev " + self.systemc_hash[0:7] + " build output")
-            html.append_log_formatted(self.systemcbuildlog)
+            html.append_log_formatted(self.env.logfolder + "systemc.log")
             html.write_page()
 
+            # Creating a csv line to add in the TestsPage (ArchC Table)
             csvline = 'SystemC;' + self.systemc + ';'
             csvline += HTML.href(self.systemc_hash[0:7], \
                                 self.systemc.replace('.git','') + '/commit/' + \
@@ -142,19 +134,20 @@ class ArchC ():
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-        #cmdret = exec_to_log(cmd, self.archcbuildlog)
-        cmdret = True
+        cmdret = exec_to_log(cmd, self.env.logfolder + "archc.log")
         if cmdret:
             print("OK")
         else:
             print("FAILED")
 
-        htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.archchtmllog
-        html = HTML(htmllog)
+        # Creating the Build Page
+        htmllog = self.env.htmloutput + "/" + self.env.testnumber + "-archc-build-log.html" 
+        html = HTMLPage(htmllog)
         html.init_page("ArchC rev "+self.archc_hash[0:7]+" build output")
-        html.append_log_formatted(self.archcbuildlog)
+        html.append_log_formatted(self.env.logfolder + "archc.log")
         html.write_page()
 
+        # Creating a csv line to add in the TestsPage (ArchC Table)
         csvline = 'ArchC;' + self.archc + ';' 
         if self.archc_hash != '-' :
             csvline += HTML.href(self.archc_hash[0:7], \
@@ -167,11 +160,11 @@ class ArchC ():
         else:
             csvline += HTML.fail()
         csvline += '(' + HTML.href('log', htmllog) + ')'
-
+        
         return csvline + '\n' + systemc_csvline
 
 
-class Simulator ():
+class Simulator (SimulatorPage):
     name        = ""
 
     generator   = ""
@@ -190,9 +183,8 @@ class Simulator ():
     env         = None
     benchmarks  = []
 
-    htmllog    = ""
-
     def __init__(self, name, inputfile, env):
+        super().__init__(env, name)
         self.name = name
         self.linkpath = ""
         self.inputfile = inputfile
@@ -203,10 +195,7 @@ class Simulator ():
         self.options   = ""
         self.desc      = ""
         
-        self.htmllog    = "-"+name+"-build-log.html"
-
         self.simsrc    = env.workspace + "/" + name
-
 
         self.buildlog = env.workspace + "/log/" + name + ".log"
         mkdir(os.path.dirname(self.buildlog))
@@ -254,37 +243,40 @@ class Simulator ():
         else:
             print("FAILED")
 
-        htmllog = self.env.htmloutput + "/" + self.env.testnumber + self.htmllog
-        html = HTML(htmllog)
+        # Creating the Build Page
+        buildpage = self.env.htmloutput + "/" + self.env.testnumber + "-" + self.name + "-build-log.html"
+        html = HTMLPage(buildpage)
         html.init_page(self.name + " rev "+self.model_hash[0:7]+" build output")
         html.append_log_formatted(self.buildlog)
         html.write_page()
 
-        csvline = self.name + ';' + self.linkpath + ';' ;
-
+        # Creating a csv line to add in the TestsPage (Tests Table)
+        tableline = self.name + ';' + self.linkpath + ';' ;
         if self.model_hash != '-' :
-            csvline += HTML.href(self.model_hash[0:7], \
+            tableline += HTML.href(self.model_hash[0:7], \
                                  self.linkpath.replace('.git','') + '/commit/' + self.model_hash) + ';'
         else:
-            csvline += '-' + ';'
-
-        csvline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
+            tableline += '-' + ';'
+        tableline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
 
         if cmdret:
-            csvline += HTML.success()
+            tableline += HTML.success()
         else:
-            csvline += HTML.fail()
-        csvline += '(' + HTML.href('log', htmllog) + ')' + ';'
-        csvline += '-;-;'
-        return csvline 
+            tableline += HTML.fail()
+
+        tableline += '(' + HTML.href('log', buildpage) + ')' + ';'
+        return tableline
 
     def run_tests(self):
 
         for bench in self.benchmarks:
             bench.download()
-            bench.run_tests(self.cross)
+            bench.run_tests(self.cross, self.name)
 
+        # Finishing the csv line with the tests results to add in the TestsPage (Tests Table)
+        tableline = '(' + HTML.href('log', self.page) + ');-;'
 
+        return tableline
 
 
     def printsim(self):

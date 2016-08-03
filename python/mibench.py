@@ -5,17 +5,9 @@ import tarfile
 
 class mibench (Benchmark):
 
-    TESTCOMPILER=""
-    TESTCOMPILER=""
-    TESTCOMPILERCXX=""
-    TESTAR=""
-    TESTRANLIB=""
-    TESTFLAG=""
-
     def __init__(self, env):
         super().__init__(env)
         self.name = "mibench"
-        self.buildlog = env.workspace + "/log/"
 
         self.benchfolder = self.folderpath + "/SourceMibench/"
         self.goldenfolder = self.folderpath + "/GoldenMibench/"
@@ -31,11 +23,10 @@ class mibench (Benchmark):
             else: 
                 get_http(base+p, self.folderpath)
 
-            #tar = tarfile.open(self.folderpath+"/"+p)
-            #tar.extractall(self.folderpath)
-            #fullprefix = self.folderpath + tar.getnames()[0]
-            #tar.close()
-
+            tar = tarfile.open(self.folderpath+"/"+p)
+            tar.extractall(self.folderpath)
+            fullprefix = self.folderpath + tar.getnames()[0]
+            tar.close()
 
     def exportenv (self, cross):
         export = ""
@@ -46,23 +37,12 @@ class mibench (Benchmark):
         export += " TESTAR="+cross+crosstuple+'-ar'
         export += " TESTCOMPILERCXX="+cross+crosstuple+'-g++'
         export += " TESTRANLIB="+cross+crosstuple+'-ranlib'
+        export += " TESTFLAG='-specs=archc -static'"
         return export
 
-    def compile(self, crossenv, folder, name):
-        cmd  = "cd " + folder + " && "
-        cmd += "make clean && "
-        cmd += crossenv + " TESTFLAG="+self.cflags+" make"
 
-        print(name+"...",end="")
-        cmdret = exec_to_log(cmd, self.buildlog + name.replace('/','_')+'.log')
-        if cmdret:
-            print("OK")
-        else:
-            print("FAILED")
-
-
-    def run_tests(self, cross):
-
+    def run_tests(self, cross, sim):
+        
         for app in self.apps:
             if   app.name == 'consumer/jpeg':
                 srcfolder = self.benchfolder + app.name + '/jpeg-6a'
@@ -73,7 +53,14 @@ class mibench (Benchmark):
             else:
                 srcfolder = self.benchfolder + app.name 
 
-            self.compile(self.exportenv(cross), srcfolder, app.name)
+            cmd  = "cd " + srcfolder + " && "
+            cmd += "make clean && "
+            cmd += self.exportenv(cross) + " make "
+
+            self.compile(cmd, app, sim)
+
+
+
 
 
 

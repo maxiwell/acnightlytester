@@ -6,6 +6,45 @@ import csv
 import string
 from . import utils
 
+class HTML:
+    @staticmethod    
+    def fail():
+        string = "<b><font color=\"crimson\"> Failed </font></b>"
+        return string
+
+    @staticmethod
+    def success():
+        string = "<b><font color=\"green\"> OK </font></b>" 
+        return string
+
+    @staticmethod
+    def fuchsia_string():
+        string = "<b><font color=\"fuchsia\"> N/A </font></b>"
+        return string
+
+    @staticmethod
+    def href(title, url):
+        string = "<a href=\""+url+"\">"+title+"</a>"
+        return string
+
+    @staticmethod
+    def monospace(text):
+        string = "<font face=\"Courier New\">"+text+"</font>"
+        return string
+
+    @staticmethod
+    def csvline_to_html(line):
+        table_string = ""
+        for l in line.splitlines():
+            table_string += "<tr>"
+            cels = l.split(';')
+            for cel in cels:
+                if cel:
+                    table_string += "<td>"+cel+"</td>"
+            table_string += "</tr>" 
+        return table_string
+
+
 class Table:
 
     string = ""
@@ -20,18 +59,6 @@ class Table:
     def close(self):
         self.string += "</table></p>\n" 
         return self.string
-
-    @staticmethod
-    def csvline_to_html(line):
-        table_string = ""
-        for l in line.splitlines():
-            table_string += "<tr>"
-            cels = l.split(';')
-            for cel in cels:
-                if cel:
-                    table_string += "<td>"+cel+"</td>"
-            table_string += "</tr>" 
-        return table_string
 
 
     def append_csv_line(self, line):
@@ -64,53 +91,27 @@ class Table:
         return self.string
 
 
-class HTML:
+
+class HTMLPage:
 
     string = ""
-    htmlfile = ""
+    page = ""
     
-    def __init__(self, htmlfile):
-        self.htmlfile = htmlfile
+    def __init__(self, page):
+        self.page = page
 
     def init_page(self, title):
         self.string += "<html>\n" 
         self.string += "<head> <title>"+title+"</title></head>\n"
         self.string += "<body>\n"
         self.string += "<h1>"+title+"</h1>\n"
-        return self.string
 
     def write_page(self):
         self.string += "</body>\n"
         self.string += "</html>\n"
-        self.f = open(self.htmlfile, "w")
-        self.f.write (self.string);
+        self.f = open(self.page, "w")
+        self.f.write (self.string)
         self.f.close()
-        return self.string
-
-    @staticmethod    
-    def fail():
-        string = "<b><font color=\"crimson\"> Failed </font></b>"
-        return string
-
-    @staticmethod
-    def success():
-        string = "<b><font color=\"green\"> OK </font></b>" 
-        return string
-
-    @staticmethod
-    def fuchsia_string():
-        string = "<b><font color=\"fuchsia\"> N/A </font></b>"
-        return string
-
-    @staticmethod
-    def href(title, url):
-        string = "<a href=\""+url+"\">"+title+"</a>"
-        return string
-
-    @staticmethod
-    def monospace(text):
-        string = "<font face=\"Courier New\">"+text+"</font>"
-        return string
 
     def append_raw(self, html):
         self.string += html + "\n" 
@@ -120,7 +121,6 @@ class HTML:
         self.string += table.string
 
     def append_log_formatted(self, log):
-
         strlog = ""
         with open(log,'r') as f:
             for l in f:
@@ -133,91 +133,61 @@ class HTML:
         self.string += strlog
         self.string += "</font></td></tr></table>"
 
-class NightlyPage():
 
-    archcrev = ""
-
-    htmlpath = ""
+   
+class IndexPage(HTMLPage):
 
     def __init__(self, env):
-        self.htmlpath = env.htmloutput + "/index.html" 
-        if not os.path.isfile(self.htmlpath):
-            self.create(self.htmlpath)
-
-        env.testnumber    = str(self.gettestnumber(self.htmlpath))
-
-    def create(self, htmlfile):
-        html = HTML(htmlfile)
-        html.init_page("ArchC's NightlyTester Main Page")
-        html.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
+        super().__init__(env.htmloutput + "/" + env.indexhtml)
         
-        table = Table()
-        table.init(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
-        table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
-        table.close()
-        
-        html.append_table(table)
-        html.write_page()
+        if not os.path.isfile (self.page):
+            self.init_page("ArchC's NightlyTester Main Page")
+            self.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
+            
+            table = Table()
+            table.init(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
+            table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
+            table.close()
+            
+            self.append_table(table)
+            self.write_page()
 
-    def gettestnumber(self, htmlpath):
-        testnumber = 0
-        with open(htmlpath, "r") as f:
-            for l in f:
-                s = re.search(r'^<tr><td>([0-9]*)</td>', l)
-                if s:
-                    testnumber = int(s.group(1))+1
-                    break
-        return testnumber
-
-    def update_table(self, strline):
-        htmlline = Table.csvline_to_html(strline)
-
-        utils.insert_line_before_once( filepath = self.htmlpath,  \
+    def update_index_table(self, strline):
+        htmlline = HTML.csvline_to_html(strline)
+        utils.insert_line_before_once( filepath = self.page,  \
                                        newline  = htmlline,       \
                                        pattern  = '<tr><td>' )    
 
 
-class AllTestsPage:
-
-    string   = ""
-    html     = ""
-
-    env      = None
+class TestsPage(HTMLPage):
 
     tablearchc = None
     tabletests = None
 
-    htmlfile_suffix = "-index.html"
+    suffix = "-tests.html"
 
     def __init__(self, env):
-        self.env = env
-        self.string   = ""
+        super().__init__(env.htmloutput + "/" + env.testnumber + self.suffix)
         
-        htmlfile = env.htmloutput + "/" + env.testnumber + self.htmlfile_suffix;
-        self.create(htmlfile)
-
-
-    def create(self, htmlfile):
-        self.html = HTML(htmlfile)
-        self.html.init_page("NightlyTester "+utils.version+" Run #"+self.env.testnumber)
-        self.html.append_raw("Produced by NightlyTester @ "+utils.gettime())
+        self.init_page("NightlyTester "+utils.version+" Run #"+env.testnumber)
+        self.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
         self.tablearchc = Table()
         self.tablearchc.init(['Component', 'Link/Path', 'Version', 'Status'])
 
         self.tabletests = Table()
         self.tabletests.init(['Name', 'Link/Path', 'Version', 'Generator', 'Options', \
-                         'Compilation', 'Benchmark', 'Tested in'])
+                              'Compilation', 'Benchmark', 'Tested in'])
          
-    def close(self):
+    def close_tests_page(self):
         self.tablearchc.close()
         self.tabletests.close()
         
-        self.html.append_table(self.tablearchc)
-        self.html.append_raw('<h3>Tests</h3>')
-        self.html.append_table(self.tabletests)
+        self.append_table(self.tablearchc)
+        self.append_raw('<h3>Tests</h3>')
+        self.append_table(self.tabletests)
 
-        self.html.write_page()
+        self.write_page()
         
 
     def update_archc_table(self, strline):
@@ -226,29 +196,31 @@ class AllTestsPage:
     def update_tests_table(self, strline):
         self.tabletests.append_csv_line(strline)
 
-
-    def had_failed(self):
-        with open(self.html.htmlfile, 'r') as f:
+    def tests_had_failed(self):
+        with open(self.page, 'r') as f:
             for l in f:
                 if re.search("Failed", l):
                     return True
         return False
+        self.testspage.update_archc_table(self.cross.get_crosscsvline())
 
-#
-#table = Table();
-#table.init( ['c1', 'c2', 'c3', 'c4'] )
-#table.from_csv("/tmp/teste.csv")
-#table.finalize()
-#
-#html = HTML("/home/max/public_html/teste.html")
-#html.init_page("teste")
-#html.append_table(table)
-#html.finalize_page()
+    def get_tests_page(self):
+        return self.page
 
 
+class SimulatorPage(HTMLPage):
+    
+    tables = []
+
+    def __init__(self, env, sim):
+        super().__init__(env.htmloutput + "/" + env.testnumber + "-" + sim + ".html")
 
 
+        self.init_page(sim + " Simulator")
+        self.append_raw("Produced by NightlyTester @ "+utils.gettime())
 
+    def close_sim_page(self):
+        self.write_page()
 
 
 

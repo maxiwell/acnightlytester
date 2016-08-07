@@ -4,7 +4,7 @@ import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
 from python.archc     import ArchC, Simulator, CrossCompilers
 from python.nightly   import Nightly, Env
-from python.benchmark import Benchmark, App
+from python.benchmark import Benchmark, App, Dataset
 from python           import utils
 from python.html      import HTML
 
@@ -23,7 +23,6 @@ def command_line_handler():
     return parser.parse_args()
 
 def config_parser_yaml(configfile):
-    env     = None
     archc   = ArchC()
     simulators = []
     cross = CrossCompilers()
@@ -31,11 +30,11 @@ def config_parser_yaml(configfile):
     with open(configfile, 'r') as config:
 #        try: 
             yamls = yaml.load(config)
-            env = Env ( yamls['nightly']['workspace'],  \
-                        yamls['nightly']['htmloutput'] )
-            env.printenv()
+            utils.env.setworkspace(yamls['nightly']['workspace'])
+            utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
+            utils.env.printenv()
 
-            archc.set_env(env)
+            archc.update_paths()
             archc.set_systemc(yamls['archc']['systemc'])
             archc.set_gdb(yamls['archc']['gdb'])
             archc.set_binutils(yamls['archc']['binutils'])
@@ -43,31 +42,33 @@ def config_parser_yaml(configfile):
 
             for _sim in yamls['nightly']['simulators']:
                 inputfile = yamls['simulators'][_sim]['inputfile']
+                run       = yamls['simulators'][_sim]['run']
                 linkpath  = yamls['simulators'][_sim]['link/path']
                 crosslink = yamls['simulators'][_sim]['cross']
                 for _module in yamls['simulators'][_sim]['modules']:
-                    sim = Simulator(_sim+"-"+_module, inputfile, env)
+                    sim = Simulator(_sim+"-"+_module, run, inputfile)
                     sim.set_linkpath(linkpath)
                     sim.set_generator(yamls['modules'][_module]['generator'])
                     sim.set_options(yamls['modules'][_module]['options'])
                     sim.set_desc(yamls['modules'][_module]['desc'])
         
                     for _bench in yamls['simulators'][_sim]['benchmarks']:
-                        bench = eval(_bench)(env)
+                        bench = eval(_bench)()
                         for _app in yamls['benchmarks'][_bench] :
-                            app = App(_app)
+                            app = App(_app, sim.name)
                             for _dataset in yamls['benchmarks'][_bench][_app]:
-                                app.append_dataset(_dataset)
+                                dataset = Dataset(_dataset, app.name, sim.name)
+                                app.append_dataset(dataset)
                             bench.append_app(app)
                         sim.append_benchmark(bench)
-                    cross.add_cross(env, crosslink, _sim)
+                    cross.add_cross(crosslink, _sim)
                     sim.set_cross( cross.get_cross_bin(_sim) ) 
                     simulators.append(sim)
             
             for s in simulators:
                 s.printsim()
 
-            nightly = Nightly(env, archc, simulators, cross)
+            nightly = Nightly(archc, simulators, cross)
             return nightly
 
 #        except Exception as e:
@@ -82,7 +83,7 @@ def main():
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")
 
-    nightly.building_archc()
+#    nightly.building_archc()
 
     nightly.running_simulators()
     

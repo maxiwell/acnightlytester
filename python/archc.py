@@ -1,6 +1,5 @@
 
-import os
-from .nightly    import Env
+import os, socket
 import subprocess
 from .utils import *
 from .html import *
@@ -28,18 +27,15 @@ class ArchC ():
     gdb_src         = "gdb/src"
     gdb_prefix      = "gdb/install"
 
-    env = None
-
-    def set_env(self, env):
-        self.env = env;
-        self.archc_src       = self.env.workspace + "/" + self.archc_src
-        self.archc_prefix    = self.env.workspace + "/" + self.archc_prefix
-        self.systemc_src     = self.env.workspace + "/" + self.systemc_src
-        self.systemc_prefix  = self.env.workspace + "/" + self.systemc_prefix
-        self.binutils_src    = self.env.workspace + "/" + self.binutils_src
-        self.binutils_prefix = self.env.workspace + "/" + self.binutils_prefix
-        self.gdb_src         = self.env.workspace + "/" + self.gdb_src
-        self.gdb_prefix      = self.env.workspace + "/" + self.gdb_prefix
+    def update_paths(self):
+        self.archc_src       = env.workspace + "/" + self.archc_src
+        self.archc_prefix    = env.workspace + "/" + self.archc_prefix
+        self.systemc_src     = env.workspace + "/" + self.systemc_src
+        self.systemc_prefix  = env.workspace + "/" + self.systemc_prefix
+        self.binutils_src    = env.workspace + "/" + self.binutils_src
+        self.binutils_prefix = env.workspace + "/" + self.binutils_prefix
+        self.gdb_src         = env.workspace + "/" + self.gdb_src
+        self.gdb_prefix      = env.workspace + "/" + self.gdb_prefix
 
     def set_linkpath(self, linkpath):
         self.archc = linkpath
@@ -88,28 +84,26 @@ class ArchC ():
             print("| Building and Installing...", end="", flush=True)
             cmd = cmd_1 + cmd_2
 
-            cmdret = exec_to_log(cmd, self.env.logfolder + "systemc.log" )
-            if cmdret:
+            log = create_rand_file()
+            execstatus = ''
+            if exec_to_log(cmd, log):
                 print("OK")
+                execstatus = HTML.success()
             else:
                 print("FAILED")
+                execstatus = HTML.fail()
 
             # Creating the Build Page
-            htmllog = self.env.htmloutput + "/" + self.env.testnumber + "-systemc-build-log.html"
-            html = HTMLPage(htmllog)
-            html.init_page("SystemC rev " + self.systemc_hash[0:7] + " build output")
-            html.append_log_formatted(self.env.logfolder + "systemc.log")
-            html.write_page()
+            htmllog = env.htmloutput + "/" + env.testnumber + "-systemc-build-log.html"
+            HTML.log_to_html(log, htmllog, "SystemC rev " + self.systemc_hash[0:7] + " build output")
 
             # Creating a csv line to add in the TestsPage (ArchC Table)
             csvline = 'SystemC;' + self.systemc + ';'
             csvline += HTML.href(self.systemc_hash[0:7], \
                                 self.systemc.replace('.git','') + '/commit/' + \
                                 self.systemc_hash) + ';'
-            if cmdret:
-                csvline += HTML.success()
-            else:
-                csvline += HTML.fail()
+
+            csvline += execstatus
             csvline += '(' + HTML.href('log', htmllog) + ')'
             return csvline
 
@@ -134,19 +128,19 @@ class ArchC ():
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-        cmdret = exec_to_log(cmd, self.env.logfolder + "archc.log")
-        if cmdret:
+        log = create_rand_file()
+        execstatus = ''
+        if exec_to_log(cmd, log): 
             print("OK")
+            execstatus = HTML.success()
         else:
             print("FAILED")
+            execstatus = HTML.fail()
 
         # Creating the Build Page
-        htmllog = self.env.htmloutput + "/" + self.env.testnumber + "-archc-build-log.html" 
-        html = HTMLPage(htmllog)
-        html.init_page("ArchC rev "+self.archc_hash[0:7]+" build output")
-        html.append_log_formatted(self.env.logfolder + "archc.log")
-        html.write_page()
-
+        htmllog = env.htmloutput + "/" + env.testnumber + "-archc-build-log.html"
+        HTML.log_to_html(log, htmllog, "ArchC rev "+self.archc_hash[0:7]+" build output")
+        
         # Creating a csv line to add in the TestsPage (ArchC Table)
         csvline = 'ArchC;' + self.archc + ';' 
         if self.archc_hash != '-' :
@@ -155,10 +149,7 @@ class ArchC ():
         else:
             csvline += self.archc_hash[0:7] + ';'
 
-        if cmdret:
-            csvline += HTML.success()
-        else:
-            csvline += HTML.fail()
+        csvline += execstatus
         csvline += '(' + HTML.href('log', htmllog) + ')'
         
         return csvline + '\n' + systemc_csvline
@@ -172,34 +163,32 @@ class Simulator (SimulatorPage):
     desc        = ""
 
     cross       = ""
+    endian      = ""
 
+    run         = ""
     inputfile   = ""
     linkpath    = ""
+    simfolder   = ""
     simsrc      = ""
-    buildlog    = ""
 
     model_hash  = ""
 
-    env         = None
     benchmarks  = []
 
-    def __init__(self, name, inputfile, env):
-        super().__init__(env, name)
+    def __init__(self, name, run, inputfile):
+        super().__init__(name)
         self.name = name
-        self.linkpath = ""
         self.inputfile = inputfile
-        self.env  = env
+        self.linkpath = ""
         self.benchmarks = []
 
         self.generator = ""
         self.options   = ""
-        self.desc      = ""
+        self.desc      = "mips"
         
-        self.simsrc    = env.workspace + "/" + name
-
-        self.buildlog = env.workspace + "/log/" + name + ".log"
-        mkdir(os.path.dirname(self.buildlog))
-        rm(self.buildlog)
+        self.simfolder = env.workspace + "/" + name + '/'
+        self.simsrc    = self.simfolder + "/src/"
+        self.run       = self.simsrc + run
 
     def set_linkpath(self, linkpath):
         self.linkpath = linkpath
@@ -208,7 +197,13 @@ class Simulator (SimulatorPage):
             self.model_hash = '-'
         else:
             git_clone(self.linkpath, self.simsrc, self.name)
-            self.model_hash = get_githash(self.simsrc)
+
+        self.model_hash = get_githash(self.simsrc)
+        with open(self.simsrc + self.inputfile, 'r') as f:
+            for l in f:
+                s = re.search(r'set_endian\("(.*)"\)', l)
+                if s:
+                    self.endian = s.group(1)
 
     def set_generator(self, generator):
         self.generator = generator
@@ -225,8 +220,8 @@ class Simulator (SimulatorPage):
     def append_benchmark(self, benchmark):
         self.benchmarks.append(benchmark)
 
-    def gen_and_build(self, archc_env_file):
-        cmd_source = 'source '+archc_env_file+' && '
+    def gen_and_build(self):
+        cmd_source = 'source '+env.archc_envfile+' && '
         cmd_cd     = "cd " + self.simsrc + " && "
         cmd_acsim  = self.generator + " " + self.inputfile + " " \
                     + self.options + " && "
@@ -237,18 +232,18 @@ class Simulator (SimulatorPage):
         print("| "+cmd)
         print("| Generating and Building... ", end="", flush=True)
 
-        cmdret =  exec_to_log(cmd, self.buildlog) 
-        if cmdret:
+        log = create_rand_file()
+        execstatus = ''
+        if exec_to_log(cmd, log):
             print("OK")
+            execstatus = HTML.success()
         else:
             print("FAILED")
+            execstatus = HTML.fail()
 
         # Creating the Build Page
-        buildpage = self.env.htmloutput + "/" + self.env.testnumber + "-" + self.name + "-build-log.html"
-        html = HTMLPage(buildpage)
-        html.init_page(self.name + " rev "+self.model_hash[0:7]+" build output")
-        html.append_log_formatted(self.buildlog)
-        html.write_page()
+        buildpage = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-build-log.html"
+        HTML.log_to_html(log, buildpage, self.name + " rev "+self.model_hash[0:7]+" build output")
 
         # Creating a csv line to add in the TestsPage (Tests Table)
         tableline = self.name + ';' + self.linkpath + ';' ;
@@ -257,25 +252,38 @@ class Simulator (SimulatorPage):
                                  self.linkpath.replace('.git','') + '/commit/' + self.model_hash) + ';'
         else:
             tableline += '-' + ';'
+
         tableline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
-
-        if cmdret:
-            tableline += HTML.success()
-        else:
-            tableline += HTML.fail()
-
+        tableline += execstatus
         tableline += '(' + HTML.href('log', buildpage) + ')' + ';'
         return tableline
 
     def run_tests(self):
 
         for bench in self.benchmarks:
-            bench.download()
-            bench.run_tests(self.cross, self.name)
+            bench.download(self.simfolder+'/benchmark/')
+            bench.run_tests(self.cross, self.endian, self.name, self.run)
+            self.create_benchmark_table(bench)
 
+        self.close_sim_page()
+
+        test_results = ""
+        if self.tests_had_failed():
+            test_results = HTML.fail()
+        else:
+            test_results = HTML.success()
+
+        hostname = socket.gethostname()
+        cpuinfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-cpuinfo.txt"
+        meminfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-meminfo.txt"
+
+        exec_to_log("cat /proc/cpuinfo", cpuinfofile)        
+        exec_to_log("cat /proc/meminfo", meminfofile)        
+        
         # Finishing the csv line with the tests results to add in the TestsPage (Tests Table)
-        tableline = '(' + HTML.href('log', self.page) + ');-;'
-
+        tableline = test_results + '(' + HTML.href('report', self.page) + ');' + hostname + \
+                                   ' (' + HTML.href('cpuinfo', cpuinfofile) + ', ' + \
+                                          HTML.href('meminfo', meminfofile) + ');'
         return tableline
 
 
@@ -295,13 +303,11 @@ class Simulator (SimulatorPage):
 class CrossCompilers():
 
     cross = {}
-    prefix = "/xtools/"
 
-    def add_cross(self, env, cross, model):
+    def add_cross(self, cross, model):
         if model in self.cross:
             return self.cross[model]
-        prefix = env.workspace + self.prefix + "/"
-        mkdir(prefix)
+        prefix = env.xtoolsfolder        
         if (cross.startswith("./")) or (cross.startswith("/")):
             prefix += os.path.basename(cross)
             if not os.path.isdir(prefix+'/bin'):

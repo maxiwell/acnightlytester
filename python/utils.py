@@ -1,18 +1,21 @@
 
 
 import os, sys, signal
+from random import randint
 import subprocess
 import datetime as date
 import fileinput
 import urllib.request 
+from .env import Env
 
 version = "4.0"
-workspace = ""
+env = Env()
 debug = False
 
 def mkdir(directory):
     if not os.path.exists(directory+"/"):
         os.makedirs(directory+"/")
+    return directory
 
 def cp(src, dst):
     mkdir(dst)
@@ -36,6 +39,7 @@ def exec_to_log(cmd, log):
     else:
         return False
 
+
 def gettime():
     now = date.datetime.now()
     return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
@@ -55,6 +59,11 @@ def insert_line_before_once(filepath, newline, pattern):
                     print (newline + '\n')
                     repetition -= 1
             print ( l )
+
+def create_rand_file():
+    return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
+    
+
 
 def get_http(url, dest):
     pkg = os.path.basename(url)
@@ -84,7 +93,7 @@ def git_clone(url, dest, pkg = "" ):
 
 def cleanup():
     if (debug == False):
-        rm(workspace);
+        rm(env.workspace);
 
 def abort(string):
     cleanup()

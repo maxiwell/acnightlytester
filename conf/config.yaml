@@ -18,6 +18,7 @@ simulators:
         #modules   : [acsim, powersc, hltrace]
         modules   : [acsim]
         inputfile : mips.ac
+        run       : mips.x --load=
         link/path : https://github.com/archc/mips.git
         #link/path : /home/max/ArchC/processors/github/mips
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
@@ -26,6 +27,7 @@ simulators:
     arm:
         modules   : [acsim, powersc, hltrace] 
         inputfile : arm.ac
+        run       : arm.x --load=
         link/path : https://github.com/archc/arm.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
         #cross     : /home/max/x-tools/arm-newlib-eabi
@@ -33,6 +35,7 @@ simulators:
     powerpc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : powerpc.ac
+        run       : powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
         #cross     : /home/max/x-tools/powerpc-newlib-elf
@@ -40,6 +43,7 @@ simulators:
     sparc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : sparc.ac
+        run       : sparc.x --load=
         link/path : https://github.com/archc/sparc.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
         #cross     : /home/max/x-tools/sparc-newlib-elf
@@ -61,20 +65,20 @@ modules:
    
 benchmarks:
     mibench:
-        automotive/basicmath : [small,large]
-        automotive/bitcount  : [small,large]
-        automotive/qsort     : [small,large]
-        automotive/susan     : [small,large]
-        telecomm/adpcm       : [small,large]
-        telecomm/CRC32       : [small,large]
-        telecomm/FFT         : [small,large] 
-        telecomm/gsm         : [small,large]
-        network/dijkstra     : [small,large]
-        network/patricia     : [small,large] 
-        security/rijndael    : [small,large]
-        security/sha         : [small,large]
-        consumer/jpeg        : [small,large]
-        consumer/lame        : [small,large]
+        #automotive/basicmath : [small]
+        automotive/bitcount  : [small]
+        automotive/qsort     : [small]
+        automotive/susan     : [small]
+        #telecomm/adpcm       : [small]
+        telecomm/CRC32       : [small]
+        #telecomm/FFT         : [small] 
+        telecomm/gsm         : [small]
+        network/dijkstra     : [small]
+        network/patricia     : [small] 
+        security/rijndael    : [small]
+        security/sha         : [small]
+        consumer/jpeg        : [small]
+        #consumer/lame        : [small]
     spec2006:
         gcc        : [test]
         bzip_2     : [test]

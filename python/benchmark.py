@@ -2,16 +2,35 @@
 from .utils import *
 from .html import *
 
+class Dataset:
+    name = ""
+    execpage = ""
+    diffpage = ""
+    diffstatus = ""
+
+    def __init__(self, name, app, sim):
+        self.name = name
+        self.execpage = env.htmloutput + '/' + env.testnumber + '-' + sim + '-' + \
+                        app.replace('/','_') + '-' + name.replace('/','_') + '-run.html'
+                        
+        self.diffpage = env.htmloutput + '/' + env.testnumber + '-' + sim + '-' + \
+                        app.replace('/','_') + '-' + name.replace('/','_') + '-diff.html'
+
+        self.diffstatus = True
 
 class App:
     name = ""
     dataset = []
-    htmlsuffix = ""
+    appfolder   = ""
+    buildpage   = ""
+    buildstatus = ""
 
-    def __init__(self, name):
+    def __init__(self, name, sim):
         self.name = name
         self.dataset = []
-        self.htmlsuffix = "-"+name.replace('/','_')+"-build.html"
+
+        self.buildpage = env.htmloutput + '/' + env.testnumber + '-' + sim + \
+                         '-' + name.replace('/','_') + '-build.html'
 
     def append_dataset(self, dataset):
         self.dataset.append(dataset)
@@ -27,21 +46,9 @@ class App:
 
 
 class Benchmark():
-
-    folder     = "/benchmark/"
-    folderpath = "" 
-
     name = ""
-    env  = None
     apps = []
 
-    htmllog = ""
-
-    def __init__(self, env):
-        self.folderpath = env.workspace + self.folder 
-        self.env = env
-        self.buildlog = env.workspace + "/log/"
-        
     def append_app(self, app):
         self.apps.append(app)
 
@@ -50,30 +57,48 @@ class Benchmark():
         for a in self.apps:
             print ( "| "+a.tostring())
 
-    def download(self, cross):
+    def download(self, benchmark_folder):
         raise NotImplementedError("Please Implement this method")
 
-    def run_tests(self):
+    def run_tests(self, cross_folder, simulator_endian, simulator_name, simulator_cmdline):
         raise NotImplementedError("Please Implement this method")
 
     def compile(self, cmd, app, sim):
 
         print(app.name+"...",end="")
 
-        buildlog = self.buildlog + sim + "-" + app.name.replace('/','_')+'.log'
-        cmdret = exec_to_log(cmd, buildlog)
-        if cmdret:
+        log = create_rand_file()
+        if exec_to_log(cmd, log):
             print("OK")
+            app.buildstatus = HTML.success()
         else:
             print("FAILED")
+            app.buildstatus = HTML.fail()
 
-        htmllog = self.env.htmloutput + "/" + self.env.testnumber + "-" + sim + app.htmlsuffix
-        html    = HTMLPage(htmllog)
-        html.init_page(sim + ' ' + app.name + ' build log')
-        html.append_log_formatted(buildlog)
-        html.write_page()
-    
+        HTML.log_to_html(log, app.buildpage, \
+                    sim + ' ' + app.name + ' build log')
 
+    def run(self, cmd, app, dataset):
+        log = create_rand_file()
+        exec_to_log(cmd, log)
+        HTML.log_to_html(log, dataset.execpage, \
+                         app.name + ' ' + dataset.name + ' Simulator Output')
+
+    def diff(self, app, dataset, appfolder, goldenfolder, outputfiles):
+        html = HTMLPage(dataset.diffpage)
+        html.init_page(app.name + ' ' + dataset.name + ' output compared with Golden Model')
+        for f in outputfiles:
+            cmd  = 'diff -w '
+            cmd +=    appfolder + '/' + f + ' '
+            cmd += goldenfolder + '/' + f + ' '
+            
+            log = create_rand_file() 
+            if not exec_to_log(cmd, log):
+                dataset.diffstatus = False
+
+            html.append_raw('<h2>File '+f+'</h2>\n') 
+            html.append_log_formatted(log)
+            html.write_page()
 
 
 

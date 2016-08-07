@@ -4,7 +4,7 @@ import sys, re
 import os
 import csv
 import string
-from . import utils
+from .utils import *
 
 class HTML:
     @staticmethod    
@@ -44,17 +44,24 @@ class HTML:
             table_string += "</tr>" 
         return table_string
 
+    @staticmethod
+    def log_to_html(logfile, htmlfile, title):
+        html = HTMLPage(htmlfile)
+        html.init_page(title)
+        html.append_log_formatted(logfile)
+        html.write_page()
 
 class Table:
 
     string = ""
+    ncols  = 0
 
-    def init(self, cols):
+    def __init__(self, cols):
         self.string += '<p><table border="1" cellspacing="1" cellpadding="5"><tr>\n'
         for col in cols:
             self.string += "<th>"+col+"</th>"
         self.string += "</tr>\n"
-        return self.string
+        ncols = len(cols)
 
     def close(self):
         self.string += "</table></p>\n" 
@@ -133,19 +140,29 @@ class HTMLPage:
         self.string += strlog
         self.string += "</font></td></tr></table>"
 
+    def tests_had_failed(self):
+        with open(self.page, 'r') as f:
+            for l in f:
+                if re.search("Failed", l):
+                    return True
+        return False
+
+    def get_page(self):
+        return self.page
+
+
 
    
 class IndexPage(HTMLPage):
 
-    def __init__(self, env):
+    def __init__(self):
         super().__init__(env.htmloutput + "/" + env.indexhtml)
         
         if not os.path.isfile (self.page):
             self.init_page("ArchC's NightlyTester Main Page")
-            self.append_raw("<p>Produced by NightlyTester @ "+utils.gettime()+"</p>")
+            self.append_raw("<p>Produced by NightlyTester @ "+gettime()+"</p>")
             
-            table = Table()
-            table.init(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
+            table = Table(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
             table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
             table.close()
             
@@ -154,7 +171,7 @@ class IndexPage(HTMLPage):
 
     def update_index_table(self, strline):
         htmlline = HTML.csvline_to_html(strline)
-        utils.insert_line_before_once( filepath = self.page,  \
+        insert_line_before_once( filepath = self.page,  \
                                        newline  = htmlline,       \
                                        pattern  = '<tr><td>' )    
 
@@ -166,17 +183,15 @@ class TestsPage(HTMLPage):
 
     suffix = "-tests.html"
 
-    def __init__(self, env):
+    def __init__(self):
         super().__init__(env.htmloutput + "/" + env.testnumber + self.suffix)
         
-        self.init_page("NightlyTester "+utils.version+" Run #"+env.testnumber)
-        self.append_raw("Produced by NightlyTester @ "+utils.gettime())
+        self.init_page("NightlyTester "+version+" Run #"+env.testnumber)
+        self.append_raw("Produced by NightlyTester @ "+gettime())
 
-        self.tablearchc = Table()
-        self.tablearchc.init(['Component', 'Link/Path', 'Version', 'Status'])
+        self.tablearchc = Table(['Component', 'Link/Path', 'Version', 'Status'])
 
-        self.tabletests = Table()
-        self.tabletests.init(['Name', 'Link/Path', 'Version', 'Generator', 'Options', \
+        self.tabletests = Table(['Name', 'Link/Path', 'Version', 'Generator', 'Options', \
                               'Compilation', 'Benchmark', 'Tested in'])
          
     def close_tests_page(self):
@@ -196,31 +211,56 @@ class TestsPage(HTMLPage):
     def update_tests_table(self, strline):
         self.tabletests.append_csv_line(strline)
 
-    def tests_had_failed(self):
-        with open(self.page, 'r') as f:
-            for l in f:
-                if re.search("Failed", l):
-                    return True
-        return False
-        self.testspage.update_archc_table(self.cross.get_crosscsvline())
-
-    def get_tests_page(self):
-        return self.page
-
 
 class SimulatorPage(HTMLPage):
     
-    tables = []
-
-    def __init__(self, env, sim):
+    benchtable = []
+    def __init__(self, sim):
         super().__init__(env.htmloutput + "/" + env.testnumber + "-" + sim + ".html")
 
 
         self.init_page(sim + " Simulator")
-        self.append_raw("Produced by NightlyTester @ "+utils.gettime())
+        self.append_raw("Produced by NightlyTester @ "+gettime())
 
     def close_sim_page(self):
         self.write_page()
 
 
+    def create_benchmark_table(self, bench):
+        cols = [bench.name.title(), 'Compilation']
+        maxlen = bench.apps[0]
+        for app in bench.apps:
+            if len(app.dataset) > len(maxlen.dataset):
+                maxlen = app
+        for ds in maxlen.dataset:
+            cols += [ds.name.title()+' Dataset', 'Speed', '#Instrs.']
+
+        table = Table(cols)
+
+        bench.apps.sort(key=lambda x: x.name)
+        for app in bench.apps:
+            csvline = app.name + ';' + app.buildstatus + \
+                      '(' + HTML.href('log', app.buildpage) + ');'
+            for ds in app.dataset:
+                if ds.diffstatus:
+                    csvline += HTML.success()
+                else:
+                    csvline += HTML.fail()
+
+                csvline += '(' + HTML.href('output', ds.execpage) + ', ' + \
+                                 HTML.href('diff', ds.diffpage) + ');'
+                with open(ds.execpage) as f:
+                    speed = ''
+                    instr = ''
+                    for l in f:
+                        s = re.search('Simulation speed: (.*)',l)
+                        i = re.search('Number of instructions executed: (.*)',l)
+                        if s:
+                            speed += s.group(1)+'<br>'
+                        if i:
+                            instr += i.group(1)+'<br>'
+                    csvline += speed + ';' + instr + ';'
+
+            table.append_csv_line(csvline)
+        self.append_table(table)
 

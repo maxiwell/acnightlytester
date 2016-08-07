@@ -1,6 +1,6 @@
 
 nightly:
-    workspace  : /tmp/TEMP
+    workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
     simulators : [mips]
  
@@ -9,8 +9,8 @@ archc:
     systemc   : /home/max/ArchC/tools/systemc/2.3.1/
     binutils  : 
     gdb       : 
-    #link/path : https://github.com/archc/archc.git
-    link/path : /home/max/ArchC/archc/github/src/
+    link/path : https://github.com/archc/archc.git
+    #link/path : /home/max/ArchC/archc/github/src/
 
 
 simulators:
@@ -65,29 +65,29 @@ modules:
    
 benchmarks:
     mibench:
-        #automotive/basicmath : [small]
-        #automotive/bitcount  : [small]
-        #automotive/qsort     : [small]
-        #automotive/susan     : [small]
-        #telecomm/adpcm       : [small]
-        #telecomm/CRC32       : [small]
-        #telecomm/FFT         : [small] 
-        #telecomm/gsm         : [small]
-        #network/dijkstra     : [small]
-        #network/patricia     : [small] 
-        #security/rijndael    : [small]
-        security/sha         : [small]
-        #consumer/jpeg        : [small]
-        #consumer/lame        : [small]
+        automotive/basicmath : [small,large]
+        automotive/bitcount  : [small,large]
+        automotive/qsort     : [small,large]
+        automotive/susan     : [small,large]
+        telecomm/adpcm       : [small,large]
+        telecomm/CRC32       : [small,large]
+        telecomm/FFT         : [small,large] 
+        telecomm/gsm         : [small,large]
+        network/dijkstra     : [small,large]
+        network/patricia     : [small,large] 
+        security/rijndael    : [small,large]
+        security/sha         : [small,large]
+        consumer/jpeg        : [small,large]
+        consumer/lame        : [small,large]
     spec2006:
-        #401.bzip2      : [test]
-        #403.gcc        : [test]
-        #429.mcf        : [test] 
+        401.bzip2      : [test]
+        403.gcc        : [test]
+        429.mcf        : [test] 
         445.gobmk      : [test]
-        #456.hmmer      : [test]
-        #458.sjeng      : [test]
-        #462.libquantum : [test]
-        #464.h264ref    : [test] 
+        456.hmmer      : [test]
+        458.sjeng      : [test]
+        462.libquantum : [test]
+        464.h264       : [test] 
 
         # apps with problems
         #omnetpp    = [test] 

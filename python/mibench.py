@@ -24,10 +24,10 @@ class mibench (Benchmark):
             else: 
                 get_http(base+p, benchmark_folder)
 
-            #tar = tarfile.open(benchmark_folder+"/"+p)
-            #tar.extractall(benchmark_folder)
-            #fullprefix = benchmark_folder + tar.getnames()[0]
-            #tar.close()
+            tar = tarfile.open(benchmark_folder+"/"+p)
+            tar.extractall(benchmark_folder)
+            fullprefix = benchmark_folder + tar.getnames()[0]
+            tar.close()
 
     def exportenv (self, cross, endian):
         export = ""

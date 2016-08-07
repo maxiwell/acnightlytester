@@ -23,7 +23,7 @@ simulators:
         #link/path : /home/max/ArchC/processors/github/mips
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
         cross     : /home/max/x-tools/mips-newlib-elf
-        benchmarks: [mibench]
+        benchmarks: [mibench, spec2006]
     arm:
         modules   : [acsim, powersc, hltrace] 
         inputfile : arm.ac
@@ -66,29 +66,28 @@ modules:
 benchmarks:
     mibench:
         #automotive/basicmath : [small]
-        automotive/bitcount  : [small]
-        automotive/qsort     : [small]
-        automotive/susan     : [small]
+        #automotive/bitcount  : [small]
+        #automotive/qsort     : [small]
+        #automotive/susan     : [small]
         #telecomm/adpcm       : [small]
-        telecomm/CRC32       : [small]
+        #telecomm/CRC32       : [small]
         #telecomm/FFT         : [small] 
-        telecomm/gsm         : [small]
-        network/dijkstra     : [small]
-        network/patricia     : [small] 
-        security/rijndael    : [small]
+        #telecomm/gsm         : [small]
+        #network/dijkstra     : [small]
+        #network/patricia     : [small] 
+        #security/rijndael    : [small]
         security/sha         : [small]
-        consumer/jpeg        : [small]
+        #consumer/jpeg        : [small]
         #consumer/lame        : [small]
     spec2006:
-        gcc        : [test]
-        bzip_2     : [test]
-        gcc        : [test]
-        mcf        : [test] 
-        gobmk      : [test]
-        hmmer      : [test]
-        sjeng      : [test]
-        libquantum : [test]
-        h264       : [test] 
+        #401.bzip2      : [test]
+        #403.gcc        : [test]
+        #429.mcf        : [test] 
+        445.gobmk      : [test]
+        #456.hmmer      : [test]
+        #458.sjeng      : [test]
+        #462.libquantum : [test]
+        #464.h264ref    : [test] 
 
         # apps with problems
         #omnetpp    = [test] 

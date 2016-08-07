@@ -76,8 +76,20 @@ class Table:
             for cel in cels:
                 if cel:
                     table_string += "<td>"+cel+"</td>"
-            table_string += "</tr>" 
+            table_string += "</tr>\n" 
         self.string += table_string
+
+    def append_csv_line_bold(self, line):
+        table_string = ""
+        for l in line.splitlines():
+            table_string += "<tr>"
+            cels = l.split(';')
+            for cel in cels:
+                if cel:
+                    table_string += "<td><b>"+cel+"</b></td>"
+            table_string += "</tr>\n" 
+        self.string += table_string
+
 
 
     def from_csv(self, csvfile):
@@ -94,7 +106,7 @@ class Table:
         return self.string
 
     def append_raw(self, html):
-        self.string += html + '\n'
+        self.string += html 
         return self.string
 
 
@@ -214,28 +226,30 @@ class TestsPage(HTMLPage):
 
 class SimulatorPage(HTMLPage):
     
-    benchtable = []
+    benchtable = None
+
     def __init__(self, sim):
         super().__init__(env.htmloutput + "/" + env.testnumber + "-" + sim + ".html")
-
+        self.benchtable = Table([])
 
         self.init_page(sim + " Simulator")
         self.append_raw("Produced by NightlyTester @ "+gettime())
 
     def close_sim_page(self):
+        self.append_table(self.benchtable)
         self.write_page()
 
 
     def create_benchmark_table(self, bench):
-        cols = [bench.name.title(), 'Compilation']
+        cols = bench.name.title() + ';Compilation;'
         maxlen = bench.apps[0]
         for app in bench.apps:
             if len(app.dataset) > len(maxlen.dataset):
                 maxlen = app
         for ds in maxlen.dataset:
-            cols += [ds.name.title()+' Dataset', 'Speed', '#Instrs.']
+            cols += ds.name.title()+' Dataset;Speed;#Instrs.;'
 
-        table = Table(cols)
+        self.benchtable.append_csv_line_bold(cols)
 
         bench.apps.sort(key=lambda x: x.name)
         for app in bench.apps:
@@ -261,6 +275,6 @@ class SimulatorPage(HTMLPage):
                             instr += i.group(1)+'<br>'
                     csvline += speed + ';' + instr + ';'
 
-            table.append_csv_line(csvline)
-        self.append_table(table)
+            self.benchtable.append_csv_line(csvline)
+        self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')
 

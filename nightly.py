@@ -9,6 +9,7 @@ from python           import utils
 from python.html      import HTML
 
 from python.mibench   import mibench
+from python.spec2006  import spec2006
 
 def command_line_handler():
     parser = argparse.ArgumentParser()

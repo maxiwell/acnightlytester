@@ -56,15 +56,13 @@ def insert_line_before_once(filepath, newline, pattern):
         for l in f:
             if l.startswith(pattern):
                 if repetition > 0:
-                    print (newline + '\n')
+                    print (newline)
                     repetition -= 1
-            print ( l )
+            print ( l , end = '' )
 
 def create_rand_file():
     return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
     
-
-
 def get_http(url, dest):
     pkg = os.path.basename(url)
     print("Getting " + pkg + " over HTTP... ", end="", flush=True)

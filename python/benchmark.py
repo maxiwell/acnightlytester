@@ -49,6 +49,9 @@ class Benchmark():
     name = ""
     apps = []
 
+    def __init__(self):
+        self.apps = []
+
     def append_app(self, app):
         self.apps.append(app)
 
@@ -65,7 +68,7 @@ class Benchmark():
 
     def compile(self, cmd, app, sim):
 
-        print(app.name+"...",end="")
+        print('| [compiling] '+app.name+"... ",end="", flush=True)
 
         log = create_rand_file()
         if exec_to_log(cmd, log):
@@ -79,8 +82,13 @@ class Benchmark():
                     sim + ' ' + app.name + ' build log')
 
     def run(self, cmd, app, dataset):
+        print('| [ running ] ' + app.name + " (" + dataset.name + ")... ",end="", flush=True)
         log = create_rand_file()
-        exec_to_log(cmd, log)
+        if exec_to_log(cmd, log):
+            print("OK")
+        else:
+            print("FAILED")
+
         HTML.log_to_html(log, dataset.execpage, \
                          app.name + ' ' + dataset.name + ' Simulator Output')
 

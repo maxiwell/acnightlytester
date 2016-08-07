@@ -261,6 +261,7 @@ class Simulator (SimulatorPage):
     def run_tests(self):
 
         for bench in self.benchmarks:
+            print('|--- ' + bench.name + ' ---', flush=True)
             bench.download(self.simfolder+'/benchmark/')
             bench.run_tests(self.cross, self.endian, self.name, self.run)
             self.create_benchmark_table(bench)

@@ -7,6 +7,7 @@ import tarfile
 class mibench (Benchmark):
 
     def __init__(self):
+        super().__init__()
         self.name = "mibench"
 
     def download(self, benchmark_folder):

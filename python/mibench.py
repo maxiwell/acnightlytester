@@ -116,4 +116,9 @@ class mibenchtest(mibench):
     def __init__(self, name):
         super().__init__(name)
 
+class mibenchsmall(mibench):
+
+    def __init__(self, name):
+        super().__init__(name)
+
 

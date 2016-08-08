@@ -7,11 +7,11 @@ nightly:
     workspace  : /files/nightly/TEMP${RANDOM}
     #workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
-    simulators : [mips, arm, powerpc, sparc]
+    simulators : [mips-acsim-pw]
  
 archc:
-    systemc   : https://github.com/archc/systemc.git
-    #systemc   : /home/max/ArchC/tools/systemc/2.3.1/
+    #systemc   : https://github.com/archc/systemc.git
+    systemc   : /home/max/ArchC/tools/systemc/2.3.1/
     binutils  : 
     gdb       : 
     link/path : https://github.com/archc/archc.git
@@ -44,8 +44,8 @@ simulators:
     mips-acsim-pw:
         model     : mips
         modules   : [acsim, powersc]
-        benchmarks: [mibench, spec2006]
-        #benchmarks: [mibenchtest]
+        #benchmarks: [mibench, spec2006]
+        benchmarks: [mibenchtest]
     mips-hlt:
         model     : mips
         modules   : [hltrace]

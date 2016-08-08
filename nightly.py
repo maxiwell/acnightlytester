@@ -41,13 +41,20 @@ def config_parser_yaml(configfile):
             archc.set_binutils(yamls['archc']['binutils'])
             archc.set_linkpath(yamls['archc']['link/path'])
 
-            for _sim in yamls['nightly']['simulators']:
-                inputfile = yamls['simulators'][_sim]['inputfile']
-                run       = yamls['simulators'][_sim]['run']
-                linkpath  = yamls['simulators'][_sim]['link/path']
-                crosslink = yamls['simulators'][_sim]['cross']
+            simlist = []
+            if yamls['nightly']['simulators'] == 'all':
+                simlist = yamls['simulators']
+            else:
+                simlist = yamls['nightly']['simulators']
+
+            for _sim in simlist:
+                model     = yamls['simulators'][_sim]['model']
+                inputfile = yamls['models'][model]['inputfile']
+                run       = yamls['models'][model]['run']
+                linkpath  = yamls['models'][model]['link/path']
+                crosslink = yamls['models'][model]['cross']
                 for _module in yamls['simulators'][_sim]['modules']:
-                    sim = Simulator(_sim+"-"+_module, run, inputfile)
+                    sim = Simulator(model+'-'+_module, model, _module, run, inputfile)
                     sim.set_linkpath(linkpath)
                     sim.set_generator(yamls['modules'][_module]['generator'])
                     sim.set_options(yamls['modules'][_module]['options'])
@@ -65,8 +72,8 @@ def config_parser_yaml(configfile):
                                 app.append_dataset(dataset)
                             bench.append_app(app)
                         sim.append_benchmark(bench)
-                    cross.add_cross(crosslink, _sim)
-                    sim.set_cross( cross.get_cross_bin(_sim) ) 
+                    cross.add_cross(crosslink, model)
+                    sim.set_cross( cross.get_cross_bin(model) ) 
                     simulators.append(sim)
             
             for s in simulators:

@@ -157,7 +157,9 @@ class ArchC ():
 
 class Simulator (SimulatorPage):
     name        = ""
+    model       = ""
 
+    module      = ""
     generator   = ""
     options     = ""
     desc        = ""
@@ -177,13 +179,15 @@ class Simulator (SimulatorPage):
 
     custom_links = {}
 
-    def __init__(self, name, run, inputfile):
+    def __init__(self, name, model, module, run, inputfile):
         super().__init__(name)
         self.name = name
+        self.model = model
         self.inputfile = inputfile
         self.linkpath = ""
         self.benchmarks = []
 
+        self.module    = module
         self.generator = ""
         self.options   = ""
         self.desc      = "mips"
@@ -299,11 +303,13 @@ class Simulator (SimulatorPage):
 
     def printsim(self):
         print("Simulator: " + self.name)
-        print("| from " + self.linkpath)
-        print("| generator: " + self.generator)
-        print("| options: " + self.options )
+        print("| model: " + self.model)
+        print("| - from " + self.linkpath)
+        print("| module: "+ self.module)
+        print("| - generator: " + self.generator)
+        print("| - options: " + self.options )
         if (self.desc):
-            print("| desc: " + self.desc )
+            print("| - desc: " + self.desc )
         print("| benchmark: ", end="")
         for b in self.benchmarks:
             print("["+b.name+"] ", end="")

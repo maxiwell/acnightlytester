@@ -1,17 +1,20 @@
 
+
+# S{RANDOM}     : Random number up to 9999
+# ${SCRIPTROOT} : Nightly path
+
 nightly:
     workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
     simulators : [mips, arm, powerpc, sparc]
  
 archc:
-    #systemc   : https://github.com/archc/systemc.git
-    systemc   : /home/max/ArchC/tools/systemc/2.3.1/
+    systemc   : https://github.com/archc/systemc.git
+    #systemc   : /home/max/ArchC/tools/systemc/2.3.1/
     binutils  : 
     gdb       : 
     link/path : https://github.com/archc/archc.git
     #link/path : /home/max/ArchC/archc/github/src/
-
 
 simulators:
     mips:
@@ -20,8 +23,8 @@ simulators:
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         #link/path : /home/max/ArchC/processors/github/mips
-        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
-        cross     : /home/max/x-tools/mips-newlib-elf
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        #cross     : /home/max/x-tools/mips-newlib-elf
         benchmarks: [mibench, spec2006]
         #benchmarks: [mibenchtest]
     arm:
@@ -29,29 +32,22 @@ simulators:
         inputfile : arm.ac
         run       : ./arm.x --load=
         link/path : https://github.com/archc/arm.git
-        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
-        cross     : /home/max/x-tools/arm-newlib-eabi
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
         benchmarks: [mibench, spec2006]
-        #benchmarks: [mibenchtest]
     powerpc:
         modules   : [acsim, hltrace] 
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
-        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
-        cross     : /home/max/x-tools/powerpc-newlib-elf
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
         benchmarks: [mibench, spec2006]
-        #benchmarks: [mibenchtest]
     sparc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : sparc.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/archc/sparc.git
-        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
-        cross     : /home/max/x-tools/sparc-newlib-elf
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
         benchmarks: [mibench, spec2006]
-        #benchmarks: [mibenchtest]
-
 
 # 'custom links' must end with ' && echo <file>'
 # The echo output will be used as target file by the link

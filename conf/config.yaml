@@ -2,7 +2,7 @@
 nightly:
     workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
-    simulators : [mips]
+    simulators : [mips, arm, powerpc, sparc]
  
 archc:
     #systemc   : https://github.com/archc/systemc.git
@@ -15,39 +15,39 @@ archc:
 
 simulators:
     mips:
-        #modules   : [acsim, powersc, hltrace]
-        modules   : [acsim]
+        modules   : [acsim, powersc, hltrace]
+        #modules   : [acsim]
         inputfile : mips.ac
-        run       : mips.x --load=
+        run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         #link/path : /home/max/ArchC/processors/github/mips
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
         cross     : /home/max/x-tools/mips-newlib-elf
-        benchmarks: [mibench, spec2006]
+        benchmarks: [mibenchtest]
     arm:
-        modules   : [acsim, powersc, hltrace] 
+        modules   : [acsim, hltrace] 
         inputfile : arm.ac
-        run       : arm.x --load=
+        run       : ./arm.x --load=
         link/path : https://github.com/archc/arm.git
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
-        #cross     : /home/max/x-tools/arm-newlib-eabi
-        benchmarks: [mibench]
+        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+        cross     : /home/max/x-tools/arm-newlib-eabi
+        benchmarks: [mibenchtest]
     powerpc:
-        modules   : [acsim, powersc, hltrace] 
+        modules   : [acsim, hltrace] 
         inputfile : powerpc.ac
-        run       : powerpc.x --load=
+        run       : ./powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
-        #cross     : /home/max/x-tools/powerpc-newlib-elf
-        benchmarks: [mibench]
+        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+        cross     : /home/max/x-tools/powerpc-newlib-elf
+        benchmarks: [mibenchtest]
     sparc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : sparc.ac
-        run       : sparc.x --load=
+        run       : ./sparc.x --load=
         link/path : https://github.com/archc/sparc.git
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
-        #cross     : /home/max/x-tools/sparc-newlib-elf
-        benchmarks: [mibench]
+        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+        cross     : /home/max/x-tools/sparc-newlib-elf
+        benchmarks: [mibenchtest]
 
 modules: 
     acsim: 
@@ -58,12 +58,25 @@ modules:
         generator: acsim
         options: -abi -nw -pw
         desc:
+        custom links:
+            power report: |
+                echo window_power_report_*.csv
     hltrace: 
         generator: acsim
         options: -abi -nw -hlt
         desc:
+        custom links:
+            high level trace: |
+                tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
    
 benchmarks:
+    mibenchtest:
+        automotive/qsort     : [small]
+        security/sha         : [small]
+        automotive/susan     : [small]
+        telecomm/gsm         : [small]
+        consumer/jpeg        : [small]
+
     mibench:
         automotive/basicmath : [small,large]
         automotive/bitcount  : [small,large]
@@ -87,7 +100,7 @@ benchmarks:
         456.hmmer      : [test]
         458.sjeng      : [test]
         462.libquantum : [test]
-        464.h264       : [test] 
+        464.h264ref    : [test] 
 
         # apps with problems
         #omnetpp    = [test] 

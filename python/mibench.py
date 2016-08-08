@@ -6,9 +6,9 @@ import tarfile
 
 class mibench (Benchmark):
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
-        self.name = "mibench"
+        self.name = name
 
     def download(self, benchmark_folder):
         self.benchfolder  = benchmark_folder + "/SourceMibench/"
@@ -114,4 +114,10 @@ class mibench (Benchmark):
                 self.run (cmd_env + cmd_run, app, ds)
                 self.diff (app, ds, appfolder, goldenfolder, outputfiles[ds.name])
                 
+
+class mibenchtest(mibench):
+
+    def __init__(self, name):
+        super().__init__(name)
+
 

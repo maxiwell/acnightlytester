@@ -8,8 +8,8 @@ from python.benchmark import Benchmark, App, Dataset
 from python           import utils
 from python.html      import HTML
 
-from python.mibench   import mibench
-from python.spec2006  import spec2006
+from python.mibench   import *
+from python.spec2006  import *
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
@@ -54,7 +54,7 @@ def config_parser_yaml(configfile):
                     sim.set_desc(yamls['modules'][_module]['desc'])
         
                     for _bench in yamls['simulators'][_sim]['benchmarks']:
-                        bench = eval(_bench)()
+                        bench = eval(_bench)(_bench)
                         for _app in yamls['benchmarks'][_bench] :
                             app = App(_app, sim.name)
                             for _dataset in yamls['benchmarks'][_bench][_app]:

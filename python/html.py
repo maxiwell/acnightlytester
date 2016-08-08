@@ -79,14 +79,14 @@ class Table:
             table_string += "</tr>\n" 
         self.string += table_string
 
-    def append_csv_line_bold(self, line):
+    def append_csv_line_as_title(self, line):
         table_string = ""
         for l in line.splitlines():
             table_string += "<tr>"
             cels = l.split(';')
             for cel in cels:
                 if cel:
-                    table_string += "<td><b>"+cel+"</b></td>"
+                    table_string += "<th>"+cel+"</th>"
             table_string += "</tr>\n" 
         self.string += table_string
 
@@ -249,7 +249,7 @@ class SimulatorPage(HTMLPage):
         for ds in maxlen.dataset:
             cols += ds.name.title()+' Dataset;Speed;#Instrs.;'
 
-        self.benchtable.append_csv_line_bold(cols)
+        self.benchtable.append_csv_line_as_title(cols)
 
         bench.apps.sort(key=lambda x: x.name)
         for app in bench.apps:

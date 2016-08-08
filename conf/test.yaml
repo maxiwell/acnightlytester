@@ -43,7 +43,7 @@ models:
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
 simulators:
-    mips-acsim:
+    mips-acsim-pw:
         model     : mips
         modules   : [acsim, powersc]
         #benchmarks: [mibench, spec2006]

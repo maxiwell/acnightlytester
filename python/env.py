@@ -4,7 +4,7 @@ from . import utils
 
 class Env:
 
-    indexhtml  = "index.html"
+    indexhtml       = "index.html"
 
     logfolder       = '/log/'
     xtoolsfolder    = '/xtools/'
@@ -15,6 +15,18 @@ class Env:
     def __init__(self):
         self.random     = randint(0000,9999)
         self.scriptroot = os.getcwd() + '/'
+
+    def copy(self, env):
+        self.indexhtml     = env.indexhtml
+        self.logfolder     = env.logfolder
+        self.xtoolsfolder  = env.xtoolsfolder
+        self.condorfolder  = env.condorfolder
+        self.archc_envfile = env.archc_envfile
+        self.random        = env.random
+        self.scriptroot    = env.scriptroot
+        self.workspace     = env.workspace
+        self.htmloutput    = env.htmloutput
+        self.testnumber    = env.testnumber
 
     def setworkspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 

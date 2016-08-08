@@ -2,28 +2,29 @@
 
 import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
+import pickle
+
+sys.path.append('../')
 from python.archc     import ArchC, Simulator, CrossCompilers
-from python.nightly   import Nightly, Env
+from python.nightly   import Nightly, Condor
 from python.benchmark import Benchmark, App, Dataset
 from python           import utils
 from python.html      import HTML
-
 from python.mibench   import *
 from python.spec2006  import *
 
 def command_line_handler():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--force', dest='force', action='store_true', \
-                        help='run the Nightly even without GIT modification')
-    parser.add_argument('--condor', dest='condor', action='store_true', \
-                        help='run over the condor')
     parser.add_argument('-dbg', '--debug', dest='debug', action='store_true', \
                         help="don't remove the 'workspace' folder")
-    parser.add_argument('configfile', metavar='config.yaml', \
-                        help='configuration file')
+    parser.add_argument('simulatorobj', metavar='mips-acsin.p')
+    parser.add_argument('envobj', metavar='env.p')
+    parser.add_argument('archcobj', metavar='archc.p')
+    parser.add_argument('crossobj', metavar='cross.p')
+
     return parser.parse_args()
 
-def config_parser_yaml(configfile):
+def config_parser_yaml(configfile, workspace, htmloutput):
     archc   = ArchC()
     simulators = []
     cross = CrossCompilers()
@@ -31,8 +32,9 @@ def config_parser_yaml(configfile):
     with open(configfile, 'r') as config:
         try: 
             yamls = yaml.load(config)
-            utils.env.setworkspace(yamls['nightly']['workspace'])
-            utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
+
+            utils.env.setworkspace(workspace)
+            utils.env.sethtmloutput(htmloutput)
             utils.env.printenv()
 
             archc.update_paths()
@@ -90,18 +92,13 @@ def main():
     args        = command_line_handler()
     utils.debug = args.debug
     
-    nightly = config_parser_yaml(args.configfile)
+    simulator = pickle.load (open (args.simulatorobj, "rb"))
+    utils.env.copy(pickle.load (open (args.envobj, "rb")))
+    archc     = pickle.load (open (args.archcobj, "rb"))
+    cross     = pickle.load (open (args.crossobj, "rb"))
+    condor = Condor( archc, simulator, cross)
 
-    if not nightly.git_hashes_changed() and not args.force:
-        utils.abort("All repositories have tested in the last Nightly execution")
-
-#    nightly.building_archc()
-
-    for simulator in nightly.simulators:
-        if args.condor:
-            nightly.condor_runnning_simulator(simulator)
-        else:
-            nightly.running_simulator(simulator)
+    condor.running_simulator(simulator)
     
 #    nightly.finalize()
      

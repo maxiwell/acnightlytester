@@ -2,6 +2,7 @@
 import os, re, shutil
 from .html import *
 from . import utils
+import pickle
 
 class Nightly ():
 
@@ -19,24 +20,32 @@ class Nightly ():
 
     def running_simulators (self):
         for simulator in self.simulators:
-            self.running_simulator(simulator)
-
-    def running_simulator (self, simulator):
-        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
-        line  = simulator.gen_and_build();
-        line += simulator.run_tests()
-        self.testspage.update_tests_table(line)
+            env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+            line  = simulator.gen_and_build();
+            line += simulator.run_tests()
+            self.testspage.update_tests_table(line)
 
     def condor_runnning_simulator(self, simulator):
+        envobj        = env.condorfolder + 'env.p'
+        archcobj      = env.condorfolder + 'archc.p'
+        crossobj      = env.condorfolder + 'cross.p'
+        simulatorobj  = env.condorfolder + simulator.name + '.p'
         condorexec = env.condorfolder + 'condor.py'
+        condorfile = env.condorfolder + simulator.name + '.condor'
+        
+        pickle.dump( simulator,  open (simulatorobj, "wb" ))
+        pickle.dump( env,        open (envobj, "wb" ))
+        pickle.dump( self.archc, open (archcobj, "wb" ))
+        pickle.dump( self.cross, open (crossobj, "wb" ))
         shutil.copyfile(env.scriptroot + 'condor/condor.py', condorexec)
-        condorfile =  env.condorfolder + simulator.name + '.condor'
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
+
         search_and_replace(condorfile, '{EXECUTABLE}', 'condor.py')
-        search_and_replace(condorfile, '{ARGUMENTS}', simulator.model)
+        search_and_replace(condorfile, '{ARGUMENTS}', simulatorobj + ' ' + envobj + ' ' \
+                                                      archicobj + ' ' + crossobj )
         search_and_replace(condorfile, '{TESTROOT}', env.workspace)
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
-#        exec_to_var ('condor_submit ' + condorfile)
+        exec_to_var ('condor_submit ' + condorfile)
 
     def finalize(self):
 
@@ -84,6 +93,20 @@ class Nightly ():
                             return True
         return False
 
-    
+class Condor:
+
+    def __init__(self, archc, simulator, cross):
+        self.archc      = archc
+        self.simulator = simulator
+        self.cross      = cross
+        
+    def running_simulator (self, simulator):
+        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+        line  = simulator.gen_and_build();
+        line += simulator.run_tests()
+#        self.testspage.update_tests_table(line)
+
+
+
 
 

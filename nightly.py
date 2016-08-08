@@ -75,7 +75,8 @@ def config_parser_yaml(configfile):
                     cross.add_cross(crosslink, model)
                     sim.set_cross( cross.get_cross_bin(model) ) 
                     simulators.append(sim)
-            
+           
+            simulators.sort(key=lambda x: x.name)
             for s in simulators:
                 s.printsim()
 

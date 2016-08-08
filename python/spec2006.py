@@ -6,9 +6,9 @@ import tarfile
 
 class spec2006 (Benchmark):
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
-        self.name = "spec2006"
+        self.name = name
 
     def download(self, benchmark_folder):
         self.benchfolder  = benchmark_folder + "/SourceSPEC2006/CPU2006/"

@@ -36,10 +36,11 @@ class Nightly ():
             test_results = HTML.success()
         
         csvline =  env.testnumber + ';' + gettime() + ';'
-        csvline += test_results + "(" + HTML.href("log", self.testspage.get_page()) + ');'
+        csvline += test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ');'
         csvline += "-;-;"
        
         self.indexpage.update_index_table(csvline)
+        cleanup()
 
 
     def git_hashes_changed(self):

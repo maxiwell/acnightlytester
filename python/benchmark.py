@@ -1,15 +1,19 @@
 
 from .utils import *
 from .html import *
+import shutil
 
 class Dataset:
     name = ""
     execpage = ""
     diffpage = ""
     diffstatus = ""
+    custom_links = {}
 
     def __init__(self, name, app, sim):
+        self.custom_links = {}
         self.name = name
+
         self.execpage = env.htmloutput + '/' + env.testnumber + '-' + sim + '-' + \
                         app.replace('/','_') + '-' + name.replace('/','_') + '-run.html'
                         
@@ -48,9 +52,14 @@ class App:
 class Benchmark():
     name = ""
     apps = []
+    custom_links = {}
+    simulator_name = ""
 
     def __init__(self):
+        self.name = ""
         self.apps = []
+        self.custom_links = {}
+        self.simulator_name = ""
 
     def append_app(self, app):
         self.apps.append(app)
@@ -66,12 +75,12 @@ class Benchmark():
     def run_tests(self, cross_folder, simulator_endian, simulator_name, simulator_cmdline):
         raise NotImplementedError("Please Implement this method")
 
-    def compile(self, cmd, app, sim):
-
+    def compile(self, srcfolder, cmd, app):
         print('| [compiling] '+app.name+"... ",end="", flush=True)
+        cmd_cd = "cd " + srcfolder + " && "
 
         log = create_rand_file()
-        if exec_to_log(cmd, log):
+        if exec_to_log(cmd_cd + cmd, log):
             print("OK")
             app.buildstatus = HTML.success()
         else:
@@ -79,12 +88,14 @@ class Benchmark():
             app.buildstatus = HTML.fail()
 
         HTML.log_to_html(log, app.buildpage, \
-                    sim + ' ' + app.name + ' build log')
+                    self.simulator_name + ' ' + app.name + ' build log')
 
-    def run(self, cmd, app, dataset):
+    def run(self, appfolder, cmd, app, dataset):
         print('| [ running ] ' + app.name + " (" + dataset.name + ")... ",end="", flush=True)
+        cmd_cd = "cd " + appfolder + " && "
+
         log = create_rand_file()
-        if exec_to_log(cmd, log):
+        if exec_to_log(cmd_cd + cmd, log):
             print("OK")
         else:
             print("FAILED")
@@ -92,7 +103,20 @@ class Benchmark():
         HTML.log_to_html(log, dataset.execpage, \
                          app.name + ' ' + dataset.name + ' Simulator Output')
 
-    def diff(self, app, dataset, appfolder, goldenfolder, outputfiles):
+        try:
+            for link, cmdline in self.custom_links.items():
+                cmd = cmd_cd + cmdline.strip()
+                f = exec_to_var(cmd).split('\n')[-1]
+                ext = find_ext(f)
+
+                dataset.custom_links[link] = env.htmloutput + '/' + env.testnumber + '-' + self.simulator_name + '-' + \
+                                             app.name.replace('/','_') + '-' + dataset.name + '-' + link.replace(' ','_') + ext
+    
+                shutil.move(appfolder + '/' + f, dataset.custom_links[link])
+        except:
+            print('ERROR in Custom Link command line')
+
+    def diff(self, appfolder, goldenfolder, outputfiles, app, dataset):
         html = HTMLPage(dataset.diffpage)
         html.init_page(app.name + ' ' + dataset.name + ' output compared with Golden Model')
         for f in outputfiles:

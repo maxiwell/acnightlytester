@@ -28,6 +28,11 @@ class HTML:
         return string
 
     @staticmethod
+    def lhref(title, url):
+        url = './'+os.path.basename(url)
+        return HTML.href(title, url)
+
+    @staticmethod
     def monospace(text):
         string = "<font face=\"Courier New\">"+text+"</font>"
         return string
@@ -254,15 +259,20 @@ class SimulatorPage(HTMLPage):
         bench.apps.sort(key=lambda x: x.name)
         for app in bench.apps:
             csvline = app.name + ';' + app.buildstatus + \
-                      '(' + HTML.href('log', app.buildpage) + ');'
+                      '(' + HTML.lhref('log', app.buildpage) + ');'
             for ds in app.dataset:
                 if ds.diffstatus:
                     csvline += HTML.success()
                 else:
                     csvline += HTML.fail()
 
-                csvline += '(' + HTML.href('output', ds.execpage) + ', ' + \
-                                 HTML.href('diff', ds.diffpage) + ');'
+                csvline += '(' + HTML.lhref('output', ds.execpage) + ', ' + \
+                                 HTML.lhref('diff', ds.diffpage) 
+                                 
+                for link, page in ds.custom_links.items():
+                    csvline += ', ' + HTML.lhref (link, page)
+                    
+                csvline += ');'
                 with open(ds.execpage) as f:
                     speed = ''
                     instr = ''

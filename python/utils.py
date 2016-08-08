@@ -39,6 +39,19 @@ def exec_to_log(cmd, log):
     else:
         return False
 
+def exec_to_var(cmd):
+    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    out, err = process.communicate(cmd.encode('utf-8'))
+    return out.strip().decode('utf-8')
+
+def find_ext(filename):
+    name = filename.split('.')
+    ext = ''
+    if len(name) == 2:
+        ext = '.'+name[1]
+    else:
+        ext = '.'+name[1]+'.'+name[2]
+    return ext
 
 def gettime():
     now = date.datetime.now()
@@ -90,8 +103,8 @@ def git_clone(url, dest, pkg = "" ):
 
 
 def cleanup():
-    if (debug == False):
-        rm(env.workspace);
+    if debug == False:
+        rm(env.workspace)
 
 def abort(string):
     cleanup()

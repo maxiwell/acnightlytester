@@ -52,7 +52,6 @@ class mibench (Benchmark):
             outputfiles['small'] = ['output_small.txt']
             outputfiles['large'] = ['output_large.txt']
             srcfolder = appfolder
-            cmd_env   = ''
 
             if app.name == 'automotive/basicmath':
                 outputfiles['small'] = ['output_small.txt']
@@ -68,7 +67,6 @@ class mibench (Benchmark):
                     outputfiles['small'] = ['output_small.adpcm', 'output_small.pcm']
                     outputfiles['large'] = ['output_large.adpcm', 'output_large.pcm']
                 srcfolder = appfolder + '/src'
-                cmd_env += "export ENDIAN='"+simulator_endian+"' && "
             elif app.name == 'telecomm/FFT':
                 outputfiles['small'] = ['output_small.txt', 'output_small.inv.txt']
                 outputfiles['large'] = ['output_large.txt', 'output_large.inv.txt']
@@ -85,7 +83,6 @@ class mibench (Benchmark):
                 else:
                     outputfiles['small'] = ['LITTLE_ENDIAN_output_small.enc', 'output_small.dec']
                     outputfiles['large'] = ['LITTLE_ENDIAN_output_large.enc', 'output_large.dec']
-                cmd_env += "export ENDIAN='"+simulator_endian+"' && "
             elif app.name == 'consumer/jpeg':
                 outputfiles['small'] = ['output_small_encode.jpeg', 'output_small_decode.ppm']
                 outputfiles['large'] = ['output_large_encode.jpeg', 'output_large_decode.ppm']
@@ -95,24 +92,23 @@ class mibench (Benchmark):
                 outputfiles['large'] = ['output_large.mp3']
                 srcfolder = appfolder + '/lame3.70'
                 
-            cmd  = "cd " + srcfolder + " && "
-            cmd += "make clean && "
+            cmd  = "make clean && "
             cmd += self.exportenv(cross_folder, simulator_endian) + " make "
     
-            self.compile(cmd, app, simulator_name)
+            self.compile(srcfolder, cmd, app)
     
-            cmd_env += "source "+env.archc_envfile+" && "
+            cmd_env  = "source "+env.archc_envfile+" && "
+            cmd_env += "export ENDIAN='"+simulator_endian+"' && "
             cmd_env += "export SIMULATOR='"+simulator_cmdline+"' && "
-            cmd_env += "cd " + self.benchfolder + app.name  + " && " 
            
-            for ds in app.dataset:
-                if ds.name == 'small':
+            for dataset in app.dataset:
+                if dataset.name == 'small':
                     cmd_run = " ./runme_small.sh"
-                if ds.name == 'large':
+                if dataset.name == 'large':
                     cmd_run = " ./runme_large.sh"
 
-                self.run (cmd_env + cmd_run, app, ds)
-                self.diff (app, ds, appfolder, goldenfolder, outputfiles[ds.name])
+                self.run  (appfolder, cmd_env + cmd_run, app, dataset)
+                self.diff (appfolder, goldenfolder, outputfiles[dataset.name], app, dataset)
                 
 
 class mibenchtest(mibench):

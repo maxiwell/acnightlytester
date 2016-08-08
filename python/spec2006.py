@@ -47,7 +47,6 @@ class spec2006 (Benchmark):
 
             outputfiles = {}
             srcfolder = appfolder + '/src'
-            cmd_env   = ''
 
             if app.name == '401.bzip2':
                 outputfiles['test'] = ['input.program.out']
@@ -67,22 +66,20 @@ class spec2006 (Benchmark):
                 outputfiles['test'] = ['foreman_test_baseline_encodelog.out']
                
             exportenv = self.exportenv(cross_folder, simulator_endian)
-            cmd  = "cd " + srcfolder + " && "
-            cmd += "make clean " + exportenv + " && "
+            cmd  = "make clean " + exportenv + " && "
             cmd += "make "       + exportenv
 
-            self.compile(cmd, app, simulator_name)
+            self.compile(srcfolder, cmd, app)
     
-            cmd_env += "source "+env.archc_envfile+" && "
+            cmd_env  = "source "+env.archc_envfile+" && "
             cmd_env += "export SIMULATOR='"+simulator_cmdline+"' && "
-            cmd_env += "cd " + self.benchfolder + app.name  + " && " 
            
-            for ds in app.dataset:
-                if ds.name == 'test':
+            for dataset in app.dataset:
+                if dataset.name == 'test':
                     cmd_run = " ./runme_test.sh"
                     goldenfolder = self.goldenfolder + app.name + '/data/test/output/'
 
-                self.run (cmd_env + cmd_run, app, ds)
-                self.diff (app, ds, appfolder, goldenfolder, outputfiles[ds.name])
+                self.run  (appfolder, cmd_env + cmd_run, app, dataset)
+                self.diff (appfolder, goldenfolder, outputfiles[dataset.name], app, dataset)
                 
 

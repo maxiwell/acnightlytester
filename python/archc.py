@@ -104,7 +104,7 @@ class ArchC ():
                                 self.systemc_hash) + ';'
 
             csvline += execstatus
-            csvline += '(' + HTML.href('log', htmllog) + ')'
+            csvline += '(' + HTML.lhref('log', htmllog) + ')'
             return csvline
 
     def build_archc(self):
@@ -150,7 +150,7 @@ class ArchC ():
             csvline += self.archc_hash[0:7] + ';'
 
         csvline += execstatus
-        csvline += '(' + HTML.href('log', htmllog) + ')'
+        csvline += '(' + HTML.lhref('log', htmllog) + ')'
         
         return csvline + '\n' + systemc_csvline
 
@@ -175,6 +175,8 @@ class Simulator (SimulatorPage):
 
     benchmarks  = []
 
+    custom_links = {}
+
     def __init__(self, name, run, inputfile):
         super().__init__(name)
         self.name = name
@@ -189,6 +191,8 @@ class Simulator (SimulatorPage):
         self.simfolder = env.workspace + "/" + name + '/'
         self.simsrc    = self.simfolder + "/src/"
         self.run       = self.simsrc + run
+
+        self.custom_links = {} 
 
     def set_linkpath(self, linkpath):
         self.linkpath = linkpath
@@ -217,7 +221,12 @@ class Simulator (SimulatorPage):
     def set_cross(self, path):
         self.cross = path
 
+    def set_custom_links(self, link, cmdline):
+        self.custom_links[link] = cmdline
+
     def append_benchmark(self, benchmark):
+        benchmark.custom_links   = self.custom_links
+        benchmark.simulator_name = self.name
         self.benchmarks.append(benchmark)
 
     def gen_and_build(self):
@@ -255,7 +264,7 @@ class Simulator (SimulatorPage):
 
         tableline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
         tableline += execstatus
-        tableline += '(' + HTML.href('log', buildpage) + ')' + ';'
+        tableline += '(' + HTML.lhref('log', buildpage) + ')' + ';'
         return tableline
 
     def run_tests(self):
@@ -282,9 +291,9 @@ class Simulator (SimulatorPage):
         exec_to_log("cat /proc/meminfo", meminfofile)        
         
         # Finishing the csv line with the tests results to add in the TestsPage (Tests Table)
-        tableline = test_results + '(' + HTML.href('report', self.page) + ');' + hostname + \
-                                   ' (' + HTML.href('cpuinfo', cpuinfofile) + ', ' + \
-                                          HTML.href('meminfo', meminfofile) + ');'
+        tableline = test_results + '(' + HTML.lhref('report', self.page) + ');' + hostname + \
+                                   ' (' + HTML.lhref('cpuinfo', cpuinfofile) + ', ' + \
+                                          HTML.lhref('meminfo', meminfofile) + ');'
         return tableline
 
 

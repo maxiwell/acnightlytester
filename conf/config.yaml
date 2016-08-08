@@ -16,14 +16,14 @@ archc:
 simulators:
     mips:
         modules   : [acsim, powersc, hltrace]
-        #modules   : [acsim]
         inputfile : mips.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         #link/path : /home/max/ArchC/processors/github/mips
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
         cross     : /home/max/x-tools/mips-newlib-elf
-        benchmarks: [mibenchtest]
+        benchmarks: [mibench, spec2006]
+        #benchmarks: [mibenchtest]
     arm:
         modules   : [acsim, hltrace] 
         inputfile : arm.ac
@@ -31,7 +31,8 @@ simulators:
         link/path : https://github.com/archc/arm.git
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
         cross     : /home/max/x-tools/arm-newlib-eabi
-        benchmarks: [mibenchtest]
+        benchmarks: [mibench, spec2006]
+        #benchmarks: [mibenchtest]
     powerpc:
         modules   : [acsim, hltrace] 
         inputfile : powerpc.ac
@@ -39,7 +40,8 @@ simulators:
         link/path : https://github.com/archc/powerpc.git
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
         cross     : /home/max/x-tools/powerpc-newlib-elf
-        benchmarks: [mibenchtest]
+        benchmarks: [mibench, spec2006]
+        #benchmarks: [mibenchtest]
     sparc:
         modules   : [acsim, powersc, hltrace] 
         inputfile : sparc.ac
@@ -47,7 +49,12 @@ simulators:
         link/path : https://github.com/archc/sparc.git
         #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
         cross     : /home/max/x-tools/sparc-newlib-elf
-        benchmarks: [mibenchtest]
+        benchmarks: [mibench, spec2006]
+        #benchmarks: [mibenchtest]
+
+
+# 'custom links' must end with ' && echo <file>'
+# The echo output will be used as target file by the link
 
 modules: 
     acsim: 
@@ -59,8 +66,8 @@ modules:
         options: -abi -nw -pw
         desc:
         custom links:
-            power report: |
-                echo window_power_report_*.csv
+            power report: | 
+                mv window_power_report_*.csv output.txt && echo output.txt
     hltrace: 
         generator: acsim
         options: -abi -nw -hlt

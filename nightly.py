@@ -29,7 +29,7 @@ def config_parser_yaml(configfile):
     cross = CrossCompilers()
 
     with open(configfile, 'r') as config:
-#        try: 
+        try: 
             yamls = yaml.load(config)
             utils.env.setworkspace(yamls['nightly']['workspace'])
             utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
@@ -52,6 +52,9 @@ def config_parser_yaml(configfile):
                     sim.set_generator(yamls['modules'][_module]['generator'])
                     sim.set_options(yamls['modules'][_module]['options'])
                     sim.set_desc(yamls['modules'][_module]['desc'])
+                    if 'custom links' in yamls['modules'][_module]:
+                        for cl in yamls['modules'][_module]['custom links']:
+                            sim.set_custom_links(cl, yamls['modules'][_module]['custom links'][cl])
         
                     for _bench in yamls['simulators'][_sim]['benchmarks']:
                         bench = eval(_bench)(_bench)
@@ -72,8 +75,8 @@ def config_parser_yaml(configfile):
             nightly = Nightly(archc, simulators, cross)
             return nightly
 
-#        except Exception as e:
-#            utils.abort("[config.yaml] "+str(e))
+        except Exception as e:
+            utils.abort("[config.yaml] "+str(e))
                 
 def main():
     args        = command_line_handler()

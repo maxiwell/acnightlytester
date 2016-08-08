@@ -1,5 +1,5 @@
 
-import os, re
+import os, re, shutil
 from .html import *
 from . import utils
 
@@ -19,10 +19,24 @@ class Nightly ():
 
     def running_simulators (self):
         for simulator in self.simulators:
-            env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
-            line  = simulator.gen_and_build();
-            line += simulator.run_tests()
-            self.testspage.update_tests_table(line)
+            self.running_simulator(simulator)
+
+    def running_simulator (self, simulator):
+        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+        line  = simulator.gen_and_build();
+        line += simulator.run_tests()
+        self.testspage.update_tests_table(line)
+
+    def condor_runnning_simulator(self, simulator):
+        condorexec = env.condorfolder + 'condor.py'
+        shutil.copyfile(env.scriptroot + 'condor/condor.py', condorexec)
+        condorfile =  env.condorfolder + simulator.name + '.condor'
+        shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
+        search_and_replace(condorfile, '{EXECUTABLE}', 'condor.py')
+        search_and_replace(condorfile, '{ARGUMENTS}', simulator.model)
+        search_and_replace(condorfile, '{TESTROOT}', env.workspace)
+        search_and_replace(condorfile, '{PREFIX}', simulator.name)
+#        exec_to_var ('condor_submit ' + condorfile)
 
     def finalize(self):
 

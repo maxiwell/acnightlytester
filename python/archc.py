@@ -325,7 +325,8 @@ class CrossCompilers():
             return self.cross[model]
         prefix = env.xtoolsfolder        
         if (cross.startswith("./")) or (cross.startswith("/")):
-            prefix += os.path.basename(cross)
+            prefix += os.path.basename(os.path.normpath(cross))
+            print(prefix)
             if not os.path.isdir(prefix+'/bin'):
                 get_local(cross, prefix, ' Cross')
             self.cross[model] = {'src' : cross, 'prefix' : prefix}

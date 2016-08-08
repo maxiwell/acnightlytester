@@ -8,20 +8,23 @@ class Env:
 
     logfolder       = '/log/'
     xtoolsfolder    = '/xtools/'
+    condorfolder    = '/condor/'
 
     archc_envfile   = ""
 
     def __init__(self):
         self.random     = randint(0000,9999)
-        self.scriptroot = os.getcwd()
+        self.scriptroot = os.getcwd() + '/'
 
     def setworkspace(self, workspace):
-        self.workspace       = self.resolvenv(workspace) 
-        self.logfolder       = self.workspace + self.logfolder
-        self.xtoolsfolder    = self.workspace + self.xtoolsfolder
+        self.workspace    = self.resolvenv(workspace) 
+        self.logfolder    = self.workspace + self.logfolder
+        self.xtoolsfolder = self.workspace + self.xtoolsfolder
+        self.condorfolder = self.workspace + self.condorfolder
 
         utils.mkdir(self.logfolder)
         utils.mkdir(self.xtoolsfolder)
+        utils.mkdir(self.condorfolder)
 
     def sethtmloutput(self, htmloutput):
         self.htmloutput = self.resolvenv(htmloutput) 

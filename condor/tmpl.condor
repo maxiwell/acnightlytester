@@ -1,14 +1,14 @@
 universe = vanilla
-log = PREFIX.log
+log = {PREFIX}.log
 getenv = True
 
-executable = EXECUTABLE
-arguments = ARGUMENTS
-output = PREFIX.out
+executable = {EXECUTABLE}
+arguments = {ARGUMENTS}
+output = {PREFIX}.out
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = TESTROOT
+transfer_input_files = {TESTROOT}
 #transfer_output_files = /tmp/condor/
 
 #requirements = ((Machine == "n01.lsc.ic.unicamp.br") || (Machine == "n02.lsc.ic.unicamp.br") || (Machine == "n03.lsc.ic.unicamp.br") || (Machine == "n04.lsc.ic.unicamp.br"))
@@ -18,8 +18,5 @@ request_memory = 1024
 #priority = 20
 request_disk = 30000000
 
-
-
 queue 1
-
 

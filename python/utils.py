@@ -63,6 +63,11 @@ def get_githash(git):
         l = '-'
     return l
 
+def search_and_replace(filepath, pattern, string):
+    with fileinput.input(filepath, inplace=True) as f:
+        for l in f:
+            print (l.replace(pattern, string), end='')  
+
 def insert_line_before_once(filepath, newline, pattern):
     repetition = 1;
     with fileinput.input(filepath, inplace=True) as f:

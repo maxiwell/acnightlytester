@@ -4,7 +4,7 @@
 # ${SCRIPTROOT} : Nightly path
 
 nightly:
-    workspace  : /files/nightly/TEMP${RANDOM}
+    workspace  : /files/nightly/TEMP
     #workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
     simulators : [mips-acsim-pw]
@@ -23,7 +23,9 @@ models:
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         #link/path : /home/max/ArchC/processors/github/mips
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        #cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        cross     : /home/max/x-tools/mips-newlib-elf
+       
     arm:
         inputfile : arm.ac
         run       : ./arm.x --load=

@@ -1,0 +1,137 @@
+
+
+# S{RANDOM}     : Random number up to 9999
+# ${SCRIPTROOT} : Nightly path
+
+nightly:
+    workspace  : /files/nightly/TEMP${RANDOM}
+    #workspace  : /tmp/TEMP${RANDOM}
+    htmloutput : ${SCRIPTROOT}/public_html
+    simulators : [mips, arm, powerpc, sparc]
+ 
+archc:
+    systemc   : https://github.com/archc/systemc.git
+    #systemc   : /home/max/ArchC/tools/systemc/2.3.1/
+    binutils  : 
+    gdb       : 
+    link/path : https://github.com/archc/archc.git
+    #link/path : /home/max/ArchC/archc/github/src/
+
+models:
+    mips:
+        inputfile : mips.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/archc/mips.git
+        #link/path : /home/max/ArchC/processors/github/mips
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    arm:
+        inputfile : arm.ac
+        run       : ./arm.x --load=
+        link/path : https://github.com/archc/arm.git
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+    powerpc:
+        inputfile : powerpc.ac
+        run       : ./powerpc.x --load=
+        link/path : https://github.com/archc/powerpc.git
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+    sparc:
+        inputfile : sparc.ac
+        run       : ./sparc.x --load=
+        link/path : https://github.com/archc/sparc.git
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+
+simulators:
+    mips-acsim-pw:
+        model     : mips
+        modules   : [acsim, powersc]
+        benchmarks: [mibench, spec2006]
+        #benchmarks: [mibenchtest]
+    mips-hlt:
+        model     : mips
+        modules   : [hltrace]
+        benchmarks: [mibench]
+    arm-acsim-pw:
+        model     : arm
+        modules   : [acsim, powersc]
+        benchmarks: [mibench, spec2006]
+    arm-hlt:
+        model     : arm
+        modules   : [hltrace]
+        benchmarks: [mibench]
+    powerpc-acsim-pw:
+        model     : powerpc
+        modules   : [acsim, powersc]
+        benchmarks: [mibench, spec2006]
+    powerpc-hlt:
+        model     : powerpc
+        modules   : [hltrace]
+        benchmarks: [mibench]
+    sparc-acsim-pw:
+        model     : sparc
+        modules   : [acsim, powersc]
+        benchmarks: [mibench, spec2006]
+    sparc-hlt:
+        model     : sparc
+        modules   : [hltrace]
+        benchmarks: [mibench]
+
+# 'custom links' must end with ' && echo <file>'
+# The echo output will be used as target file by the link
+
+modules: 
+    acsim: 
+        generator: acsim
+        options: -abi -nw
+        desc:
+    powersc:
+        generator: acsim
+        options: -abi -nw -pw
+        desc:
+        custom links:
+            power report: | 
+                mv window_power_report_*.csv output.txt && echo output.txt
+    hltrace: 
+        generator: acsim
+        options: -abi -nw -hlt
+        desc:
+        custom links:
+            high level trace: |
+                tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
+   
+benchmarks:
+    mibenchtest:
+        automotive/qsort     : [small]
+        security/sha         : [small]
+        automotive/susan     : [small]
+        telecomm/gsm         : [small]
+        consumer/jpeg        : [small]
+    mibench:
+        automotive/basicmath : [small,large]
+        automotive/bitcount  : [small,large]
+        automotive/qsort     : [small,large]
+        automotive/susan     : [small,large]
+        telecomm/adpcm       : [small,large]
+        telecomm/CRC32       : [small,large]
+        telecomm/FFT         : [small,large] 
+        telecomm/gsm         : [small,large]
+        network/dijkstra     : [small,large]
+        network/patricia     : [small,large] 
+        security/rijndael    : [small,large]
+        security/sha         : [small,large]
+        consumer/jpeg        : [small,large]
+        consumer/lame        : [small,large]
+    spec2006:
+        401.bzip2      : [test]
+        403.gcc        : [test]
+        429.mcf        : [test] 
+        445.gobmk      : [test]
+        456.hmmer      : [test]
+        458.sjeng      : [test]
+        462.libquantum : [test]
+        464.h264ref    : [test] 
+
+        # apps with problems
+        #omnetpp    = [test] 
+        #astar      = [test]
+
+

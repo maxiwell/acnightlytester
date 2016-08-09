@@ -20,10 +20,13 @@ class Nightly ():
 
     def running_simulators (self):
         for simulator in self.simulators:
-            env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
-            line  = simulator.gen_and_build();
-            line += simulator.run_tests()
-            self.testspage.update_tests_table(line)
+            self.running_simulator(simulator)
+
+    def running_simulator(self, simulator):
+        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+        line  = simulator.gen_and_build();
+        line += simulator.run_tests()
+        self.testspage.update_tests_table(line)
 
     def condor_runnning_simulator(self, simulator):
         envobj        = env.condorfolder + 'env.p'

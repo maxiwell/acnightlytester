@@ -4,13 +4,11 @@ import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
 
 sys.path.append(os.path.dirname(__file__))
-sys.path.append(os.path.dirname(__file__) + '/python/')
 
 from python.archc     import ArchC, Simulator 
 from python.nightly   import Nightly, Env
-from python.benchmark import Benchmark, App, Dataset
+from python.benchmark import App, Dataset
 from python           import utils
-from python.html      import HTML
 
 from python.mibench   import *
 from python.spec2006  import *
@@ -102,7 +100,7 @@ def main():
     for simulator in nightly.simulators:
         if args.condor:
             nightly.condor_runnning_simulator(simulator)
-            # The Condor simulation that will finalize the page
+            # nightly.finalize() is called by condor.py in each node machine
         else:
             nightly.running_simulator(simulator)
             nightly.finalize()

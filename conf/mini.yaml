@@ -51,7 +51,7 @@ simulators:
     arm-acsim-pw:
         model     : arm
         modules   : [acsim, powersc]
-        benchmarks: [mibench, spec2006]
+        benchmarks: [mibench]
     arm-hlt:
         model     : arm
         modules   : [hltrace]
@@ -59,7 +59,7 @@ simulators:
     powerpc-acsim-pw:
         model     : powerpc
         modules   : [acsim, powersc]
-        benchmarks: [mibench, spec2006]
+        benchmarks: [mibench]
     powerpc-hlt:
         model     : powerpc
         modules   : [hltrace]

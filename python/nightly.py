@@ -41,7 +41,7 @@ class Nightly ():
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
-        search_and_replace(condorfile, '{ARGUMENTS}', envobj + ' ' + simulatorobj + ' ' + archcobj)
+        search_and_replace(condorfile, '{ARGUMENTS}', envobj + ' ' + archcobj + ' ' + simulatorobj)
         search_and_replace(condorfile, '{TESTROOT}', env.workspace)
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
         exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)

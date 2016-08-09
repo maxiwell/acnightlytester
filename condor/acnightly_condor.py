@@ -4,7 +4,9 @@ import os, re, argparse, yaml, signal, sys
 from configparser     import ConfigParser
 import pickle
 
-sys.path.append('../')
+sys.path.append(os.path.dirname(__file__) + '/../')
+sys.path.append(os.path.dirname(__file__) + '/../python/')
+
 from python.archc     import ArchC, Simulator, CrossCompilers
 from python.nightly   import Nightly, Condor
 from python.benchmark import Benchmark, App, Dataset

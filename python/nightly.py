@@ -33,7 +33,7 @@ class Nightly ():
         archcobj      = env.condorfolder + 'archc.p'
         crossobj      = env.condorfolder + 'cross.p'
         simulatorobj  = env.condorfolder + simulator.name + '.p'
-        condorexec = env.condorfolder + 'condor.py'
+        condorexec = env.condorfolder + 'acnighlty_condor.py'
         condorfile = env.condorfolder + simulator.name + '.condor'
         
         pickle.dump( simulator,  open (simulatorobj, "wb" ))
@@ -43,9 +43,9 @@ class Nightly ():
         shutil.copyfile(env.scriptroot + 'condor/condor.py', condorexec)
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
 
-        search_and_replace(condorfile, '{EXECUTABLE}', 'condor.py')
+        search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
         search_and_replace(condorfile, '{ARGUMENTS}', simulatorobj + ' ' + envobj + ' ' + \
-                                                      archicobj + ' ' + crossobj )
+                                                      archcobj + ' ' + crossobj )
         search_and_replace(condorfile, '{TESTROOT}', env.workspace)
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
         exec_to_var ('condor_submit ' + condorfile)

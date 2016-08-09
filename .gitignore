@@ -11,3 +11,5 @@ sources/older
 *.conf
 __pycache__
 xtools
+*.yaml
+*.yml

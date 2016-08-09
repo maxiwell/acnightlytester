@@ -4,8 +4,8 @@
 # ${SCRIPTROOT} : Nightly path
 
 nightly:
-    workspace  : /tmp/TEMP
-    htmloutput : /home/maxiwell/public_html/nightly
+    workspace  : /tmp/TEMP${RANDOM}
+    htmloutput : ${SCRIPTROOT}/home/maxiwell/public_html/
     simulators : [mips-acsim-pw]
  
 archc:
@@ -41,7 +41,7 @@ models:
 simulators:
     mips-acsim-pw:
         model     : mips
-        modules   : [acsim]
+        modules   : [acsim, powersc]
         #benchmarks: [mibench, spec2006]
         benchmarks: [mibenchtest]
     mips-hlt:

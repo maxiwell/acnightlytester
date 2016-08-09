@@ -49,8 +49,11 @@ class Nightly ():
         self.testspage.close_tests_page()
 
         # [IndexPage] Init 
+        tags = "index"
+        for s in self.simulators:
+            tags += s.name+'archc'
         csvline  =  env.testnumber + ';' + gettime() 
-        csvline += HTML.running('index', 1)
+        csvline += HTML.running(tags, 1)
         csvline += ';-;' + gethostname() 
         self.indexpage.update_index_table(csvline)
 
@@ -102,10 +105,10 @@ class Nightly ():
             test_results = HTML.fail()
         else:
             test_results = HTML.success()
-        
+       
         csvline = test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ');'
         search_and_replace_first (self.indexpage.get_page(), \
-                            '<td tag=\'index\'.*</td></td>',
+                            '<td tag=\'index.*</td></td>',
                             HTML.csvcells_to_html(csvline))
         cleanup()
 
@@ -147,7 +150,7 @@ class Condor:
         env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
-#        self.testspage.update_tests_table(line)
+        self.testspage.update_tests_table(line)
 
 
 

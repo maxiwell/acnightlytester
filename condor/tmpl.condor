@@ -1,5 +1,6 @@
 universe = vanilla
 log = {PREFIX}.log
+error = {PREFIX}.err
 getenv = True
 
 executable = {EXECUTABLE}

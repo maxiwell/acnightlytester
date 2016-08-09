@@ -90,7 +90,10 @@ def get_bz2_or_folder(srclink, dstfolder):
             get_local(srclink, prefix)
         else:
             if not os.path.isfile(prefix):
-                get_http(srclink, dstfolder)
+                if srclink.startswith('http'):
+                    get_http(srclink, dstfolder)
+                else:
+                    get_local(srclink, prefix)
             tar = tarfile.open(prefix)
             prefix = dstfolder + tar.getnames()[0]
             if not os.path.isdir(prefix):

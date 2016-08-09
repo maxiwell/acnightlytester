@@ -195,7 +195,7 @@ class Simulator (SimulatorPage):
         self.simfolder = env.workspace + "/" + name + '/'
         self.simsrc    = self.simfolder + "/src/"
         self.run       = self.simsrc + run
-
+        
         self.custom_links = {} 
 
     def set_linkpath(self, linkpath):

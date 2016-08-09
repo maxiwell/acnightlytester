@@ -27,18 +27,19 @@ def main():
     args        = command_line_handler()
     utils.debug = args.debug
 
-    utils.rm(args.workspace)    
+    args.workspace = os.path.normpath(args.workspace)
+    utils.rm(args.workspace)
     os.symlink(os.getcwd(), args.workspace)
     
     utils.env.copy(pickle.load (open (args.envobj, "rb")))
     archc     = pickle.load (open (args.archcobj, "rb"))
     simulator = pickle.load (open (args.simulatorobj, "rb"))
     
-    condor = Condor( archc, simulator)
+    condor = Condor(archc, simulator)
 
     condor.running_simulator(simulator)
     
-#    nightly.finalize()
+    condor.finalize(simulator)
      
 if __name__ == '__main__':
     main()  

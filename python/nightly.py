@@ -51,11 +51,11 @@ class Nightly ():
         # [IndexPage] Init 
         tags = "index"
         for s in self.simulators:
-            tags += s.name+'archc'
-        csvline  =  env.testnumber + ';' + gettime() 
-        csvline += HTML.running(tags, 1)
-        csvline += HTML.lhref('log', self.testspage.get_page())
-        csvline += ';-;' + gethostname() 
+            tags += s.name
+        csvline  =  env.testnumber + ';' + gettime() + '</td>' 
+        csvline +=  HTML.running(tags, 1) 
+        csvline += '<td> -- ('  + HTML.lhref('log', self.testspage.get_page()) + ');-;'
+        csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
 
         index_page_path = self.indexpage.get_page()
@@ -102,14 +102,14 @@ class Nightly ():
     def finalize(self):
 
         test_results = ""
-        if self.testspage.tests_had_failed():
+        if had_failed(self.testspage.get_page()):
             test_results = HTML.fail()
         else:
             test_results = HTML.success()
        
-        csvline = test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ');'
+        csvline  = gettime() + ';' + test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ')'
         search_and_replace_first (self.indexpage.get_page(), \
-                            '<td tag=\'index.*</td></td>',
+                            '<td tag=\'index.*>log</a>\)</td>',
                             HTML.csvcells_to_html(csvline))
         cleanup()
 
@@ -141,19 +141,39 @@ class Nightly ():
                             return True
         return False
 
+
+
 class Condor:
 
     def __init__(self, archc, simulator):
         self.archc      = archc
         self.simulator = simulator
+
+        self.testspage = env.htmloutput + "/" + env.testnumber + TestsPage.suffix
+        self.indexpage = env.htmloutput + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
         env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
-        self.testspage.update_tests_table(line)
+        search_and_replace(self.testspage, \
+                   '<td tag=\'' + simulator.name + '\'.*</td></td>', \
+                   HTML.csvcells_to_html(line))
 
+    def finalize(self, simulator):
+        status = ''
+        if had_failed (self.indexpage):
+            status = 'FAILED'
+        else:
+            status = 'OK'
 
+        search_and_replace_first (self.indexpage, simulator.name, status)
 
+        csvline  = "(" + HTML.lhref("log", self.testspage) + ')'
+        
+        search_and_replace_first (self.indexpage, '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
 
+        search_and_replace_first (self.indexpage, '<td tag=\'index[FAILED]*\'.*>log</a>\)</td>', \
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
 

@@ -102,10 +102,12 @@ def main():
     for simulator in nightly.simulators:
         if args.condor:
             nightly.condor_runnning_simulator(simulator)
+            # The Condor simulation that will finalize the page
         else:
             nightly.running_simulator(simulator)
-    
-    nightly.finalize()
+            nightly.finalize()
+   
+     
      
 if __name__ == '__main__':
     main()  

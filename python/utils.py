@@ -121,7 +121,14 @@ def get_bz2_or_folder(srclink, dstfolder):
                 abort("Error in " + srclink + " download")
 
     return prefix+'/' 
-                      
+    
+def had_failed(page):
+   with open(page, 'r') as f:
+       for l in f:
+           if re.search("Failed", l):
+               return True
+   return False
+           
                       
 def get_http(url, dest):
     pkg = os.path.basename(url)

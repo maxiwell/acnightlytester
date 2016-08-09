@@ -172,17 +172,8 @@ class HTMLPage:
         self.string += strlog
         self.string += "</font></td></tr></table>"
 
-    def tests_had_failed(self):
-        with open(self.page, 'r') as f:
-            for l in f:
-                if re.search("Failed", l):
-                    return True
-        return False
-
     def get_page(self):
         return self.page
-
-
 
    
 class IndexPage(HTMLPage):
@@ -194,8 +185,8 @@ class IndexPage(HTMLPage):
             self.init_page("ArchC's NightlyTester Main Page")
             self.append_raw("<p>Produced by NightlyTester @ "+gettime()+"</p>")
             
-            table = Table(['Test #', 'Date', 'Report', 'Comment', 'Started by'])
-            table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
+            table = Table(['Test #', 'Initial', 'Final', 'Report', 'Comment', 'Started by'])
+            table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")
             table.close()
             
             self.append_table(table)

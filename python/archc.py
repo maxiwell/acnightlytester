@@ -273,7 +273,7 @@ class Simulator (SimulatorPage):
         self.close_sim_page()
 
         test_results = ""
-        if self.tests_had_failed():
+        if had_failed(self.page):
             test_results = HTML.fail()
         else:
             test_results = HTML.success()

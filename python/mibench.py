@@ -11,23 +11,11 @@ class mibench (Benchmark):
         self.name = name
 
     def download(self, benchmark_folder):
-        self.benchfolder  = benchmark_folder + "/SourceMibench/"
-        self.goldenfolder = benchmark_folder + "/GoldenMibench/"
-
         base = env.scriptroot + '/sources/'
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
-        pkg = ['GoldenMibench.tar.bz2', 'SourceMibench.tar.bz2'] 
-        for p in pkg:
-            if (base.startswith("./")) or (base.startswith("/")):
-                get_local(base+p, benchmark_folder)
-            else: 
-                get_http(base+p, benchmark_folder)
-
-            tar = tarfile.open(benchmark_folder+"/"+p)
-            tar.extractall(benchmark_folder)
-            fullprefix = benchmark_folder + tar.getnames()[0]
-            tar.close()
+        self.benchfolder  = get_bz2_or_folder(base + 'SourceMibench.tar.bz2', benchmark_folder) 
+        self.goldenfolder = get_bz2_or_folder(base + 'GoldenMibench.tar.bz2', benchmark_folder) 
 
     def exportenv (self, cross, endian):
         export = ""

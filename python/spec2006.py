@@ -11,23 +11,11 @@ class spec2006 (Benchmark):
         self.name = name
 
     def download(self, benchmark_folder):
-        self.benchfolder  = benchmark_folder + "/SourceSPEC2006/CPU2006/"
-        self.goldenfolder = benchmark_folder + "/GoldenSpec/"
-
         base = env.scriptroot + "/sources/"
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
-        pkg = ['GoldenSPEC2006.tar.bz2', 'SourceSPEC2006.tar.bz2'] 
-        for p in pkg:
-            if (base.startswith("./")) or (base.startswith("/")):
-                get_local(base+p, benchmark_folder)
-            else: 
-                get_http(base+p, benchmark_folder)
-
-            tar = tarfile.open(benchmark_folder+"/"+p)
-            tar.extractall(benchmark_folder)
-            fullprefix = benchmark_folder + tar.getnames()[0]
-            tar.close()
+        self.benchfolder  = get_bz2_or_folder(base + 'SourceSPEC2006.tar.bz2', benchmark_folder) + 'CPU2006/'
+        self.goldenfolder = get_bz2_or_folder(base + 'GoldenSPEC2006.tar.bz2', benchmark_folder) 
 
     def exportenv (self, cross, endian):
         export = ""

@@ -6,13 +6,12 @@ import pickle
 
 class Nightly ():
 
-    def __init__(self, archc, simulators, cross):
+    def __init__(self, archc, simulators):
         self.indexpage = IndexPage()
         self.testspage = TestsPage()
         
         self.archc      = archc
         self.simulators = simulators
-        self.cross      = cross
         
     def building_archc(self):
         line = self.archc.build_archc();
@@ -31,7 +30,6 @@ class Nightly ():
     def condor_runnning_simulator(self, simulator):
         envobj        = env.condorfolder + 'env.p'
         archcobj      = env.condorfolder + 'archc.p'
-        crossobj      = env.condorfolder + 'cross.p'
         simulatorobj  = env.condorfolder + simulator.name + '.p'
         condorexec = env.condorfolder + 'acnightly_condor.py'
         condorfile = env.condorfolder + simulator.name + '.condor'
@@ -39,20 +37,27 @@ class Nightly ():
         pickle.dump( simulator,  open (simulatorobj, "wb" ))
         pickle.dump( env,        open (envobj, "wb" ))
         pickle.dump( self.archc, open (archcobj, "wb" ))
-        pickle.dump( self.cross, open (crossobj, "wb" ))
         shutil.copyfile(env.scriptroot + 'condor/acnightly_condor.py', condorexec)
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
-        search_and_replace(condorfile, '{ARGUMENTS}', simulatorobj + ' ' + envobj + ' ' + \
-                                                      archcobj + ' ' + crossobj )
+        search_and_replace(condorfile, '{ARGUMENTS}', envobj + ' ' + simulatorobj + ' ' + archcobj)
         search_and_replace(condorfile, '{TESTROOT}', env.workspace)
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
         exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)
 
     def finalize(self):
+        
+        # Get cross csv lines:
+        crosslines = ''
+        # The dict is just to show one cross per model
+        models = {}
+        for s in self.simulators:
+            if not s.model in models:
+                crosslines += 'Cross ' + s.model + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
+                models[s.model] = s.crosslink
+        self.testspage.update_archc_table(crosslines)
 
-        self.testspage.update_archc_table(self.cross.get_crosscsvline())
         self.testspage.close_tests_page()
 
         test_results = ""
@@ -98,10 +103,9 @@ class Nightly ():
 
 class Condor:
 
-    def __init__(self, archc, simulator, cross):
+    def __init__(self, archc, simulator):
         self.archc      = archc
         self.simulator = simulator
-        self.cross      = cross
         
     def running_simulator (self, simulator):
         env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'

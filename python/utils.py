@@ -1,11 +1,12 @@
 
 
 import os, sys, signal
-from random import randint
+import tarfile
 import subprocess
 import datetime as date
 import fileinput
 import urllib.request 
+from random import randint
 from .env import Env
 
 version = "4.0"
@@ -80,6 +81,23 @@ def insert_line_before_once(filepath, newline, pattern):
 
 def create_rand_file():
     return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
+   
+def get_bz2_or_folder(srclink, dstfolder):
+    prefix  = dstfolder 
+    prefix += os.path.basename(os.path.normpath(srclink))
+    if not os.path.isdir(prefix):
+        if os.path.isdir(srclink):
+            get_local(srclink, prefix)
+        else:
+            if not os.path.isfile(prefix):
+                get_http(srclink, dstfolder)
+            tar = tarfile.open(prefix)
+            prefix = dstfolder + tar.getnames()[0]
+            if not os.path.isdir(prefix):
+                tar.extractall(dstfolder)
+            tar.close()
+    return prefix+'/'
+   
     
 def get_http(url, dest):
     pkg = os.path.basename(url)

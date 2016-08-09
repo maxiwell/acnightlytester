@@ -6,7 +6,7 @@ from configparser     import ConfigParser
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(__file__) + '/python/')
 
-from python.archc     import ArchC, Simulator, CrossCompilers
+from python.archc     import ArchC, Simulator 
 from python.nightly   import Nightly, Env
 from python.benchmark import Benchmark, App, Dataset
 from python           import utils
@@ -30,7 +30,6 @@ def command_line_handler():
 def config_parser_yaml(configfile):
     archc   = ArchC()
     simulators = []
-    cross = CrossCompilers()
 
     with open(configfile, 'r') as config:
         try: 
@@ -76,15 +75,14 @@ def config_parser_yaml(configfile):
                                 app.append_dataset(dataset)
                             bench.append_app(app)
                         sim.append_benchmark(bench)
-                    cross.add_cross(crosslink, model)
-                    sim.set_cross( cross.get_cross_bin(model) ) 
+                    sim.set_cross( crosslink )
                     simulators.append(sim)
            
             simulators.sort(key=lambda x: x.name)
             for s in simulators:
                 s.printsim()
 
-            nightly = Nightly(archc, simulators, cross)
+            nightly = Nightly(archc, simulators)
             return nightly
 
         except Exception as e:
@@ -99,7 +97,7 @@ def main():
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")
 
-    nightly.building_archc()
+#    nightly.building_archc()
 
     for simulator in nightly.simulators:
         if args.condor:

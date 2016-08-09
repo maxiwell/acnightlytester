@@ -3,7 +3,6 @@ import os, socket
 import subprocess
 from .utils import *
 from .html import *
-import tarfile
 import hashlib
 
 class ArchC ():
@@ -164,6 +163,7 @@ class Simulator (SimulatorPage):
     options     = ""
     desc        = ""
 
+    crosslink   = ""
     cross       = ""
     endian      = ""
 
@@ -223,7 +223,7 @@ class Simulator (SimulatorPage):
         self.desc = desc
 
     def set_cross(self, path):
-        self.cross = path
+        self.crosslink = path
 
     def set_custom_links(self, link, cmdline):
         self.custom_links[link] = cmdline
@@ -272,7 +272,7 @@ class Simulator (SimulatorPage):
         return tableline
 
     def run_tests(self):
-
+        self.cross = get_bz2_or_folder(self.crosslink, env.xtoolsfolder)+'/bin/'
         for bench in self.benchmarks:
             print('|--- ' + bench.name + ' ---', flush=True)
             bench.download(self.simfolder+'/benchmark/')
@@ -315,36 +315,3 @@ class Simulator (SimulatorPage):
             print("["+b.name+"] ", end="")
         print()
             
-
-class CrossCompilers():
-
-    cross = {}
-
-    def add_cross(self, cross, model):
-        if model in self.cross:
-            return self.cross[model]
-        prefix = env.xtoolsfolder        
-        if (cross.startswith("./")) or (cross.startswith("/")):
-            prefix += os.path.basename(os.path.normpath(cross))
-            if not os.path.isdir(prefix+'/bin'):
-                get_local(cross, prefix, ' Cross')
-            self.cross[model] = {'src' : cross, 'prefix' : prefix}
-        else:
-            get_http(cross, prefix)
-            tarname = os.path.basename(cross)
-            tar = tarfile.open(prefix+"/"+tarname)
-            tar.extractall(prefix)
-            prefix += tar.getnames()[0]
-            tar.close()
-            self.cross[model] = { 'src' : cross, 'prefix' : prefix}
-        return self.cross[model]
-
-    def get_crosscsvline(self):
-        csvline = ""
-        for key in self.cross:
-            csvline += 'Cross '+key+';'+self.cross[key]['src']+';-;'+HTML.success()+'\n' 
-        return csvline
-
-    def get_cross_bin(self, model):
-        return self.cross[model]['prefix']+'/bin/'
-

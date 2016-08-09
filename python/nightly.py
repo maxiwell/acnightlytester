@@ -31,13 +31,13 @@ class Nightly ():
         envobj        = env.condorfolder + 'env.p'
         archcobj      = env.condorfolder + 'archc.p'
         simulatorobj  = env.condorfolder + simulator.name + '.p'
-        condorexec = env.condorfolder + 'acnightly_condor.py'
-        condorfile = env.condorfolder + simulator.name + '.condor'
+        condorexec    = env.condorfolder + 'condor.py'
+        condorfile    = env.condorfolder + simulator.name + '.condor'
         
         pickle.dump( simulator,  open (simulatorobj, "wb" ))
         pickle.dump( env,        open (envobj, "wb" ))
         pickle.dump( self.archc, open (archcobj, "wb" ))
-        shutil.copyfile(env.scriptroot + 'condor/acnightly_condor.py', condorexec)
+        shutil.copyfile(env.scriptroot + 'condor/condor.py', condorexec)
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)

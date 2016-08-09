@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, re, argparse, yaml, signal, sys
+import os, re, argparse, signal, sys
 from configparser     import ConfigParser
 import pickle
 

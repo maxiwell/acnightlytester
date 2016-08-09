@@ -54,6 +54,7 @@ class Nightly ():
             tags += s.name+'archc'
         csvline  =  env.testnumber + ';' + gettime() 
         csvline += HTML.running(tags, 1)
+        csvline += HTML.lhref('log', self.testspage.get_page())
         csvline += ';-;' + gethostname() 
         self.indexpage.update_index_table(csvline)
 

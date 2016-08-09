@@ -12,7 +12,7 @@ The output is a set of HTML files.
 Using the script:
 
 ```
-./nightlytester.sh -h
+./acnightly.py -h
 ```
 
 Links:

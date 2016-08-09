@@ -4,8 +4,7 @@
 # ${SCRIPTROOT} : Nightly path
 
 nightly:
-    workspace  : /files/nightly/TEMP${RANDOM}
-    #workspace  : /tmp/TEMP${RANDOM}
+    workspace  : /tmp/TEMP${RANDOM}
     htmloutput : ${SCRIPTROOT}/public_html
     simulators : all
  

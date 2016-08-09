@@ -1,6 +1,5 @@
 import os, re
 from random import randint
-from . import utils
 
 class Env:
 
@@ -34,9 +33,9 @@ class Env:
         self.xtoolsfolder = self.workspace + self.xtoolsfolder
         self.condorfolder = self.workspace + self.condorfolder
 
-        utils.mkdir(self.logfolder)
-        utils.mkdir(self.xtoolsfolder)
-        utils.mkdir(self.condorfolder)
+        for d in [self.logfolder, self.xtoolsfolder, self.condorfolder]:
+            if not os.path.exists(d+"/"):
+                os.makedirs(d+"/")     
 
     def sethtmloutput(self, htmloutput):
         self.htmloutput = self.resolvenv(htmloutput) 

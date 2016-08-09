@@ -12,10 +12,56 @@ class Nightly ():
         
         self.archc      = archc
         self.simulators = simulators
+
+        # [TestsPage] Init the Tables
+        # -- ArchC 
+        csvline = 'ArchC;' + self.archc.archc + ';' 
+        if self.archc.archc_hash != '-' :
+            csvline += HTML.href(self.archc.archc_hash[0:7], \
+                                 self.archc.archc.replace('.git','') + '/commit/' + self.archc.archc_hash ) 
+        else:
+            csvline += self.archc.archc_hash[0:7]
+        csvline += HTML.running('archc', 1)
+        self.testspage.update_archc_table(csvline)
+
+        # --CrossCompiler
+        crosslines = ''
+        models = {}   # The dict is just to show one cross per model
+        for s in self.simulators:
+            if not s.model in models:
+                crosslines += 'Cross ' + s.model + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
+                models[s.model] = s.crosslink
+        self.testspage.update_archc_table(crosslines)
+
+        # -- Simulators
+        for simulator in self.simulators:
+            tableline = simulator.name + ';' + simulator.linkpath + ';' ;
+            if simulator.model_hash != '-' :
+                tableline += HTML.href(simulator.model_hash[0:7], simulator.linkpath.replace('.git','') \
+                            + '/commit/' + simulator.model_hash) + ';'
+            else:
+                tableline += '-' + ';'
+            tableline += HTML.monospace(simulator.generator) + ';' + HTML.monospace(simulator.options) 
+            tableline += HTML.running(simulator.name, 3)
+            self.testspage.update_tests_table(tableline)
+       
+        # [TestsPage] Close 
+        self.testspage.close_tests_page()
+
+        # [IndexPage] Init 
+        csvline  =  env.testnumber + ';' + gettime() 
+        csvline += HTML.running('index', 1)
+        csvline += ';-;' + gethostname() 
+        self.indexpage.update_index_table(csvline)
+
+        index_page_path = self.indexpage.get_page()
+
         
     def building_archc(self):
         line = self.archc.build_archc();
-        self.testspage.update_archc_table(line)
+        search_and_replace(self.testspage.get_page(), \
+                            '^.*tag=\'archc\'.*$', 
+                            HTML.csvline_to_html(line))
 
     def running_simulators (self):
         for simulator in self.simulators:
@@ -25,9 +71,11 @@ class Nightly ():
         env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
-        self.testspage.update_tests_table(line)
-
-    def condor_runnning_simulator(self, simulator):
+        search_and_replace(self.testspage.get_page(), \
+                           '<td tag=\'' + simulator.name + '\'.*</td></td>', \
+                           HTML.csvcells_to_html(line))
+                                                           
+    def condor_runnning_simulator(self, simulator):        
         envobj        = env.condorfolder + 'env.p'
         archcobj      = env.condorfolder + 'archc.p'
         simulatorobj  = env.condorfolder + simulator.name + '.p'
@@ -48,18 +96,6 @@ class Nightly ():
         exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)
 
     def finalize(self):
-        
-        # Get cross csv lines:
-        crosslines = ''
-        # The dict is just to show one cross per model
-        models = {}
-        for s in self.simulators:
-            if not s.model in models:
-                crosslines += 'Cross ' + s.model + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
-                models[s.model] = s.crosslink
-        self.testspage.update_archc_table(crosslines)
-
-        self.testspage.close_tests_page()
 
         test_results = ""
         if self.testspage.tests_had_failed():
@@ -67,11 +103,10 @@ class Nightly ():
         else:
             test_results = HTML.success()
         
-        csvline =  env.testnumber + ';' + gettime() + ';'
-        csvline += test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ');'
-        csvline += "-;-;"
-       
-        self.indexpage.update_index_table(csvline)
+        csvline = test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ');'
+        search_and_replace_first (self.indexpage.get_page(), \
+                            '<td tag=\'index\'.*</td></td>',
+                            HTML.csvcells_to_html(csvline))
         cleanup()
 
 

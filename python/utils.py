@@ -1,7 +1,7 @@
 
 
-import os, sys, signal
-import tarfile
+import os, sys, signal, re
+import tarfile, socket
 import subprocess
 import datetime as date
 import fileinput
@@ -12,6 +12,7 @@ from .env import Env
 version = "4.0"
 env = Env()
 debug = False
+index_page_path = ""
 
 def mkdir(directory):
     if not os.path.exists(directory+"/"):
@@ -58,6 +59,9 @@ def gettime():
     now = date.datetime.now()
     return str(now.strftime("%a %Y/%m/%d %H:%M:%S"))
 
+def gethostname():
+    return socket.gethostname()
+
 def get_githash(git):
     l = os.popen("cd "+git+" && ( git log --pretty=format:'%H' -n 1 ) 2>&1").read()
     if not l:
@@ -67,7 +71,20 @@ def get_githash(git):
 def search_and_replace(filepath, pattern, string):
     with fileinput.input(filepath, inplace=True) as f:
         for l in f:
-            print (l.replace(pattern, string), end='')  
+            res = re.sub(pattern, string, l)
+            print (res, end='')  
+
+def search_and_replace_first(filepath, pattern, string):
+    repetition = 1;
+    with fileinput.input(filepath, inplace=True) as f:
+        for l in f:
+            if repetition > 0:
+                res = re.sub(pattern, string, l)
+                print (res, end='')
+                if res != l:
+                    repetition -= 1
+            else:
+                print(l)
 
 def insert_line_before_once(filepath, newline, pattern):
     repetition = 1;
@@ -94,14 +111,18 @@ def get_bz2_or_folder(srclink, dstfolder):
                     get_http(srclink, dstfolder)
                 else:
                     get_local(srclink, dstfolder)
-            tar = tarfile.open(prefix)
-            prefix = dstfolder + tar.getnames()[0]
-            if not os.path.isdir(prefix):
-                tar.extractall(dstfolder)
-            tar.close()
-    return prefix+'/'
-   
-    
+            try:
+                tar = tarfile.open(prefix)
+                prefix = dstfolder + tar.getnames()[0]
+                if not os.path.isdir(prefix):
+                    tar.extractall(dstfolder)
+                tar.close()
+            except:
+                abort("Error in " + srclink + " download")
+
+    return prefix+'/' 
+                      
+                      
 def get_http(url, dest):
     pkg = os.path.basename(url)
     print("Getting " + pkg + " over HTTP... ", end="", flush=True)
@@ -133,14 +154,14 @@ def cleanup():
         rm(env.workspace)
 
 def abort(string):
-    cleanup()
+    search_and_replace (index_page_path, '^tag=\'index\'.*$', '')
+    print(index_page_path)
     print("ERROR: "+string)
+    cleanup()
     sys.exit(2)
 
 def signal_handler(signal, frame):
-    print("You pressed ctrl+c!")
-    cleanup()
-    sys.exit(1)
+    abort("You pressed CTRL+C!")
 
 signal.signal(signal.SIGINT, signal_handler)
 

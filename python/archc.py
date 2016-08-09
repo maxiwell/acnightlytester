@@ -1,5 +1,5 @@
 
-import os, socket
+import os
 import subprocess
 from .utils import *
 from .html import *
@@ -258,16 +258,7 @@ class Simulator (SimulatorPage):
         buildpage = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-build-log.html"
         HTML.log_to_html(log, buildpage, self.name + " rev "+self.model_hash[0:7]+" build output")
 
-        # Creating a csv line to add in the TestsPage (Tests Table)
-        tableline = self.name + ';' + self.linkpath + ';' ;
-        if self.model_hash != '-' :
-            tableline += HTML.href(self.model_hash[0:7], \
-                                 self.linkpath.replace('.git','') + '/commit/' + self.model_hash) + ';'
-        else:
-            tableline += '-' + ';'
-
-        tableline += HTML.monospace(self.generator) + ';' + HTML.monospace(self.options) + ';' 
-        tableline += execstatus
+        tableline  = execstatus
         tableline += '(' + HTML.lhref('log', buildpage) + ')' + ';'
         return tableline
 
@@ -287,7 +278,7 @@ class Simulator (SimulatorPage):
         else:
             test_results = HTML.success()
 
-        hostname = socket.gethostname()
+        hostname = gethostname()
         cpuinfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-cpuinfo.txt"
         meminfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-meminfo.txt"
 

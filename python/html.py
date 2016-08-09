@@ -18,11 +18,16 @@ class HTML:
         return string
 
     @staticmethod
-    def fuchsia_string():
-        string = "<b><font color=\"fuchsia\"> N/A </font></b>"
+    def fuchsia(string):
+        string = "<b><font color=\"fuchsia\">" + string + "</font></b>"
         return string
 
-    @staticmethod
+    def running(tag, colspan):
+        string  = "<td tag='" + tag + "' align=\"center\" colspan=" + str(colspan) + ">"
+        string += HTML.fuchsia("Running...") + "</td>"
+        return string
+                   
+    @staticmethod  
     def href(title, url):
         string = "<a href=\""+url+"\">"+title+"</a>"
         return string
@@ -36,6 +41,16 @@ class HTML:
     def monospace(text):
         string = "<font face=\"Courier New\">"+text+"</font>"
         return string
+
+    @staticmethod
+    def csvcells_to_html(line):
+        table_string = ""
+        for l in line.splitlines():
+            cels = l.split(';')
+            for cel in cels:
+                if cel:
+                    table_string += "<td>"+cel+"</td>"
+        return table_string
 
     @staticmethod
     def csvline_to_html(line):

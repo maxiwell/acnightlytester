@@ -14,7 +14,7 @@ class spec2006 (Benchmark):
         self.benchfolder  = benchmark_folder + "/SourceSPEC2006/CPU2006/"
         self.goldenfolder = benchmark_folder + "/GoldenSpec/"
 
-        base = "/home/max/ArchC/acnightly/sources/"
+        base = env.scriptroot + "/sources/"
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
         pkg = ['GoldenSPEC2006.tar.bz2', 'SourceSPEC2006.tar.bz2'] 

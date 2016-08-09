@@ -14,7 +14,7 @@ class mibench (Benchmark):
         self.benchfolder  = benchmark_folder + "/SourceMibench/"
         self.goldenfolder = benchmark_folder + "/GoldenMibench/"
 
-        base = "/home/max/ArchC/acnightly/sources/"
+        base = env.scriptroot + '/sources/'
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
         pkg = ['GoldenMibench.tar.bz2', 'SourceMibench.tar.bz2'] 

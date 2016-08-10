@@ -2,7 +2,7 @@
 from .benchbase import Benchmark
 from .utils import *
 from .html  import Table, HTML, HTMLPage
-import tarfile
+import tarfile, shutil
 
 class mibench (Benchmark):
 
@@ -176,5 +176,66 @@ class spec2006 (Benchmark):
                 self.run  (appfolder, cmd_env + cmd_run, app, dataset)
                 self.diff (appfolder, goldenfolder, outputfiles[dataset.name], app, dataset)
                 
+class acstone(Benchmark):
 
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+
+    def download(self, benchmark_folder):
+
+        self.benchfolder = benchmark_folder + 'acstone/'
+        rm (self.benchfolder)
+        
+        git_clone('http://github.com/archc/acstone.git', self.benchfolder)  
+
+    def exportev(self, cross, arch):
+        cc  = ''
+        for f in os.listdir(cross):
+            if f.endswith("-gcc"):
+                cc = f
+
+        export  = ' ARCH="' + arch + '"'
+        export += ' CROSS_COMPILER="' + cross + cc + '"'
+        export += ' GDB="gdb-multiarch"'
+
+        return export 
+
+    def run_tests(self, cross_folder, simulator_endian, simulator_name, simulator_cmdline):
+        for app in self.apps:
+
+            appfolder = self.benchfolder + app.name + '/'
+            mkdir(appfolder)
+
+            begin = int(app.name.split('-')[0])
+            end   = int(app.name.split('-')[1])
+            for f in os.listdir(self.benchfolder):
+                if re.match(r'.*\.c', f):
+                    if int(f.split('.')[0]) >= begin and \
+                        int(f.split('.')[0]) <= end:
+                            shutil.copy( self.benchfolder + f, appfolder)
+            shutil.copy( self.benchfolder + 'Makefile', appfolder)
+            for d in ['bin', 'gdb']:
+                shutil.copytree( self.benchfolder + d, appfolder + d)
+
+            exportenv  = self.exportev(cross_folder, simulator_name) 
+            exportenv += " SIMULATOR='" + simulator_cmdline + "'" 
+            
+            cmd = "make " + exportenv + " build"
+            self.compile( appfolder, cmd, app )
+   
+            cmd_env  = "source " + env.archc_envfile + " && "
+            for dataset in app.dataset:
+                cmd = "make " + exportenv + " run"
+                self.run  ( appfolder, cmd_env + cmd, app, dataset )
+               
+                goldenfolder = appfolder + 'golden/'
+                mkdir (goldenfolder)
+                exec_to_var( 'cd ' + appfolder + ' && mv *.x86.out ' + goldenfolder)
+                outls = exec_to_var ('cd ' + goldenfolder + " && rename 's/\.x86//g' * && ls *.out"  )
+                outputfiles = outls.split()
+
+                exec_to_var ("cd " + appfolder + " && rename 's/\." + simulator_name + "//g' *" )
+
+                self.diff ( appfolder, goldenfolder, outputfiles, app, dataset)
 

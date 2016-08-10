@@ -29,61 +29,57 @@ def config_parser_yaml(configfile):
     simulators = []
 
     with open(configfile, 'r') as config:
-        try: 
-            yamls = yaml.load(config)
-            utils.env.setworkspace(yamls['nightly']['workspace'])
-            utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
-            utils.env.printenv()
+        yamls = yaml.load(config)
+        utils.env.setworkspace(yamls['nightly']['workspace'])
+        utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
+        utils.env.printenv()
 
-            archc.update_paths()
-            archc.set_systemc(yamls['archc']['systemc'])
-            archc.set_gdb(yamls['archc']['gdb'])
-            archc.set_binutils(yamls['archc']['binutils'])
-            archc.set_linkpath(yamls['archc']['link/path'])
+        archc.update_paths()
+        archc.set_systemc(yamls['archc']['systemc'])
+        archc.set_gdb(yamls['archc']['gdb'])
+        archc.set_binutils(yamls['archc']['binutils'])
+        archc.set_linkpath(yamls['archc']['link/path'])
 
-            simlist = []
-            if yamls['nightly']['simulators'] == 'all':
-                simlist = yamls['simulators']
-            else:
-                simlist = yamls['nightly']['simulators']
+        simlist = []
+        if yamls['nightly']['simulators'] == 'all':
+            simlist = yamls['simulators']
+        else:
+            simlist = yamls['nightly']['simulators']
 
-            for _sim in simlist:
-                model     = yamls['simulators'][_sim]['model']
-                inputfile = yamls['models'][model]['inputfile']
-                run       = yamls['models'][model]['run']
-                linkpath  = yamls['models'][model]['link/path']
-                crosslink = yamls['models'][model]['cross']
-                for _module in yamls['simulators'][_sim]['modules']:
-                    sim = Simulator(model+'-'+_module, model, _module, run, inputfile)
-                    sim.set_linkpath(linkpath)
-                    sim.set_generator(yamls['modules'][_module]['generator'])
-                    sim.set_options(yamls['modules'][_module]['options'])
-                    sim.set_desc(yamls['modules'][_module]['desc'])
-                    if 'custom links' in yamls['modules'][_module]:
-                        for cl in yamls['modules'][_module]['custom links']:
-                            sim.set_custom_links(cl, yamls['modules'][_module]['custom links'][cl])
+        for _sim in simlist:
+            model     = yamls['simulators'][_sim]['model']
+            inputfile = yamls['models'][model]['inputfile']
+            run       = yamls['models'][model]['run']
+            linkpath  = yamls['models'][model]['link/path']
+            crosslink = yamls['models'][model]['cross']
+            for _module in yamls['simulators'][_sim]['modules']:
+                sim = Simulator(model+'-'+_module, model, _module, run, inputfile)
+                sim.set_linkpath(linkpath)
+                sim.set_generator(yamls['modules'][_module]['generator'])
+                sim.set_options(yamls['modules'][_module]['options'])
+                sim.set_desc(yamls['modules'][_module]['desc'])
+                if 'custom links' in yamls['modules'][_module]:
+                    for cl in yamls['modules'][_module]['custom links']:
+                        sim.set_custom_links(cl, yamls['modules'][_module]['custom links'][cl])
         
-                    for _bench in yamls['simulators'][_sim]['benchmarks']:
-                        bench = eval(_bench)(_bench)
-                        for _app in yamls['benchmarks'][_bench] :
-                            app = App(_app, sim.name)
-                            for _dataset in yamls['benchmarks'][_bench][_app]:
-                                dataset = Dataset(_dataset, app.name, sim.name)
-                                app.append_dataset(dataset)
-                            bench.append_app(app)
-                        sim.append_benchmark(bench)
-                    sim.set_cross( crosslink )
-                    simulators.append(sim)
-           
-            simulators.sort(key=lambda x: x.name)
-            for s in simulators:
-                s.printsim()
+                for _bench in yamls['simulators'][_sim]['benchmarks']:
+                    bench = eval(_bench)(_bench)
+                    for _app in yamls['benchmarks'][_bench] :
+                        app = App(_app, sim.name)
+                        for _dataset in yamls['benchmarks'][_bench][_app]:
+                            dataset = Dataset(_dataset, app.name, sim.name)
+                            app.append_dataset(dataset)
+                        bench.append_app(app)
+                    sim.append_benchmark(bench)
+                sim.set_cross( crosslink )
+                simulators.append(sim)
+        
+        simulators.sort(key=lambda x: x.name)
+        for s in simulators:
+            s.printsim()
 
-            nightly = Nightly(archc, simulators)
-            return nightly
-
-        except Exception as e:
-            utils.abort("[config.yaml] "+str(e))
+        nightly = Nightly(archc, simulators)
+        return nightly
                 
 def main():
     args        = command_line_handler()
@@ -94,7 +90,7 @@ def main():
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")
 
-    nightly.building_archc()
+#    nightly.building_archc()
 
     for simulator in nightly.simulators:
         if args.condor:

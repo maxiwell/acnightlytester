@@ -5,7 +5,7 @@
 
 nightly:
     workspace  : /tmp/TEMP${RANDOM}
-    htmloutput : ${SCRIPTROOT}/home/maxiwell/public_html/
+    htmloutput : ${SCRIPTROOT}/public_html/
     simulators : [mips-acsim-pw]
  
 archc:

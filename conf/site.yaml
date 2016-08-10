@@ -1,5 +1,4 @@
 
-
 # S{RANDOM}     : Random number up to 9999
 # ${SCRIPTROOT} : Nightly path
 
@@ -37,6 +36,10 @@ models:
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
 simulators:
+    mips-gdb:
+        model     : mips
+        modules   : [gdb]
+        benchmarks: [acstone]
     mips-acsim-pw:
         model     : mips
         modules   : [acsim, powersc]
@@ -45,6 +48,10 @@ simulators:
         model     : mips
         modules   : [hltrace]
         benchmarks: [mibenchsmall]
+    arm-gdb:
+        model     : arm
+        modules   : [gdb]
+        benchmarks: [acstone]
     arm-acsim-pw:
         model     : arm
         modules   : [acsim]
@@ -53,6 +60,10 @@ simulators:
         model     : arm
         modules   : [hltrace]
         benchmarks: [mibenchsmall]
+    powerpc-gdb:
+        model     : powerpc
+        modules   : [gdb]
+        benchmarks: [acstone]
     powerpc-acsim-pw:
         model     : powerpc
         modules   : [acsim]
@@ -61,6 +72,10 @@ simulators:
         model     : powerpc
         modules   : [hltrace]
         benchmarks: [mibenchsmall]
+    sparc-gdb:
+        model     : sparc
+        modules   : [gdb]
+        benchmarks: [acstone]
     sparc-acsim-pw:
         model     : sparc
         modules   : [acsim, powersc]
@@ -139,9 +154,13 @@ benchmarks:
         458.sjeng      : [test]
         462.libquantum : [test]
         464.h264ref    : [test] 
-
-        # apps with problems
-        #omnetpp    = [test] 
-        #astar      = [test]
-
+        #omnetpp       : [test]  # with problem
+        #astar         : [test]  # with problem
+    acstonesmall:
+        000-020        : [acstone]
+    acstone:
+        000-020        : [acstone]
+        021-050        : [acstone]
+        050-100        : [acstone]
+        100-200        : [acstone]
 

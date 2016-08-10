@@ -84,7 +84,7 @@ def search_and_replace_first(filepath, pattern, string):
                 if res != l:
                     repetition -= 1
             else:
-                print(l)
+                print(l, end='')
 
 def insert_line_before_once(filepath, newline, pattern):
     repetition = 1;
@@ -92,9 +92,9 @@ def insert_line_before_once(filepath, newline, pattern):
         for l in f:
             if l.startswith(pattern):
                 if repetition > 0:
-                    print (newline)
+                    print (newline, end='')
                     repetition -= 1
-            print ( l , end = '' )
+            print ( l , end='')
 
 def create_rand_file():
     return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
@@ -111,14 +111,11 @@ def get_bz2_or_folder(srclink, dstfolder):
                     get_http(srclink, dstfolder)
                 else:
                     get_local(srclink, dstfolder)
-            try:
-                tar = tarfile.open(prefix)
-                prefix = dstfolder + tar.getnames()[0]
-                if not os.path.isdir(prefix):
-                    tar.extractall(dstfolder)
-                tar.close()
-            except:
-                abort("Error in " + srclink + " download")
+            tar = tarfile.open(prefix)
+            prefix = dstfolder + tar.getnames()[0]
+            if not os.path.isdir(prefix):
+                tar.extractall(dstfolder)
+            tar.close()
 
     return prefix+'/' 
     
@@ -161,8 +158,10 @@ def cleanup():
         rm(env.workspace)
 
 def abort(string):
-    search_and_replace (index_page_path, '^tag=\'index\'.*$', '')
-    print(index_page_path)
+    try:
+        search_and_replace (index_page_path, '^tag=\'index\'.*$', '')
+    except:
+        pass
     print("ERROR: "+string)
     cleanup()
     sys.exit(2)

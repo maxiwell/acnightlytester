@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, re
-import os
-import csv
-import string
+import sys, re, os, string
 from .utils import *
 
 class HTML:
@@ -110,25 +107,9 @@ class Table:
             table_string += "</tr>\n" 
         self.string += table_string
 
-
-
-    def from_csv(self, csvfile):
-        table_string = ""
-        with open( csvfile, newline='') as cf:
-            reader       = csv.reader( cf, delimiter=';' )
-            for row in reader:
-                table_string += "<tr>" + \
-                                    "<td>" + \
-                                        "</td><td>".join(row)  + \
-                                    "</td>" + \
-                                "</tr>\n"
-        self.string += table_string
-        return self.string
-
     def append_raw(self, html):
         self.string += html 
         return self.string
-
 
 
 class HTMLPage:

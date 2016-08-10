@@ -4,13 +4,12 @@ import os, re, argparse, signal, sys
 from configparser     import ConfigParser
 import pickle
 
-from python.archc     import ArchC, Simulator
-from python.nightly   import Nightly, Condor
-from python.benchmark import Benchmark, App, Dataset
-from python           import utils
-from python.html      import HTML
-from python.mibench   import *
-from python.spec2006  import *
+from modules.archc      import ArchC, Simulator
+from modules.nightly    import Nightly, Condor
+from modules.benchbase  import Benchmark, App, Dataset
+from modules            import utils
+from modules.html       import HTML
+from modules.benchmarks import *
 
 def command_line_handler():
     parser = argparse.ArgumentParser()

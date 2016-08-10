@@ -5,13 +5,12 @@ from configparser     import ConfigParser
 
 sys.path.append(os.path.dirname(__file__))
 
-from python.archc     import ArchC, Simulator 
-from python.nightly   import Nightly, Env
-from python.benchmark import App, Dataset
-from python           import utils
+from modules.archc     import ArchC, Simulator 
+from modules.nightly   import Nightly, Env
+from modules.benchbase import App, Dataset
+from modules           import utils
 
-from python.mibench   import *
-from python.spec2006  import *
+from modules.benchmarks import *
 
 def command_line_handler():
     parser = argparse.ArgumentParser()

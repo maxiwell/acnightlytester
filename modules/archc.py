@@ -7,76 +7,49 @@ import hashlib
 
 class ArchC ():
 
-    archc     = ""
-    systemc   = ""
-    binutils  = "" 
-    gdb       = ""
-
-    archc_src    = "archc/src"
-    archc_prefix = "archc/install"
-    archc_hash   = ""
-
-    systemc_src    = "systemc/src"
-    systemc_prefix = "systemc/install"
-    systemc_hash   = ""
-
-    binutils_src    = "binutils/src"
-    binutils_prefix = "binutils/instsall"
-
-    gdb_src         = "gdb/src"
-    gdb_prefix      = "gdb/install"
+    archc   = {}
+    systemc = {} 
 
     def update_paths(self):
-        self.archc_src       = env.workspace + "/" + self.archc_src
-        self.archc_prefix    = env.workspace + "/" + self.archc_prefix
-        self.systemc_src     = env.workspace + "/" + self.systemc_src
-        self.systemc_prefix  = env.workspace + "/" + self.systemc_prefix
-        self.binutils_src    = env.workspace + "/" + self.binutils_src
-        self.binutils_prefix = env.workspace + "/" + self.binutils_prefix
-        self.gdb_src         = env.workspace + "/" + self.gdb_src
-        self.gdb_prefix      = env.workspace + "/" + self.gdb_prefix
+        self.archc['src']       = env.workspace + "/archc/src"
+        self.archc['prefix']    = env.workspace + "/archc/install"
+        self.archc['hash']      = '-'
+
+        self.systemc['src']     = env.workspace + "/systemc/src"
+        self.systemc['prefix']  = env.workspace + "/systemc/install"
+        self.systemc['hash']    = '-'
 
     def set_linkpath(self, linkpath):
-        self.archc = linkpath
-        if (linkpath.startswith("./")) or (linkpath.startswith("/")):
-            get_local(linkpath, self.archc_src, "ArchC")
-            self.archc_hash = '-'
-        else:
-            git_clone(linkpath, self.archc_src, "ArchC")
-            self.archc_hash = get_githash(self.archc_src)
+        self.archc['link'] = linkpath
+        get_tar_git_or_folder (linkpath, self.archc['src'])
+        if (linkpath.endswith(".git")):
+            self.archc['hash'] = get_githash(self.archc['src'])
 
     def set_systemc(self, linkpath):
-        self.systemc = linkpath
-        if (linkpath.startswith("./")) or (linkpath.startswith("/")):
-            get_local(linkpath, self.systemc_src, "SystemC")
-            self.archc_hash = '-'
-        else:
-            git_clone(linkpath, self.systemc_src, "SystemC")
-            self.systemc_hash = get_githash(self.systemc_src)
+        self.systemc['link'] = linkpath
+        get_tar_git_or_folder (linkpath, self.systemc['src'])
+        if (linkpath.endswith(".git")):
+            self.systemc['hash'] = get_githash(self.systemc['src'])
 
     def set_binutils(self, linkpath):
-        self.binutils = linkpath
-#        if self.binutils :
-#            get_from( url_or_path = linkpath, \
-#                    copy_to = self.binutils_src, pkg = "Binutils")
+        env.binutils['link'] = linkpath
+        env.binutils['src']  = get_tar_git_or_folder (linkpath, env.binutils['src'])
 
     def set_gdb(self, linkpath):
-        self.gdb = linkpath
-#        if self.gdb :
-#            get_from( url_or_path = linkpath, \
-#                    copy_to = self.gdb_src, pkg = "GDB")
+        env.gdb['link'] = linkpath
+        env.gdb['src']  = get_tar_git_or_folder (linkpath, env.gdb['src'])
 
     def build_systemc(self):
-        if os.path.isdir(self.systemc_src+"/lib"):
-            cp (self.systemc_src, self.systemc_prefix)
-            csvline = 'SystemC;' + self.systemc + ";-;" + HTML.success() 
+        if os.path.isdir(self.systemc['src']+"/lib"):
+            cp (self.systemc['src'], self.systemc['prefix'])
+            csvline = 'SystemC;' + self.systemc['link'] + ";-;" + HTML.success() 
             return csvline
         else:
-            cmd_1 = "cd "+self.systemc_src + " && " 
+            cmd_1 = "cd "+self.systemc['src'] + " && " 
             cmd_2 = ""
-            if (self.systemc_src+"/autogen.sh"):
+            if (self.systemc['src']+"/autogen.sh"):
                 cmd_2 += "./autogen.sh && " 
-            cmd_2 += "./configure --prefix=" + self.systemc_prefix 
+            cmd_2 += "./configure --prefix=" + self.systemc['prefix'] 
             cmd_2 += " && make && make install"
             print("SystemC:")
             print("| " + cmd_2)
@@ -94,13 +67,13 @@ class ArchC ():
 
             # Creating the Build Page
             htmllog = env.htmloutput + "/" + env.testnumber + "-systemc-build-log.html"
-            HTML.log_to_html(log, htmllog, "SystemC rev " + self.systemc_hash[0:7] + " build output")
+            HTML.log_to_html(log, htmllog, "SystemC rev " + self.systemc['hash'][0:7] + " build output")
 
             # Creating a csv line to add in the TestsPage (ArchC Table)
-            csvline = 'SystemC;' + self.systemc + ';'
-            csvline += HTML.href(self.systemc_hash[0:7], \
-                                self.systemc.replace('.git','') + '/commit/' + \
-                                self.systemc_hash) + ';'
+            csvline = 'SystemC;' + self.systemc['link'] + ';'
+            csvline += HTML.href(self.systemc['hash'][0:7], \
+                                self.systemc['link'].replace('.git','') + '/commit/' + \
+                                self.systemc['hash']) + ';'
 
             csvline += execstatus
             csvline += '(' + HTML.lhref('log', htmllog) + ')'
@@ -108,19 +81,20 @@ class ArchC ():
 
     def build_archc(self):
 
-        systemc_csvline = ""
-        if self.systemc:
-            systemc_csvline = self.build_systemc()
+        extra_csvline = ""
 
-        cmd_1 = "cd " + self.archc_src + " && "
+        cmd_1 = "cd " + self.archc['src'] + " && "
         cmd_2 = "./autogen.sh && " + \
-                "./configure --prefix=" + self.archc_prefix
-        if self.systemc:
-            cmd_2 += " --with-systemc=" + self.systemc_prefix
-        if self.binutils: 
-            cmd_2 += " --with-binutils=" + self.binutils_src
-        if self.gdb:
-            cmd_2 += " --with-gdb=" + self.gdb_src
+                "./configure --prefix=" + self.archc['prefix']
+        if 'link' in self.systemc:
+            extra_csvline += self.build_systemc() + '\n'
+            cmd_2 += " --with-systemc=" + self.systemc['prefix']
+        if 'link' in env.binutils: 
+            extra_csvline += 'Binutils;' + env.binutils['link'] + ';-;' + HTML.success() + '\n'
+            cmd_2 += " --with-binutils=" + env.binutils['src']
+        if 'link' in env.gdb:
+            extra_csvline += 'GDB;' + env.gdb['link'] + ';-;' + HTML.success() + '\n'
+            cmd_2 += " --with-gdb=" + env.gdb['src']
         cmd_2 += " && make && make install"
         print("ArchC:")
         print("| "+cmd_2)
@@ -138,25 +112,25 @@ class ArchC ():
 
         # Creating the Build Page
         htmllog = env.htmloutput + "/" + env.testnumber + "-archc-build-log.html"
-        HTML.log_to_html(log, htmllog, "ArchC rev "+self.archc_hash[0:7]+" build output")
+        HTML.log_to_html(log, htmllog, "ArchC rev "+self.archc['hash'][0:7]+" build output")
         
         # Creating a csv line to add in the TestsPage (ArchC Table)
-        csvline = 'ArchC;' + self.archc + ';' 
-        if self.archc_hash != '-' :
-            csvline += HTML.href(self.archc_hash[0:7], \
-                                 self.archc.replace('.git','') + '/commit/' + self.archc_hash ) + ';'
+        csvline = 'ArchC;' + self.archc['link'] + ';' 
+        if self.archc['hash'] != '-' :
+            csvline += HTML.href(self.archc['hash'][0:7], \
+                                 self.archc['link'].replace('.git','') + '/commit/' + self.archc['hash'] ) + ';'
         else:
-            csvline += self.archc_hash[0:7] + ';'
+            csvline += self.archc['hash'][0:7] + ';'
 
         csvline += execstatus
         csvline += '(' + HTML.lhref('log', htmllog) + ')'
-        
-        return csvline + '\n' + systemc_csvline
+       
+        return csvline + '\n' + extra_csvline
 
 
 class Simulator (SimulatorPage):
     name        = ""
-    model       = ""
+    model       = {}
 
     module      = ""
     generator   = ""
@@ -173,8 +147,6 @@ class Simulator (SimulatorPage):
     simfolder   = ""
     simsrc      = ""
 
-    model_hash  = ""
-
     benchmarks  = []
 
     custom_links = {}
@@ -182,7 +154,10 @@ class Simulator (SimulatorPage):
     def __init__(self, name, model, module, run, inputfile):
         super().__init__(name)
         self.name = name
-        self.model = model
+        
+        self.model['name'] = model
+        self.model['hash'] = '-'
+
         self.inputfile = inputfile
         self.linkpath = ""
         self.benchmarks = []
@@ -202,11 +177,10 @@ class Simulator (SimulatorPage):
         self.linkpath = linkpath
         if (self.linkpath.startswith("./")) or (self.linkpath.startswith("/")):
             get_local(self.linkpath, self.simsrc, self.name)
-            self.model_hash = '-'
         else:
             git_clone(self.linkpath, self.simsrc, self.name)
 
-        self.model_hash = get_githash(self.simsrc)
+        self.model['hash'] = get_githash(self.simsrc)
         with open(self.simsrc + self.inputfile, 'r') as f:
             for l in f:
                 s = re.search(r'set_endian\("(.*)"\)', l)
@@ -256,14 +230,14 @@ class Simulator (SimulatorPage):
 
         # Creating the Build Page
         buildpage = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-build-log.html"
-        HTML.log_to_html(log, buildpage, self.name + " rev "+self.model_hash[0:7]+" build output")
+        HTML.log_to_html(log, buildpage, self.name + " rev "+self.model['hash'][0:7]+" build output")
 
         tableline  = execstatus
         tableline += '(' + HTML.lhref('log', buildpage) + ')' + ';'
         return tableline
 
     def run_tests(self):
-        self.cross = get_bz2_or_folder(self.crosslink, env.xtoolsfolder)+'/bin/'
+        self.cross = get_tar_git_or_folder(self.crosslink, env.xtoolsfolder)+'/bin/'
         for bench in self.benchmarks:
             print('|--- ' + bench.name + ' ---', flush=True)
             bench.download(self.simfolder+'/benchmark/')
@@ -294,7 +268,7 @@ class Simulator (SimulatorPage):
 
     def printsim(self):
         print("Simulator: " + self.name)
-        print("| model: " + self.model)
+        print("| model: " + self.model['name'])
         print("| - from " + self.linkpath)
         print("| module: "+ self.module)
         print("| - generator: " + self.generator)

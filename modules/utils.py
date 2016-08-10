@@ -92,15 +92,17 @@ def insert_line_before_once(filepath, newline, pattern):
         for l in f:
             if l.startswith(pattern):
                 if repetition > 0:
-                    print (newline, end='')
+                    print (newline)
                     repetition -= 1
             print ( l , end='')
 
 def create_rand_file():
     return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
    
-def get_bz2_or_folder(srclink, dstfolder):
-    prefix  = dstfolder 
+def get_tar_git_or_folder(srclink, dstfolder):
+    dstfolder = os.path.normpath(dstfolder) + '/'
+    mkdir (dstfolder)
+    prefix  = dstfolder
     prefix += os.path.basename(os.path.normpath(srclink))
     if not os.path.isdir(prefix):
         if os.path.isdir(srclink):
@@ -108,16 +110,19 @@ def get_bz2_or_folder(srclink, dstfolder):
         else:
             if not os.path.isfile(prefix):
                 if srclink.startswith('http'):
-                    get_http(srclink, dstfolder)
+                    if srclink.endswith('.git'):
+                        git_clone (srclink, dstfolder)
+                        return dstfolder
+                    else:
+                        get_http(srclink, dstfolder)
                 else:
                     get_local(srclink, dstfolder)
             tar = tarfile.open(prefix)
-            prefix = dstfolder + tar.getnames()[0]
+            prefix = dstfolder + tar.getnames()[0].split('/')[0]
             if not os.path.isdir(prefix):
                 tar.extractall(dstfolder)
             tar.close()
-
-    return prefix+'/' 
+    return os.path.normpath(prefix) + '/' 
     
 def had_failed(page):
    with open(page, 'r') as f:

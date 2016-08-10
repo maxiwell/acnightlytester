@@ -15,12 +15,12 @@ class Nightly ():
 
         # [TestsPage] Init the Tables
         # -- ArchC 
-        csvline = 'ArchC;' + self.archc.archc + ';' 
-        if self.archc.archc_hash != '-' :
-            csvline += HTML.href(self.archc.archc_hash[0:7], \
-                                 self.archc.archc.replace('.git','') + '/commit/' + self.archc.archc_hash ) 
+        csvline = 'ArchC;' + self.archc.archc['link'] + ';' 
+        if self.archc.archc['hash'] != '-' :
+            csvline += HTML.href(self.archc.archc['hash'][0:7], \
+                                 self.archc.archc['link'].replace('.git','') + '/commit/' + self.archc.archc['hash'] ) 
         else:
-            csvline += self.archc.archc_hash[0:7]
+            csvline += self.archc.archc['hash'][0:7]
         csvline += HTML.running('archc', 1)
         self.testspage.update_archc_table(csvline)
 
@@ -28,17 +28,17 @@ class Nightly ():
         crosslines = ''
         models = {}   # The dict is just to show one cross per model
         for s in self.simulators:
-            if not s.model in models:
-                crosslines += 'Cross ' + s.model + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
-                models[s.model] = s.crosslink
+            if not s.model['name'] in models:
+                crosslines += 'Cross ' + s.model['name'] + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
+                models[s.model['name']] = s.crosslink
         self.testspage.update_archc_table(crosslines)
 
         # -- Simulators
         for simulator in self.simulators:
             tableline = simulator.name + ';' + simulator.linkpath + ';' ;
-            if simulator.model_hash != '-' :
-                tableline += HTML.href(simulator.model_hash[0:7], simulator.linkpath.replace('.git','') \
-                            + '/commit/' + simulator.model_hash) + ';'
+            if simulator.model['hash'] != '-' :
+                tableline += HTML.href(simulator.model['hash'][0:7], simulator.linkpath.replace('.git','') \
+                            + '/commit/' + simulator.model['hash']) + ';'
             else:
                 tableline += '-' + ';'
             tableline += HTML.monospace(simulator.generator) + ';' + HTML.monospace(simulator.options) 
@@ -72,7 +72,7 @@ class Nightly ():
             self.running_simulator(simulator)
 
     def running_simulator(self, simulator):
-        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+        env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
         search_and_replace(self.testspage.get_page(), \
@@ -121,25 +121,25 @@ class Nightly ():
         if not os.path.isfile(last_page):
             return True
 
-        if self.archc.archc_hash == '-':
+        if self.archc.archc['hash'] == '-':
             return True
         for sim in self.simulators:
-            if sim.model_hash == '-':
+            if sim.model['hash'] == '-':
                 return True
 
         with open(last_page, "r") as f:
             for l in f:
 
                 # ArchC check
-                s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % self.archc.archc, l)
+                s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % self.archc.archc['link'], l)
                 if s:
-                    if self.archc.archc_hash[0:7] != s.group(2):
+                    if self.archc.archc['hash'][0:7] != s.group(2):
                         return True
                 # Simulators check
                 for sim in self.simulators:
                     s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.linkpath, l)
                     if s:
-                        if sim.model_hash[0:7] != s.group(2):
+                        if sim.model['hash'][0:7] != s.group(2):
                             return True
         return False
 
@@ -155,7 +155,7 @@ class Condor:
         self.indexpage = env.htmloutput + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
-        env.archc_envfile = self.archc.archc_prefix+'/etc/env.sh'
+        env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
         search_and_replace(self.testspage, \

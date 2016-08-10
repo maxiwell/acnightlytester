@@ -36,9 +36,11 @@ def config_parser_yaml(configfile):
 
         archc.update_paths()
         archc.set_systemc(yamls['archc']['systemc'])
-        archc.set_gdb(yamls['archc']['gdb'])
-        archc.set_binutils(yamls['archc']['binutils'])
         archc.set_linkpath(yamls['archc']['link/path'])
+        if 'gdb' in yamls['archc'] and yamls['archc']['gdb'] != None:
+            archc.set_gdb(yamls['archc']['gdb'])
+        if 'binutils' in yamls['archc'] and yamls['archc']['binutils'] != None:
+            archc.set_binutils(yamls['archc']['binutils'])
 
         simlist = []
         if yamls['nightly']['simulators'] == 'all':
@@ -90,7 +92,7 @@ def main():
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")
 
-#    nightly.building_archc()
+    nightly.building_archc()
 
     for simulator in nightly.simulators:
         if args.condor:

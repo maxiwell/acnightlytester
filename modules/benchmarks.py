@@ -14,8 +14,8 @@ class mibench (Benchmark):
         base = env.scriptroot + '/sources/'
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
-        self.benchfolder  = get_bz2_or_folder(base + 'SourceMibench.tar.bz2', benchmark_folder) 
-        self.goldenfolder = get_bz2_or_folder(base + 'GoldenMibench.tar.bz2', benchmark_folder) 
+        self.benchfolder  = get_tar_git_or_folder(base + 'SourceMibench.tar.bz2', benchmark_folder) 
+        self.goldenfolder = get_tar_git_or_folder(base + 'GoldenMibench.tar.bz2', benchmark_folder) 
 
     def exportenv (self, cross, endian):
         export = ""
@@ -120,8 +120,8 @@ class spec2006 (Benchmark):
         base = env.scriptroot + "/sources/"
         #url_base = "http://archc.lsc.ic.unicamp.br/downloads/Nightly/sources/"
 
-        self.benchfolder  = get_bz2_or_folder(base + 'SourceSPEC2006.tar.bz2', benchmark_folder) + 'CPU2006/'
-        self.goldenfolder = get_bz2_or_folder(base + 'GoldenSPEC2006.tar.bz2', benchmark_folder) 
+        self.benchfolder  = get_tar_git_or_folder(base + 'SourceSPEC2006.tar.bz2', benchmark_folder) + 'CPU2006/'
+        self.goldenfolder = get_tar_git_or_folder(base + 'GoldenSPEC2006.tar.bz2', benchmark_folder) 
 
     def exportenv (self, cross, endian):
         export = ""

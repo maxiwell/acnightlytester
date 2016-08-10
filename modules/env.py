@@ -11,6 +11,9 @@ class Env:
 
     archc_envfile   = ""
 
+    binutils    = {}
+    gdb         = {}
+
     def __init__(self):
         self.random     = randint(0000,9999)
         self.scriptroot = os.getcwd() + '/'
@@ -26,14 +29,19 @@ class Env:
         self.workspace     = env.workspace
         self.htmloutput    = env.htmloutput
         self.testnumber    = env.testnumber
+        self.binutils      = env.binutils
+        self.gdb           = env.gdb
 
     def setworkspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 
         self.logfolder    = self.workspace + self.logfolder
         self.xtoolsfolder = self.workspace + self.xtoolsfolder
         self.condorfolder = self.workspace + self.condorfolder
+        self.binutils['src'] = self.workspace + '/binutils/src/'
+        self.gdb['src']      = self.workspace + '/gdb/src/'
 
-        for d in [self.logfolder, self.xtoolsfolder, self.condorfolder]:
+        for d in [ self.logfolder, self.xtoolsfolder, self.condorfolder, \
+                  self.binutils['src'], self.gdb['src'] ]:
             if not os.path.exists(d+"/"):
                 os.makedirs(d+"/")     
 

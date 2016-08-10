@@ -178,5 +178,3 @@ class spec2006 (Benchmark):
                 
 
 
-
-

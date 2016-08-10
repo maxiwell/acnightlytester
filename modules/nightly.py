@@ -99,19 +99,21 @@ class Nightly ():
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
         exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)
 
-    def finalize(self):
+    def finalize(self, simulator):
+        status = 'OK'
+        if had_failed (self.testspage.get_page()):
+            status = 'FAILED'
+        search_and_replace_first (self.indexpage.get_page(), simulator.name, status)
 
-        test_results = ""
-        if had_failed(self.testspage.get_page()):
-            test_results = HTML.fail()
-        else:
-            test_results = HTML.success()
-       
-        csvline  = gettime() + ';' + test_results + "(" + HTML.lhref("log", self.testspage.get_page()) + ')'
-        search_and_replace_first (self.indexpage.get_page(), \
-                            '<td tag=\'index.*>log</a>\)</td>',
-                            HTML.csvcells_to_html(csvline))
+        csvline  = "(" + HTML.lhref("log", self.testspage.get_page()) + ')'
+        
+        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
+
+        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
         cleanup()
+
 
 
     def git_hashes_changed(self):
@@ -161,11 +163,9 @@ class Condor:
                    HTML.csvcells_to_html(line))
 
     def finalize(self, simulator):
-        status = ''
-        if had_failed (self.indexpage):
+        status = 'OK'
+        if had_failed (self.testspage):
             status = 'FAILED'
-        else:
-            status = 'OK'
 
         search_and_replace_first (self.indexpage, simulator.name, status)
 
@@ -174,6 +174,6 @@ class Condor:
         search_and_replace_first (self.indexpage, '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
 
-        search_and_replace_first (self.indexpage, '<td tag=\'index[FAILED]*\'.*>log</a>\)</td>', \
+        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
 

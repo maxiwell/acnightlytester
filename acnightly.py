@@ -102,14 +102,8 @@ def main():
             # nightly.finalize() is called by condor.py in each node machine
         else:
             nightly.running_simulator(simulator)
-            nightly.finalize()
-   
-     
+            nightly.finalize(simulator)
      
 if __name__ == '__main__':
     main()  
-
-
-
-
 

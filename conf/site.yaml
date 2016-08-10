@@ -107,6 +107,10 @@ modules:
         custom links:
             high level trace: |
                 tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
+    gdb:
+        generator: acsim
+        options: -gdb 
+        desc:
    
 benchmarks:
     mibenchtest:

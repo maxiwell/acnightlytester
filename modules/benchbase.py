@@ -29,6 +29,8 @@ class App:
     buildpage   = ""
     buildstatus = ""
 
+    custom_link = True
+
     def __init__(self, name, sim):
         self.name = name
         self.dataset = []
@@ -143,6 +145,7 @@ class Benchmark():
     
                 shutil.move(appfolder + '/' + f, dataset.custom_links[link])
         except:
+            app.custom_link = False
             print('ERROR in Custom Link command line')
 
 

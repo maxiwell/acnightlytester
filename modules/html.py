@@ -240,9 +240,9 @@ class SimulatorPage(HTMLPage):
                 maxlen = app
         for ds in maxlen.dataset:
             cols += ds.name.title()+' Dataset;'
+        cols += 'Speed;#Instrs.;'
         if bench.custom_links:
             cols += 'Custom Links;'
-        cols += 'Speed;#Instrs.;'
 
         self.benchtable.append_csv_line_as_title(cols)
 
@@ -262,11 +262,6 @@ class SimulatorPage(HTMLPage):
 
                     csvline += '(' + HTML.lhref('output', ds.execpage) + ', ' + \
                                      HTML.lhref('diff', ds.diffpage) + ');'
-                
-                for link, page in ds.custom_links.items():
-                    csvline +=  HTML.lhref (link, page)+'<br>'
-                csvline += ';'
-
                 try:
                     with open(ds.execpage) as f:
                         speed = ''
@@ -281,6 +276,14 @@ class SimulatorPage(HTMLPage):
                         csvline += speed + ';' + instr + ';'
                 except:
                     csvline += '-;-;'
+
+                if app.custom_link:
+                    for link, page in ds.custom_links.items():
+                        csvline +=  HTML.lhref (link, page)+'<br>'
+                else:
+                    csvline += '-'
+                csvline += ';'
+
 
             self.benchtable.append_csv_line(csvline)
         self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')

@@ -213,17 +213,19 @@ class acstone(Benchmark):
         
         # Compiling GDB if 'gdb' it an 'app' in 'acstone' benchmark
         gdbappfilter = filter(lambda x: x.name == 'gdb', self.apps)
-        for gdbapp in list(gdbappfilter):
+        for app in list(gdbappfilter):
             # Compile GDB to connect to simulator
             cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + self.gdbprefix + ' && '
             cmd += 'make && make install '
-            self.compile ( self.gdbsrc, cmd, gdbapp )
+            #self.compile ( self.gdbsrc, cmd, app )
             for f in os.listdir(self.gdbprefix + '/bin/'):
                 if f.endswith("-gdb"):
                     gdbcmd = ' GDB="' + self.gdbprefix + '/bin/' + f + '"'
                     break
             
-            for dataset in gdbapp.dataset:
+            for dataset in app.dataset:
+                self.resolve_custom_links( self.gdbprefix, app, dataset )
+
                 # Removing the execute page from HTML Log
                 dataset.execpage = None
 

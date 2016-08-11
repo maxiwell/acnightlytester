@@ -161,11 +161,13 @@ class Simulator (SimulatorPage):
         self.model['inputfile']  = inputfile
         self.model['link']   = ''
 
+        self.cross = {}
         self.cross['link']   = ''
         self.cross['prefix'] = ''
 
         self.benchmarks = []
 
+        self.module = {}
         self.module['name'] = module
         self.module['generator'] = ""
         self.module['options']   = ""

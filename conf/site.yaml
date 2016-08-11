@@ -111,7 +111,10 @@ modules:
         generator: acsim
         options: -gdb 
         desc:
-   
+        custom links:
+            gdb version: |
+                `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
+  
 benchmarks:
     mibenchtest:
         automotive/qsort     : [small]
@@ -161,8 +164,10 @@ benchmarks:
         #omnetpp       : [test]  # with problem
         #astar         : [test]  # with problem
     acstonesmall:
+        gdb            : [acstone]
         000-020        : [acstone]
     acstone:
+        gdb            : [acstone]
         000-020        : [acstone]
         021-050        : [acstone]
         050-100        : [acstone]

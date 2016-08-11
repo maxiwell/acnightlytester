@@ -277,13 +277,12 @@ class SimulatorPage(HTMLPage):
                 except:
                     csvline += '-;-;'
 
-                if app.custom_link:
-                    for link, page in ds.custom_links.items():
-                        csvline +=  HTML.lhref (link, page)+'<br>'
-                else:
-                    csvline += '-'
-                csvline += ';'
-
+            if app.custom_link:
+                for link, page in ds.custom_links.items():
+                    csvline +=  HTML.lhref (link, page)+'<br>'
+            else:
+                csvline += '-'
+            csvline += ';'
 
             self.benchtable.append_csv_line(csvline)
         self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')

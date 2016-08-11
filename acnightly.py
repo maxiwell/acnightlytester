@@ -55,11 +55,12 @@ def config_parser_yaml(configfile):
             linkpath  = yamls['models'][model]['link/path']
             crosslink = yamls['models'][model]['cross']
             for _module in yamls['simulators'][_sim]['modules']:
-                sim = Simulator(model+'-'+_module, model, _module, run, inputfile)
-                sim.set_linkpath(linkpath)
+                sim = Simulator(model, _module, run, inputfile)
+                sim.set_modellink(linkpath)
                 sim.set_generator(yamls['modules'][_module]['generator'])
                 sim.set_options(yamls['modules'][_module]['options'])
-                sim.set_desc(yamls['modules'][_module]['desc'])
+                if 'desc' in yamls['modules'][_module]:
+                    sim.set_desc(yamls['modules'][_module]['desc'])
                 if 'custom links' in yamls['modules'][_module]:
                     for cl in yamls['modules'][_module]['custom links']:
                         sim.set_custom_links(cl, yamls['modules'][_module]['custom links'][cl])
@@ -73,7 +74,7 @@ def config_parser_yaml(configfile):
                             app.append_dataset(dataset)
                         bench.append_app(app)
                     sim.append_benchmark(bench)
-                sim.set_cross( crosslink )
+                sim.set_crosslink( crosslink )
                 simulators.append(sim)
         
         simulators.sort(key=lambda x: x.name)

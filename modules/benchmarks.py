@@ -184,10 +184,13 @@ class acstone(Benchmark):
 
     def download(self, benchmark_folder):
 
-        self.benchfolder = benchmark_folder + 'acstone/'
-        rm (self.benchfolder)
+        self.benchfolder = benchmark_folder
         
         git_clone('http://github.com/archc/acstone.git', self.benchfolder)  
+        
+        # You can use the 'gdb-multiarch', if you prefer
+        # self.gdbfolder = get_tar_git_or_folder ( 'https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz', self.benchfolder )   
+
 
     def exportev(self, cross, arch):
         cc  = ''

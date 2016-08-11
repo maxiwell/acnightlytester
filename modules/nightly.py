@@ -29,20 +29,20 @@ class Nightly ():
         models = {}   # The dict is just to show one cross per model
         for s in self.simulators:
             if not s.model['name'] in models:
-                crosslines += 'Cross ' + s.model['name'] + ';' + s.crosslink + ';-;' + HTML.success() + '\n'
-                models[s.model['name']] = s.crosslink
+                crosslines += 'Cross ' + s.model['name'] + ';' + s.cross['link'] + ';-;' + HTML.success() + '\n'
+                models[s.model['name']] = s.cross['link']
         self.testspage.update_archc_table(crosslines)
 
         # -- Simulators
         for simulator in self.simulators:
-            tableline = simulator.name + ';' + simulator.linkpath + ';' ;
-            if simulator.model['hash'] != '-' :
-                tableline += HTML.href(simulator.model['hash'][0:7], simulator.linkpath.replace('.git','') \
+            tableline = simulator.get_name() + ';' + simulator.get_modellink() + ';' ;
+            if simulator.get_modelhash() != '-' :
+                tableline += HTML.href(simulator.get_modelhash()[0:7], simulator.get_modellink().replace('.git','') \
                             + '/commit/' + simulator.model['hash']) + ';'
             else:
                 tableline += '-' + ';'
-            tableline += HTML.monospace(simulator.generator) + ';' + HTML.monospace(simulator.options) 
-            tableline += HTML.running(simulator.name, 3)
+            tableline += HTML.monospace(simulator.get_generator()) + ';' + HTML.monospace(simulator.get_options()) 
+            tableline += HTML.running(simulator.get_name(), 3)
             self.testspage.update_tests_table(tableline)
        
         # [TestsPage] Close 
@@ -137,9 +137,9 @@ class Nightly ():
                         return True
                 # Simulators check
                 for sim in self.simulators:
-                    s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.linkpath, l)
+                    s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.get_modellink(), l)
                     if s:
-                        if sim.model['hash'][0:7] != s.group(2):
+                        if sim.get_modelhash()[0:7] != s.group(2):
                             return True
         return False
 

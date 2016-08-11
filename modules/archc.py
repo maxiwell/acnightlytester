@@ -4,6 +4,7 @@ import subprocess
 from .utils import *
 from .html import *
 import hashlib
+from .benchbase import SimulatorInfo
 
 class ArchC ():
 
@@ -262,10 +263,16 @@ class Simulator (SimulatorPage):
         self.cross['prefix'] = get_tar_git_or_folder(self.cross['link'], env.xtoolsfolder)+'/bin/'
         for bench in self.benchmarks:
             print('|--- ' + bench.name + ' ---', flush=True)
-            benchfolder = self.simfolder + '/benchmark/' + bench.name
+            benchfolder = self.simfolder + '/benchmark/' + bench.name + '/'
             mkdir(benchfolder)
             bench.download(benchfolder)
-            bench.run_tests(self.cross['prefix'], self.model['endian'], self.name, self.model['run'])
+            simulator_info = SimulatorInfo()
+            simulator_info.crossbin = self.cross['prefix']
+            simulator_info.arch     = self.model['name']
+            simulator_info.endian   = self.model['endian']
+            simulator_info.name     = self.name
+            simulator_info.run      = self.model['run']
+            bench.run_tests(simulator_info)
             self.create_benchmark_table(bench)
 
         self.close_sim_page()

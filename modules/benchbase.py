@@ -49,6 +49,14 @@ class App:
         return string
 
 
+class SimulatorInfo:
+    def __init__(self):
+        self.crossbin = ''
+        self.endian   = ''
+        self.arch     = ''
+        self.name     = ''
+        self.run      = ''
+
 class Benchmark():
     name = ""
     apps = []
@@ -72,7 +80,7 @@ class Benchmark():
     def download(self, benchmark_folder):
         raise NotImplementedError("Please Implement this method")
 
-    def run_tests(self, cross_folder, simulator_endian, simulator_name, simulator_cmdline):
+    def run_tests(self, simulator_info):
         raise NotImplementedError("Please Implement this method")
 
     def compile(self, srcfolder, cmd, app):

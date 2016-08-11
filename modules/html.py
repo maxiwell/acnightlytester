@@ -248,29 +248,35 @@ class SimulatorPage(HTMLPage):
             csvline = app.name + ';' + app.buildstatus + \
                       '(' + HTML.lhref('log', app.buildpage) + ');'
             for ds in app.dataset:
-                if ds.diffstatus:
-                    csvline += HTML.success()
-                else:
-                    csvline += HTML.fail()
 
-                csvline += '(' + HTML.lhref('output', ds.execpage) + ', ' + \
-                                 HTML.lhref('diff', ds.diffpage) 
-                                 
-                for link, page in ds.custom_links.items():
-                    csvline += ', ' + HTML.lhref (link, page)
-                    
-                csvline += ');'
-                with open(ds.execpage) as f:
-                    speed = ''
-                    instr = ''
-                    for l in f:
-                        s = re.search('Simulation speed: (.*)',l)
-                        i = re.search('Number of instructions executed: (.*)',l)
-                        if s:
-                            speed += s.group(1)+'<br>'
-                        if i:
-                            instr += i.group(1)+'<br>'
-                    csvline += speed + ';' + instr + ';'
+                if ds.execpage == None:
+                    csvline += '-;'
+                else:
+                    if ds.diffstatus:
+                        csvline += HTML.success()
+                    else:
+                        csvline += HTML.fail()
+
+                    csvline += '(' + HTML.lhref('output', ds.execpage) + ', ' + \
+                                     HTML.lhref('diff', ds.diffpage) 
+                    for link, page in ds.custom_links.items():
+                        csvline += ', ' + HTML.lhref (link, page)
+                    csvline += ');'
+
+                try:
+                    with open(ds.execpage) as f:
+                        speed = ''
+                        instr = ''
+                        for l in f:
+                            s = re.search('Simulation speed: (.*)',l)
+                            i = re.search('Number of instructions executed: (.*)',l)
+                            if s:
+                                speed += s.group(1)+'<br>'
+                            if i:
+                                instr += i.group(1)+'<br>'
+                        csvline += speed + ';' + instr + ';'
+                except:
+                    csvline += '-;-;'
 
             self.benchtable.append_csv_line(csvline)
         self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')

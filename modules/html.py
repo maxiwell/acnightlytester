@@ -239,7 +239,10 @@ class SimulatorPage(HTMLPage):
             if len(app.dataset) > len(maxlen.dataset):
                 maxlen = app
         for ds in maxlen.dataset:
-            cols += ds.name.title()+' Dataset;Speed;#Instrs.;'
+            cols += ds.name.title()+' Dataset;'
+        if bench.custom_links:
+            cols += 'Custom Links;'
+        cols += 'Speed;#Instrs.;'
 
         self.benchtable.append_csv_line_as_title(cols)
 
@@ -258,10 +261,11 @@ class SimulatorPage(HTMLPage):
                         csvline += HTML.fail()
 
                     csvline += '(' + HTML.lhref('output', ds.execpage) + ', ' + \
-                                     HTML.lhref('diff', ds.diffpage) 
-                    for link, page in ds.custom_links.items():
-                        csvline += ', ' + HTML.lhref (link, page)
-                    csvline += ');'
+                                     HTML.lhref('diff', ds.diffpage) + ');'
+                
+                for link, page in ds.custom_links.items():
+                    csvline +=  HTML.lhref (link, page)+'<br>'
+                csvline += ';'
 
                 try:
                     with open(ds.execpage) as f:

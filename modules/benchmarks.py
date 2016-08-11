@@ -208,57 +208,64 @@ class acstone(Benchmark):
         return export 
 
     def run_tests(self, simulator_info):
+
         gdbcmd = ' GDB="gdb-multiarch"'
+        
+        # Compiling GDB if 'gdb' it an 'app' in 'acstone' benchmark
+        gdbappfilter = filter(lambda x: x.name == 'gdb', self.apps)
+        for gdbapp in list(gdbappfilter):
+            # Compile GDB to connect to simulator
+            cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + self.gdbprefix + ' && '
+            cmd += 'make && make install '
+            self.compile ( self.gdbsrc, cmd, gdbapp )
+            for f in os.listdir(self.gdbprefix + '/bin/'):
+                if f.endswith("-gdb"):
+                    gdbcmd = ' GDB="' + self.gdbprefix + '/bin/' + f + '"'
+                    break
+            
+            for dataset in gdbapp.dataset:
+                # Removing the execute page from HTML Log
+                dataset.execpage = None
+
         for app in self.apps:
+
+            if app.name == 'gdb':
+                continue
 
             appfolder = self.benchfolder + app.name + '/'
             mkdir(appfolder)
 
-            if app.name == 'gdb':
-                # Compile GDB to connect to simulator
-                cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + self.gdbprefix + ' && '
-                cmd += 'make && make install '
-                self.compile ( self.gdbsrc, cmd, app )
-                for f in os.listdir(self.gdbprefix + '/bin/'):
-                    if f.endswith("-gdb"):
-                        gdbcmd = ' GDB="' + self.gdbprefix + '/bin/' + f + '"'
-                        break
-                for dataset in app.dataset:
-                    # Removing the execute page from HTML Log
-                    dataset.execpage = None
-            else:
+            begin = int(app.name.split('-')[0])
+            end   = int(app.name.split('-')[1])
+            for f in os.listdir(self.benchfolder):
+                if re.match(r'.*\.c', f):
+                    if int(f.split('.')[0]) >= begin and \
+                        int(f.split('.')[0]) <= end:
+                            shutil.copy( self.benchfolder + f, appfolder)
+            shutil.copy( self.benchfolder + 'Makefile', appfolder)
+            for d in ['bin', 'gdb']:
+                shutil.copytree( self.benchfolder + d, appfolder + d)
 
-                begin = int(app.name.split('-')[0])
-                end   = int(app.name.split('-')[1])
-                for f in os.listdir(self.benchfolder):
-                    if re.match(r'.*\.c', f):
-                        if int(f.split('.')[0]) >= begin and \
-                            int(f.split('.')[0]) <= end:
-                                shutil.copy( self.benchfolder + f, appfolder)
-                shutil.copy( self.benchfolder + 'Makefile', appfolder)
-                for d in ['bin', 'gdb']:
-                    shutil.copytree( self.benchfolder + d, appfolder + d)
-
-                exportenv  = self.exportev(simulator_info.crossbin, simulator_info.name) + gdbcmd
-                exportenv += " SIMULATOR='" + simulator_info.run + "'" 
-                
-                cmd = "make " + exportenv + " build"
-                self.compile( appfolder, cmd, app )
+            exportenv  = self.exportev(simulator_info.crossbin, simulator_info.name) + gdbcmd
+            exportenv += " SIMULATOR='" + simulator_info.run + "'" 
+            
+            cmd = "make " + exportenv + " build"
+            self.compile( appfolder, cmd, app )
    
-                cmd_env  = "source " + env.archc_envfile + " && "
-                for dataset in app.dataset:
-                    cmd = "make " + exportenv + " run"
-                    self.run  ( appfolder, cmd_env + cmd, app, dataset )
-                   
-                    goldenfolder = appfolder + 'golden/'
-                    mkdir (goldenfolder)
-                    exec_to_var( 'cd ' + appfolder + ' && mv *.x86.out ' + goldenfolder)
-                    outls = exec_to_var ('cd ' + goldenfolder + " && rename 's/\.x86//g' * && ls *.out"  )
-                    outputfiles = outls.split()
+            cmd_env  = "source " + env.archc_envfile + " && "
+            for dataset in app.dataset:
+                cmd = "make " + exportenv + " run"
+                self.run  ( appfolder, cmd_env + cmd, app, dataset )
+               
+                goldenfolder = appfolder + 'golden/'
+                mkdir (goldenfolder)
+                exec_to_var( 'cd ' + appfolder + ' && mv *.x86.out ' + goldenfolder)
+                outls = exec_to_var ('cd ' + goldenfolder + " && rename 's/\.x86//g' * && ls *.out"  )
+                outputfiles = outls.split()
 
-                    exec_to_var ("cd " + appfolder + " && rename 's/\." + simulator_info.name + "//g' *" )
+                exec_to_var ("cd " + appfolder + " && rename 's/\." + simulator_info.name + "//g' *" )
 
-                    self.diff ( appfolder, goldenfolder, outputfiles, app, dataset)
+                self.diff ( appfolder, goldenfolder, outputfiles, app, dataset)
 
 class acstonesmall(acstone):
 

@@ -111,18 +111,8 @@ class Benchmark():
         HTML.log_to_html(log, dataset.execpage, \
                          app.name + ' ' + dataset.name + ' Simulator Output')
 
-        try:
-            for link, cmdline in self.custom_links.items():
-                cmd = cmd_cd + cmdline.strip()
-                f = exec_to_var(cmd).split('\n')[-1]
-                ext = find_ext(f)
+        self.resolve_custom_links (appfolder, app, dataset)
 
-                dataset.custom_links[link] = env.htmloutput + '/' + env.testnumber + '-' + self.simulator_name + '-' + \
-                                             app.name.replace('/','_') + '-' + dataset.name + '-' + link.replace(' ','_') + ext
-    
-                shutil.move(appfolder + '/' + f, dataset.custom_links[link])
-        except:
-            print('ERROR in Custom Link command line')
 
     def diff(self, appfolder, goldenfolder, outputfiles, app, dataset):
         html = HTMLPage(dataset.diffpage)
@@ -140,6 +130,19 @@ class Benchmark():
             html.append_log_formatted(log)
             html.write_page()
 
+    def resolve_custom_links(self, appfolder, app, dataset):
+        cmd_cd = "cd " + appfolder + " && "
+        try:
+            for link, cmdline in self.custom_links.items():
+                cmd = cmd_cd + cmdline.strip()
+                f = exec_to_var(cmd).split('\n')[-1]
+                ext = find_ext(f)
 
+                dataset.custom_links[link] = env.htmloutput + '/' + env.testnumber + '-' + self.simulator_name + '-' + \
+                                             app.name.replace('/','_') + '-' + dataset.name + '-' + link.replace(' ','_') + ext
+    
+                shutil.move(appfolder + '/' + f, dataset.custom_links[link])
+        except:
+            print('ERROR in Custom Link command line')
 
 

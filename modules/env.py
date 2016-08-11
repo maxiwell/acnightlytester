@@ -26,8 +26,6 @@ class Env:
         self.workspace     = env.workspace
         self.htmloutput    = env.htmloutput
         self.testnumber    = env.testnumber
-        self.binutils      = env.binutils
-        self.gdb           = env.gdb
 
     def setworkspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 

@@ -152,7 +152,8 @@ class Simulator (SimulatorPage):
         
         self.simfolder = env.workspace + "/" + self.name + '/'
         self.simsrc    = self.simfolder + "/src/"
-        
+
+        self.model = {} 
         self.model['name']   = model
         self.model['hash']   = '-'
         self.model['endian'] = '' 

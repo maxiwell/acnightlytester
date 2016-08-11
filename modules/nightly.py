@@ -114,7 +114,7 @@ class Nightly ():
         pickle.dump( self.archc, open (archcobj, "wb" ))
         shutil.copyfile(env.scriptroot + 'condor/condor.py', condorexec)
         shutil.copyfile(env.scriptroot + 'condor/tmpl.condor', condorfile)
-        cp(env.scriptroot + '/python/', env.workspace + '/python/')
+        cp(env.scriptroot + '/modules/', env.workspace + '/modules/')
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
         search_and_replace(condorfile, '{ARGUMENTS}', env.workspace + ' ' + envobj + ' ' + archcobj + ' ' + simulatorobj)

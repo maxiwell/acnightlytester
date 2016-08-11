@@ -178,6 +178,8 @@ class Condor:
         self.indexpage = env.htmloutput + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
+        print(self.simulator.model['name'])
+        print(self.archc.systemc['prefix'])
         env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
         line  = simulator.gen_and_build();
         line += simulator.run_tests()

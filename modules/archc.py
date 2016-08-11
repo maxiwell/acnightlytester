@@ -13,16 +13,20 @@ class ArchC ():
     binutils    = {}
     gdb         = {}
 
-    def update_paths(self):
+    def __init__(self, _env):
+        self.archc = {}
         self.archc['src']       = env.workspace + "/archc/src"
         self.archc['prefix']    = env.workspace + "/archc/install"
         self.archc['hash']      = '-'
 
+        self.systemc = {}
         self.systemc['src']     = env.workspace + "/systemc/src"
         self.systemc['prefix']  = env.workspace + "/systemc/install"
         self.systemc['hash']    = '-'
 
+        self.binutils = {}
         self.binutils['src'] = env.workspace + '/binutils/src/'
+        self.gdb = {}
         self.gdb['src']      = env.workspace + '/gdb/src/'
 
 

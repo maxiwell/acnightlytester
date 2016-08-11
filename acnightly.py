@@ -25,7 +25,7 @@ def command_line_handler():
     return parser.parse_args()
 
 def config_parser_yaml(configfile):
-    archc   = ArchC()
+    archc   = None
     simulators = []
 
     with open(configfile, 'r') as config:
@@ -34,7 +34,7 @@ def config_parser_yaml(configfile):
         utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
         utils.env.printenv()
 
-        archc.update_paths()
+        archc = ArchC(utils.env)
         archc.set_systemc(yamls['archc']['systemc'])
         archc.set_linkpath(yamls['archc']['link/path'])
         if 'gdb' in yamls['archc'] and yamls['archc']['gdb'] != None:

@@ -83,7 +83,7 @@ class Nightly ():
         self.indexpage.update_index_table(csvline)
 
     def building_archc(self):
-        line = self.archc.build_archc();
+        line = self.archc.build_and_install_archc();
         search_and_replace(self.testspage.get_page(), \
                             '^.*tag=\'archc\'.*$', 
                             HTML.csvline_to_html(line))
@@ -93,7 +93,7 @@ class Nightly ():
             self.running_simulator(simulator)
 
     def running_simulator(self, simulator):
-        env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
+        env.set_archcenv (self.archc.get_archc_prefix() + '/etc/env.sh')
         line  = simulator.gen_and_build();
         line += simulator.run_tests()
         search_and_replace(self.testspage.get_page(), \
@@ -115,7 +115,7 @@ class Nightly ():
         cp(env.scriptroot + '/modules/', env.workspace + '/modules/')
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
-        search_and_replace(condorfile, '{ARGUMENTS}', env.workspace + ' ' + envobj + ' ' + archcobj + ' ' + simulatorobj)
+        search_and_replace(condorfile, '{ARGUMENTS}', envobj + ' ' + archcobj + ' ' + simulatorobj)
         search_and_replace(condorfile, '{TESTROOT}', env.workspace + '/')
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
         exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)
@@ -169,7 +169,7 @@ class Nightly ():
 class Condor:
 
     def __init__(self, archc, simulator):
-        self.archc      = archc
+        self.archc     = archc
         self.simulator = simulator
 
         self.testspage = env.htmloutput + "/" + env.testnumber + TestsPage.suffix
@@ -177,7 +177,8 @@ class Condor:
         
     def running_simulator (self, simulator):
         try:
-            env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
+            self.archc.reinstall_archc()
+            env.set_archcenv(self.archc.get_archc_prefix() + '/etc/env.sh')
             line  = simulator.gen_and_build();
             line += simulator.run_tests()
             search_and_replace(self.testspage, \

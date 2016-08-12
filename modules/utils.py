@@ -98,7 +98,7 @@ def insert_line_before_once(filepath, newline, pattern):
             print ( l , end='')
 
 def create_rand_file():
-    return env.logfolder + '/' + str(randint(0000,9999)) + '.log' 
+    return env.get_logfolder() + '/' + str(randint(0000,9999)) + '.log' 
    
 def get_tar_git_or_folder(srclink, dstfolder):
     dstfolder = os.path.normpath(dstfolder) + '/'
@@ -124,6 +124,12 @@ def get_tar_git_or_folder(srclink, dstfolder):
                 tar.extractall(dstfolder)
             tar.close()
     return os.path.normpath(prefix) + '/' 
+
+# Removing the 'workspace' from absolute path 
+# to find the relative path (to work in the Condor)
+def get_relative_path(absolute_path):
+    ws = os.path.normpath(env.workspace)
+    return absolute_path.replace(ws,'')
     
 def had_failed(page):
    with open(page, 'r') as f:

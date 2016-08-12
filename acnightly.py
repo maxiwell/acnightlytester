@@ -30,8 +30,8 @@ def config_parser_yaml(configfile):
 
     with open(configfile, 'r') as config:
         yamls = yaml.load(config)
-        utils.env.setworkspace(yamls['nightly']['workspace'])
-        utils.env.sethtmloutput(yamls['nightly']['htmloutput'])
+        utils.env.set_workspace(yamls['nightly']['workspace'])
+        utils.env.set_htmloutput(yamls['nightly']['htmloutput'])
         utils.env.printenv()
 
         archc = ArchC(utils.env)

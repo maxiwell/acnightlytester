@@ -15,7 +15,6 @@ def command_line_handler():
     parser = argparse.ArgumentParser()
     parser.add_argument('-dbg', '--debug', dest='debug', action='store_true', \
                         help="don't remove the 'workspace' folder")
-    parser.add_argument('workspace', metavar='/path/to/workspace')
     parser.add_argument('envobj', metavar='env.p')
     parser.add_argument('archcobj', metavar='archc.p')
     parser.add_argument('simulatorobj', metavar='mips-acsin.p')
@@ -26,13 +25,15 @@ def main():
     args        = command_line_handler()
     utils.debug = args.debug
 
-    args.workspace = os.path.normpath(args.workspace)
-    utils.rm(args.workspace)
-    os.symlink(os.getcwd(), args.workspace)
+    #args.workspace = os.path.normpath(args.workspace)
+    #utils.rm(args.workspace)
+    #os.symlink(os.getcwd(), args.workspace)
     
     utils.env.copy(pickle.load (open (args.envobj, "rb")))
     archc     = pickle.load (open (args.archcobj, "rb"))
     simulator = pickle.load (open (args.simulatorobj, "rb"))
+
+    env.set_workspace ( os.getcwd() )
     
     condor = Condor(archc, simulator)
 

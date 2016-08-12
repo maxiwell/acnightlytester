@@ -15,52 +15,71 @@ class ArchC ():
 
     def __init__(self, _env):
         self.archc = {}
-        self.archc['src']       = env.workspace + "/archc/src"
-        self.archc['prefix']    = env.workspace + "/archc/install"
+        self.archc['src']       = "/archc/src"
+        self.archc['prefix']    = "/archc/install"
         self.archc['hash']      = '-'
 
         self.systemc = {}
-        self.systemc['src']     = env.workspace + "/systemc/src"
-        self.systemc['prefix']  = env.workspace + "/systemc/install"
+        self.systemc['src']     = "/systemc/src"
+        self.systemc['prefix']  = "/systemc/install"
         self.systemc['hash']    = '-'
 
         self.binutils = {}
-        self.binutils['src'] = env.workspace + '/binutils/src/'
+        self.binutils['src'] = '/binutils/src/'
         self.gdb = {}
-        self.gdb['src']      = env.workspace + '/gdb/src/'
+        self.gdb['src']      = '/gdb/src/'
 
+    def get_archc_src(self):
+        return env.workspace + self.archc['src']
+
+    def get_archc_prefix(self):
+        return env.workspace + self.archc['prefix']
+
+    def get_systemc_src(self):
+        return env.workspace + self.systemc['src']
+
+    def get_systemc_prefix(self):
+        return env.workspace + self.systemc['prefix']
+
+    def get_binutils_src(self):
+        return env.workspace + self.binutils['src']
+
+    def get_gdb_src(self):
+        return env.workspace + self.gdb['src']
 
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
-        get_tar_git_or_folder (linkpath, self.archc['src'])
+        get_tar_git_or_folder (linkpath, self.get_archc_src())
         if (linkpath.endswith(".git")):
-            self.archc['hash'] = get_githash(self.archc['src'])
+            self.archc['hash'] = get_githash(self.get_archc_src())
 
     def set_systemc(self, linkpath):
         self.systemc['link'] = linkpath
-        get_tar_git_or_folder (linkpath, self.systemc['src'])
+        get_tar_git_or_folder (linkpath, self.get_systemc_src())
         if (linkpath.endswith(".git")):
-            self.systemc['hash'] = get_githash(self.systemc['src'])
+            self.systemc['hash'] = get_githash(self.get_systemc_src())
 
     def set_binutils(self, linkpath):
         self.binutils['link'] = linkpath
-        self.binutils['src']  = get_tar_git_or_folder (linkpath, self.binutils['src'])
+        self.binutils['src']  = get_relative_path ( \
+                    get_tar_git_or_folder (linkpath, self.get_binutils_src()))
 
     def set_gdb(self, linkpath):
         self.gdb['link'] = linkpath
-        self.gdb['src']  = get_tar_git_or_folder (linkpath, self.gdb['src'])
+        self.gdb['src']  = get_relative_path (\
+                    get_tar_git_or_folder (linkpath, self.get_gdb_src()))
 
     def build_systemc(self):
-        if os.path.isdir(self.systemc['src']+"/lib"):
-            cp (self.systemc['src'], self.systemc['prefix'])
+        if os.path.isdir(self.get_systemc_src()+"/lib"):
+            cp (self.get_systemc_src(), self.get_systemc_prefix())
             csvline = 'SystemC;' + self.systemc['link'] + ";-;" + HTML.success() 
             return csvline
         else:
-            cmd_1 = "cd "+self.systemc['src'] + " && " 
+            cmd_1 = "cd "+self.get_systemc_src() + " && " 
             cmd_2 = ""
-            if (self.systemc['src']+"/autogen.sh"):
+            if (self.get_systemc_src()+"/autogen.sh"):
                 cmd_2 += "./autogen.sh && " 
-            cmd_2 += "./configure --prefix=" + self.systemc['prefix'] 
+            cmd_2 += "./configure --prefix=" + self.get_systemc_prefix() 
             cmd_2 += " && make && make install"
             print("SystemC:")
             print("| " + cmd_2)
@@ -90,22 +109,22 @@ class ArchC ():
             csvline += '(' + HTML.lhref('log', htmllog) + ')'
             return csvline
 
-    def build_archc(self):
+    def build_and_install_archc(self):
 
         extra_csvline = ""
 
-        cmd_1 = "cd " + self.archc['src'] + " && "
+        cmd_1 = "cd " + self.get_archc_src() + " && "
         cmd_2 = "./autogen.sh && " + \
-                "./configure --prefix=" + self.archc['prefix']
+                "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
             extra_csvline += self.build_systemc() + '\n'
-            cmd_2 += " --with-systemc=" + self.systemc['prefix']
+            cmd_2 += " --with-systemc=" + self.get_systemc_prefix()
         if 'link' in self.binutils: 
             extra_csvline += 'Binutils;' + self.binutils['link'] + ';-;' + HTML.success() + '\n'
-            cmd_2 += " --with-binutils=" + self.binutils['src']
+            cmd_2 += " --with-binutils=" + self.get_binutils_src()
         if 'link' in self.gdb:
             extra_csvline += 'GDB;' + self.gdb['link'] + ';-;' + HTML.success() + '\n'
-            cmd_2 += " --with-gdb=" + self.gdb['src']
+            cmd_2 += " --with-gdb=" + self.get_gdb_src()
         cmd_2 += " && make && make install"
         print("ArchC:")
         print("| "+cmd_2)
@@ -138,6 +157,26 @@ class ArchC ():
        
         return csvline + '\n' + extra_csvline
 
+    def reinstall_archc(self):
+        if not os.path.isdir( self.get_systemc_prefix() + '/lib' ):
+            cmd  = "cd "+self.get_systemc_src() + " && " 
+            cmd += "make install"
+            exec_to_var ( cmd )
+
+        cmd  = "cd " + self.get_archc_src() + " && "
+        cmd += "./configure --prefix=" + self.get_archc_prefix()
+        if 'link' in self.systemc:
+            cmd += " --with-systemc=" + self.get_systemc_prefix()
+        if 'link' in self.binutils: 
+            cmd += " --with-binutils=" + self.get_binutils_src()
+        if 'link' in self.gdb:
+            cmd += " --with-gdb=" + self.get_gdb_src()
+        cmd += " && make && make install"
+        exec_to_var ( cmd )
+
+        # Each model will change the GDB and BINUTILS folders
+
+
 
 class Simulator (SimulatorPage):
     name        = ""
@@ -154,14 +193,14 @@ class Simulator (SimulatorPage):
         self.name = model + '-' + module
         super().__init__(self.name)
         
-        self.simfolder = env.workspace + "/" + self.name + '/'
-        self.simsrc    = self.simfolder + "/src/"
+        self.simfolder = "/" + self.name + '/'
+        self.simsrc    = "/src/"
 
         self.model = {} 
         self.model['name']   = model
         self.model['hash']   = '-'
         self.model['endian'] = '' 
-        self.model['run']    = self.simsrc + run
+        self.model['run']    = run
         self.model['inputfile']  = inputfile
         self.model['link']   = ''
 
@@ -181,6 +220,15 @@ class Simulator (SimulatorPage):
 
     def get_name(self):
         return self.name
+
+    def get_simfolder(self):
+        return env.workspace + self.simfolder
+
+    def get_simsrc(self):
+        return self.get_simfolder() + self.simsrc
+
+    def get_run_fullpath(self):
+        return self.get_simsrc() + self.model['run']
 
     def set_modellink(self, linkpath):
         self.model['link'] = linkpath
@@ -232,11 +280,11 @@ class Simulator (SimulatorPage):
 
     def download_modellink(self):
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            get_local(self.model['link'], self.simsrc, self.name)
+            get_local(self.model['link'], self.get_simsrc(), self.name)
         else:
-            git_clone(self.model['link'], self.simsrc, self.name)
+            git_clone(self.model['link'], self.get_simsrc(), self.name)
 
-        with open(self.simsrc + self.model['inputfile'], 'r') as f:
+        with open(self.get_simsrc() + self.model['inputfile'], 'r') as f:
             for l in f:
                 s = re.search(r'set_endian\("(.*)"\)', l)
                 if s:
@@ -244,8 +292,8 @@ class Simulator (SimulatorPage):
 
     def gen_and_build(self):
         self.download_modellink()
-        cmd_source = 'source '+env.archc_envfile+' && '
-        cmd_cd     = "cd " + self.simsrc + " && "
+        cmd_source = 'source '+env.get_archcenv()+' && '
+        cmd_cd     = "cd " + self.get_simsrc() + " && "
         cmd_acsim  = self.module['generator'] + " " + self.model['inputfile'] + " " \
                     + self.module['options'] + " && "
         cmd_make   = "make "
@@ -273,10 +321,10 @@ class Simulator (SimulatorPage):
         return tableline
 
     def run_tests(self):
-        self.cross['prefix'] = get_tar_git_or_folder(self.cross['link'], env.xtoolsfolder)+'/bin/'
+        self.cross['prefix'] = get_tar_git_or_folder(self.cross['link'], env.get_xtoolsfolder())+'/bin/'
         for bench in self.benchmarks:
             print('|--- ' + bench.name + ' ---', flush=True)
-            benchfolder = self.simfolder + '/benchmark/' + bench.name + '/'
+            benchfolder = self.get_simfolder() + '/benchmark/' + bench.name + '/'
             mkdir(benchfolder)
             bench.download(benchfolder)
             simulator_info = SimulatorInfo()
@@ -284,7 +332,7 @@ class Simulator (SimulatorPage):
             simulator_info.arch     = self.model['name']
             simulator_info.endian   = self.model['endian']
             simulator_info.name     = self.name
-            simulator_info.run      = self.model['run']
+            simulator_info.run      = self.get_run_fullpath()
             bench.run_tests(simulator_info)
             self.create_benchmark_table(bench)
 

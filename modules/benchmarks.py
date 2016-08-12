@@ -85,7 +85,7 @@ class mibench (Benchmark):
     
             self.compile(srcfolder, cmd, app)
     
-            cmd_env  = "source "+env.archc_envfile+" && "
+            cmd_env  = "source "+env.get_archcenv()+" && "
             cmd_env += "export ENDIAN='"+simulator_info.endian+"' && "
             cmd_env += "export SIMULATOR='"+simulator_info.run+"' && "
            
@@ -165,7 +165,7 @@ class spec2006 (Benchmark):
 
             self.compile(srcfolder, cmd, app)
     
-            cmd_env  = "source "+env.archc_envfile+" && "
+            cmd_env  = "source "+env.get_archcenv()+" && "
             cmd_env += "export SIMULATOR='"+simulator_info.run+"' && "
            
             for dataset in app.dataset:
@@ -253,7 +253,7 @@ class acstone(Benchmark):
             cmd = "make " + exportenv + " build"
             self.compile( appfolder, cmd, app )
    
-            cmd_env  = "source " + env.archc_envfile + " && "
+            cmd_env  = "source " + env.get_archcenv() + " && "
             for dataset in app.dataset:
                 cmd = "make " + exportenv + " run"
                 self.run  ( appfolder, cmd_env + cmd, app, dataset )

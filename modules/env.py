@@ -33,26 +33,32 @@ class Env:
         self.debug_mode    = env.debug_mode
         self.condor_mode   = env.condor_mode
 
-    def setworkspace(self, workspace):
+    def set_workspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 
-        self.logfolder    = self.workspace + self.logfolder
-        self.xtoolsfolder = self.workspace + self.xtoolsfolder
-        self.condorfolder = self.workspace + self.condorfolder
 
         for d in [ self.logfolder, self.xtoolsfolder, self.condorfolder ]:
-            if not os.path.exists(d+"/"):
-                os.makedirs(d+"/")     
+            if not os.path.exists(self.workspace + d + "/"):
+                os.makedirs(self.workspace + d + "/")     
 
-    def sethtmloutput(self, htmloutput):
+    def get_logfolder(self):
+        return self.workspace + self.logfolder
+
+    def get_xtoolsfolder(self):
+        return self.workspace + self.xtoolsfolder
+
+    def get_condorfolder(self):
+        return self.workspace + self.condorfolder
+
+    def set_htmloutput(self, htmloutput):
         self.htmloutput = self.resolvenv(htmloutput) 
-        self.testnumber = self.gettestnumber() 
+        self.testnumber = self.compute_testnumber() 
 
     def resolvenv(self,cmd):
         cmd = re.sub(r"\$\{RANDOM\}", str(self.random), cmd)
         cmd = re.sub(r"\$\{SCRIPTROOT\}", str(self.scriptroot), cmd)
         return cmd
 
-    def gettestnumber(self):
+    def compute_testnumber(self):
         testnumber = 0
         try:
             with open(self.htmloutput + "/" + self.indexhtml, "r") as f:
@@ -66,8 +72,14 @@ class Env:
         
         return str(testnumber)
 
-    def getindexhtml(self):
+    def get_indexhtml(self):
         return self.htmloutput + '/' + self.indexhtml
+
+    def set_archcenv(self, archcenv):
+        self.archc_envfile = archcenv
+
+    def get_archcenv(self):
+        return self.archc_envfile
 
     def printenv(self):
         print("Environment: ")

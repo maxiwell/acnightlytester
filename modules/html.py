@@ -167,7 +167,7 @@ class HTMLPage:
 class IndexPage(HTMLPage):
 
     def __init__(self):
-        super().__init__(env.htmloutput + "/" + env.indexhtml)
+        super().__init__(env.get_indexhtml())
         
         if not os.path.isfile (self.page):
             self.init_page("ArchC's NightlyTester Main Page")

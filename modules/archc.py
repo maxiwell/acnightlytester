@@ -184,6 +184,7 @@ class Simulator (SimulatorPage):
 
     def set_modellink(self, linkpath):
         self.model['link'] = linkpath
+        self.model['hash'] = get_githash_online(link, 'master')
 
     def get_modellink(self):
         return self.model['link'] 
@@ -232,7 +233,6 @@ class Simulator (SimulatorPage):
         else:
             git_clone(self.model['link'], self.simsrc, self.name)
 
-        self.model['hash'] = get_githash(self.simsrc)
         with open(self.simsrc + self.model['inputfile'], 'r') as f:
             for l in f:
                 s = re.search(r'set_endian\("(.*)"\)', l)

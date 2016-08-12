@@ -66,6 +66,9 @@ def get_githash(git):
         l = '-'
     return l
 
+def get_githash_online(link, branch):
+    return exec_to_var ('git ls-remote ' + link + ' | grep ' + branch + ' | cut -f1')
+
 def search_and_replace(filepath, pattern, string):
     with fileinput.input(filepath, inplace=True) as f:
         for l in f:

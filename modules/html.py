@@ -291,5 +291,5 @@ class SimulatorPage(HTMLPage):
                 csvline += ';'
 
             self.benchtable.append_csv_line(csvline)
-        self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')
+        self.benchtable.append_raw('<tr><td colspan=10 height=25></td></tr>')
 

@@ -11,9 +11,12 @@ class Env:
 
     archc_envfile   = ""
 
+    debug_mode      = False
+
     def __init__(self):
         self.random     = randint(0000,9999)
         self.scriptroot = os.getcwd() + '/'
+        self.debug_mode = False
 
     def copy(self, env):
         self.indexhtml     = env.indexhtml

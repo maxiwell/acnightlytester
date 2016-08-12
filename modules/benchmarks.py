@@ -217,7 +217,7 @@ class acstone(Benchmark):
             # Compile GDB to connect to simulator
             cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + self.gdbprefix + ' && '
             cmd += 'make && make install '
-            #self.compile ( self.gdbsrc, cmd, app )
+            self.compile ( self.gdbsrc, cmd, app )
             for f in os.listdir(self.gdbprefix + '/bin/'):
                 if f.endswith("-gdb"):
                     gdbcmd = ' GDB="' + self.gdbprefix + '/bin/' + f + '"'

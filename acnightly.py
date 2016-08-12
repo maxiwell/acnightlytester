@@ -86,9 +86,9 @@ def config_parser_yaml(configfile):
                 
 def main():
     args        = command_line_handler()
-    utils.debug = args.debug
     
     nightly = config_parser_yaml(args.configfile)
+    utils.env.debug_mode = args.debug
 
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")

@@ -11,7 +11,6 @@ from .env import Env
 
 version = "4.0"
 env = Env()
-debug = False
 index_page_path = ""
 
 def mkdir(directory):
@@ -159,7 +158,7 @@ def git_clone(url, dest, pkg = "" ):
 
 
 def cleanup():
-    if debug == False:
+    if env.debug_mode == False:
         rm(env.workspace)
 
 def abort(string):

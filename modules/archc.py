@@ -184,7 +184,10 @@ class Simulator (SimulatorPage):
 
     def set_modellink(self, linkpath):
         self.model['link'] = linkpath
-        self.model['hash'] = get_githash_online(link, 'master')
+        if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
+            self.model['hash'] = '-'
+        else:
+            self.model['hash'] = get_githash_online(linkpath, 'master')
 
     def get_modellink(self):
         return self.model['link'] 

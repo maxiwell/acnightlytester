@@ -3,6 +3,7 @@ import os, re, shutil
 from .html import *
 from . import utils
 import pickle
+import traceback
 
 class Nightly ():
 
@@ -182,8 +183,11 @@ class Condor:
             search_and_replace(self.testspage, \
                                '<td tag=\'' + simulator.name + '\'.*</td></td>', \
                                HTML.csvcells_to_html(line))
-        except:
-            abort_testspage("Unexpected error:", sys.exc_info()[0], self.testspage, simulator.name)
+        except Exception as err:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            self.pre_abort(''.join('!! ' + line for line in lines))
+            abort('Aborting')
             raise
 
 
@@ -202,3 +206,19 @@ class Condor:
         search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
 
+    def pre_abort(self, string):
+        log = create_rand_file ()
+        exec_to_log ("echo -e '=== Abort===\n\n" + string + "'", log)
+
+        abortpage = env.htmloutput + '/' + env.testnumber + '-' + self.simulator.name + '-system-error.html'
+        HTML.log_to_html (log, abortpage, self.simulator.name + ' System Traceback')
+
+        search_and_replace_first (self.testspage, '<td tag=\'' + self.simulator.name + '\'.*</td></td>', \
+                                  HTML.colspan(3, HTML.fail() + '(' +  HTML.lhref('Exception Log', abortpage) + ')' ))
+        
+        search_and_replace_first (self.indexpage, self.simulator.name, 'FAILED')
+        
+        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + ' (' + \
+                                HTML.lhref('log', self.testspage) + ')' ))
+        return '' 

@@ -226,7 +226,7 @@ class Simulator (SimulatorPage):
         benchmark.simulator_name = self.name
         self.benchmarks.append(benchmark)
 
-    def download_modellink(self):
+    def download_modellink():
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
             get_local(self.model['link'], self.simsrc, self.name)
         else:

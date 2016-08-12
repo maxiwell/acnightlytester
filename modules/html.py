@@ -15,8 +15,8 @@ class HTML:
         return string
 
     @staticmethod
-    def fuchsia(string):
-        string = "<b><font color=\"fuchsia\">" + string + "</font></b>"
+    def fuchsia(text):
+        string = "<b><font color=\"fuchsia\">" + text + "</font></b>"
         return string
 
     def running(tag, colspan):
@@ -24,9 +24,10 @@ class HTML:
         string += HTML.fuchsia("Running...") + "</td>"
         return string
 
-    def colspan(cols, string)
-        string  = "<td align=\"center\" colspan=" + str(cols) + ">"
-        string  = string + '</td>'
+    def colspan(cols, text):
+        print(text)
+        string   = "<td align=\"center\" colspan=" + str(cols) + ">"
+        string  += text + '</td>'
         return string
                    
     @staticmethod  
@@ -149,9 +150,11 @@ class HTMLPage:
         strlog = ""
         with open(log,'r') as f:
             for l in f:
-                tmpstr = re.sub(r'\n', r'\n<br>', l)
+                tmpstr = re.sub(r'<', r'[', l)
+                tmpstr = re.sub(r'>', r']', tmpstr)
                 tmpstr = re.sub(r'error', r'<b><font color="crinson">error</font></b>', tmpstr)
                 tmpstr = re.sub(r'warning', r'<b><font color="fuchsia">warning</font></b>', tmpstr)
+                tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
                 strlog += tmpstr
 
         self.string += "<table><tr><td><font face=\"Courier\">\n"

@@ -160,22 +160,8 @@ def cleanup():
     if env.debug_mode == False:
         rm(env.workspace)
 
-def abort_testspage (string, page, simulator_name):
-    log = create_rand_file ()
-    exec_to_log ("echo -e '=== Abort===\n\n" + string + "'", log)
-
-    abortpage = env.htmloutput + '/' env.testnumber + '-system-error.html'
-    HTML.log_to_html (log, abortpage)
-
-    try:
-        search_and_replace_first (page, '<td tag=\'' + simulator_name + '\'.*</td></td>', \
-                                  HTML.colspan(3, 'FAILED (' +  HTML.lhref('Exception Log', abortpage) + ')' ))
-
-        search_and_replace_first (env.getindexhtml(), simulator_name, 'FAILED')
-
-        search_and_replace_first (env.getindexhtml(), '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
-   
+def abort ( string ):  
+    print(string)
     cleanup()
     sys.exit(2)
 

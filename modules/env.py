@@ -7,7 +7,6 @@ class Env:
 
     logfolder       = '/log/'
     xtoolsfolder    = '/xtools/'
-    condorfolder    = '/condor/'
 
     archc_envfile   = ""
 
@@ -23,7 +22,6 @@ class Env:
         self.indexhtml     = env.indexhtml
         self.logfolder     = env.logfolder
         self.xtoolsfolder  = env.xtoolsfolder
-        self.condorfolder  = env.condorfolder
         self.archc_envfile = env.archc_envfile
         self.random        = env.random
         self.scriptroot    = env.scriptroot
@@ -36,7 +34,7 @@ class Env:
     def set_workspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 
 
-        for d in [ self.logfolder, self.xtoolsfolder, self.condorfolder ]:
+        for d in [ self.logfolder, self.xtoolsfolder ]:
             if not os.path.exists(self.workspace + d + "/"):
                 os.makedirs(self.workspace + d + "/")     
 
@@ -49,9 +47,6 @@ class Env:
 
     def get_xtoolsfolder(self):
         return self.workspace + self.xtoolsfolder
-
-    def get_condorfolder(self):
-        return self.workspace + self.condorfolder
 
     def set_htmloutput(self, htmloutput):
         self.htmloutput = self.resolvenv(htmloutput) 

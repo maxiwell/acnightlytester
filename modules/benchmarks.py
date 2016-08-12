@@ -188,14 +188,7 @@ class acstone(Benchmark):
         self.gdbfolder   = benchmark_folder + '/gdb/'
         
         rm (self.benchfolder)
-        git_clone('http://github.com/archc/acstone.git', self.benchfolder)  
-        
-        # You can use the 'gdb-multiarch', if you prefer
-        #self.gdbsrc    = get_tar_git_or_folder ( 'https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz', self.gdbfolder )
-        #self.gdbsrc    = get_tar_git_or_folder ( '/home/max/ArchC/tools/gdb-7.8.tar.gz', self.gdbfolder )
-        self.gdbsrc    = get_tar_git_or_folder ( 'https://ftp.gnu.org/gnu/gdb/gdb-7.11.tar.xz', self.gdbfolder )
-        self.gdbprefix = self.gdbfolder + '/install/' 
-        
+        git_clone('http://github.com/archc/acstone.git', self.benchfolder)         
 
     def exportev(self, cross, arch):
         cc  = ''
@@ -214,17 +207,23 @@ class acstone(Benchmark):
         # Compiling GDB if 'gdb' it an 'app' in 'acstone' benchmark
         gdbappfilter = filter(lambda x: x.name == 'gdb', self.apps)
         for app in list(gdbappfilter):
+            # You can use the 'gdb-multiarch', if you prefer
+            #gdbsrc    = get_tar_git_or_folder ( '/home/max/ArchC/tools/gdb-7.8.tar.gz', self.gdbfolder )
+            gdbsrc    = get_tar_git_or_folder ( 'https://ftp.gnu.org/gnu/gdb/gdb-7.11.tar.xz', self.gdbfolder )
+            gdbprefix = self.gdbfolder + '/install/' 
+ 
+
             # Compile GDB to connect to simulator
-            cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + self.gdbprefix + ' && '
+            cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + gdbprefix + ' && '
             cmd += 'make && make install '
-            self.compile ( self.gdbsrc, cmd, app )
-            for f in os.listdir(self.gdbprefix + '/bin/'):
+            self.compile ( gdbsrc, cmd, app )
+            for f in os.listdir(gdbprefix + '/bin/'):
                 if f.endswith("-gdb"):
-                    gdbcmd = ' GDB="' + self.gdbprefix + '/bin/' + f + '"'
+                    gdbcmd = ' GDB="' + gdbprefix + '/bin/' + f + '"'
                     break
             
             for dataset in app.dataset:
-                self.resolve_custom_links( self.gdbprefix, app, dataset )
+                self.resolve_custom_links( gdbprefix, app, dataset )
 
                 # Removing the execute page from HTML Log
                 dataset.execpage = None

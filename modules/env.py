@@ -63,6 +63,9 @@ class Env:
         
         return str(testnumber)
 
+    def getindexhtml(self):
+        return self.htmloutput + '/' + self.indexhtml
+
     def printenv(self):
         print("Environment: ")
         print("| workspace: "+self.workspace)

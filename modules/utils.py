@@ -11,7 +11,6 @@ from .env import Env
 
 version = "4.0"
 env = Env()
-index_page_path = ""
 
 def mkdir(directory):
     if not os.path.exists(directory+"/"):
@@ -163,10 +162,10 @@ def cleanup():
 
 def abort(string):
     try:
-        search_and_replace (index_page_path, '^tag=\'index\'.*$', '')
+        search_and_replace (env.getindexhtml(), 'tag=\'index\'.*$', '')
     except:
         pass
-    print("ERROR: "+string)
+    print("=== Abort=== : "+string)
     cleanup()
     sys.exit(2)
 

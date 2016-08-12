@@ -81,9 +81,6 @@ class Nightly ():
         csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
 
-        index_page_path = self.indexpage.get_page()
-
-        
     def building_archc(self):
         line = self.archc.build_archc();
         search_and_replace(self.testspage.get_page(), \

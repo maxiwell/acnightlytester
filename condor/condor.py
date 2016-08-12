@@ -24,11 +24,7 @@ def command_line_handler():
 def main():
     args        = command_line_handler()
     utils.debug = args.debug
-
-    #args.workspace = os.path.normpath(args.workspace)
-    #utils.rm(args.workspace)
-    #os.symlink(os.getcwd(), args.workspace)
-    
+   
     utils.env.copy(pickle.load (open (args.envobj, "rb")))
     archc     = pickle.load (open (args.archcobj, "rb"))
     simulator = pickle.load (open (args.simulatorobj, "rb"))

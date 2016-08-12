@@ -158,10 +158,11 @@ class ArchC ():
         return csvline + '\n' + extra_csvline
 
     def reinstall_archc(self):
-        if not os.path.isdir( self.get_systemc_prefix() + '/lib' ):
-            cmd  = "cd "+self.get_systemc_src() + " && " 
-            cmd += "make install"
-            exec_to_var ( cmd )
+        #if not os.path.isdir( self.get_systemc_prefix() + '/lib' ):
+        cmd  = "cd "+self.get_systemc_src() + " && " 
+        cmd += "./configure --prefix=" + self.get_systemc_prefix() + ' && '
+        cmd += "make && make install"
+        print ( exec_to_var ( cmd ) ) 
 
         cmd  = "cd " + self.get_archc_src() + " && "
         cmd += "./configure --prefix=" + self.get_archc_prefix()
@@ -175,7 +176,6 @@ class ArchC ():
         exec_to_var ( cmd )
 
         # Each model will change the GDB and BINUTILS folders
-
 
 
 class Simulator (SimulatorPage):

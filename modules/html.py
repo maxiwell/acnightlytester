@@ -246,10 +246,9 @@ class SimulatorPage(HTMLPage):
             if len(app.dataset) > len(maxlen.dataset):
                 maxlen = app
         for ds in maxlen.dataset:
-            cols += ds.name.title()+' Dataset;'
-        cols += 'Speed;#Instrs.;'
-        if bench.custom_links:
-            cols += 'Custom Links;'
+            cols += ds.name.title()+' Dataset;Speed;#Instrs.;'
+            if bench.custom_links:
+                cols += 'Custom Links;'
 
         self.benchtable.append_csv_line_as_title(cols)
 
@@ -284,12 +283,12 @@ class SimulatorPage(HTMLPage):
                 except:
                     csvline += '-;-;'
 
-            if app.custom_link:
-                for link, page in ds.custom_links.items():
-                    csvline +=  HTML.lhref (link, page)+'<br>'
-            else:
-                csvline += '-'
-            csvline += ';'
+                if app.custom_link:
+                    for link, page in ds.custom_links.items():
+                        csvline +=  HTML.lhref (link, page)+'<br>'
+                else:
+                    csvline += '-'
+                csvline += ';'
 
             self.benchtable.append_csv_line(csvline)
         self.benchtable.append_raw('<tr><td colspan=8 height=25></td></tr>')

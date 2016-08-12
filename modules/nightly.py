@@ -101,11 +101,11 @@ class Nightly ():
                            HTML.csvcells_to_html(line))
                                                            
     def condor_runnning_simulator(self, simulator):        
-        envobj        = env.condorfolder + 'env.p'
-        archcobj      = env.condorfolder + 'archc.p'
-        simulatorobj  = env.condorfolder + simulator.name + '.p'
-        condorexec    = env.condorfolder + 'condor.py'
-        condorfile    = env.condorfolder + simulator.name + '.condor'
+        envobj        = env.get_workspace() + 'env.p'
+        archcobj      = env.get_workspace() + 'archc.p'
+        simulatorobj  = env.get_workspace() + simulator.name + '.p'
+        condorexec    = env.get_workspace() + 'condor.py'
+        condorfile    = env.get_workspace() + simulator.name + '.condor'
         
         pickle.dump( simulator,  open (simulatorobj, "wb" ))
         pickle.dump( env,        open (envobj, "wb" ))
@@ -115,10 +115,10 @@ class Nightly ():
         cp(env.scriptroot + '/modules/', env.workspace + '/modules/')
 
         search_and_replace(condorfile, '{EXECUTABLE}', condorexec)
-        search_and_replace(condorfile, '{ARGUMENTS}', envobj + ' ' + archcobj + ' ' + simulatorobj)
-        search_and_replace(condorfile, '{TESTROOT}', env.workspace + '/')
+        search_and_replace(condorfile, '{ARGUMENTS}', 'env.p  archc.p  ' + simulator.name + '.p')
+        search_and_replace(condorfile, '{TESTROOT}', env.get_workspace())
         search_and_replace(condorfile, '{PREFIX}', simulator.name)
-        exec_to_var ('cd ' + env.condorfolder + ' && condor_submit ' + condorfile)
+        exec_to_var ('cd ' + env.get_workspace() + ' && condor_submit ' + condorfile)
 
     def finalize(self, simulator):
         status = 'OK'

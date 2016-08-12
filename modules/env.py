@@ -40,6 +40,10 @@ class Env:
             if not os.path.exists(self.workspace + d + "/"):
                 os.makedirs(self.workspace + d + "/")     
 
+    def get_workspace(self):
+        return os.path.normpath(self.workspace) + '/'
+
+
     def get_logfolder(self):
         return self.workspace + self.logfolder
 

@@ -9,8 +9,8 @@ nightly:
  
 archc:
     systemc   : https://github.com/archc/systemc.git
-    binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
-    gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
+#    binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
+#    gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
     link/path : https://github.com/archc/archc.git
 
 models:
@@ -22,17 +22,17 @@ models:
     arm:
         inputfile : arm.ac
         run       : ./arm.x --load=
-        link/path : https://github.com/archc/arm.git
+        link/path : https://github.com/maxiwell/arm.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
-        link/path : https://github.com/archc/powerpc.git
+        link/path : https://github.com/maxiwell/powerpc.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
         inputfile : sparc.ac
         run       : ./sparc.x --load=
-        link/path : https://github.com/archc/sparc.git
+        link/path : https://github.com/maxiwell/sparc.git
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
 simulators:
@@ -167,7 +167,7 @@ benchmarks:
         gdb            : [acstone]
         000-020        : [acstone]
     acstone:
-        gdb            : [acstone]
+        #gdb            : [acstone]
         000-020        : [acstone]
         021-050        : [acstone]
         050-100        : [acstone]

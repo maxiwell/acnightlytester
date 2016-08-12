@@ -184,17 +184,6 @@ class Simulator (SimulatorPage):
 
     def set_modellink(self, linkpath):
         self.model['link'] = linkpath
-        if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            get_local(self.model['link'], self.simsrc, self.name)
-        else:
-            git_clone(self.model['link'], self.simsrc, self.name)
-
-        self.model['hash'] = get_githash(self.simsrc)
-        with open(self.simsrc + self.model['inputfile'], 'r') as f:
-            for l in f:
-                s = re.search(r'set_endian\("(.*)"\)', l)
-                if s:
-                    self.model['endian'] = s.group(1)
 
     def get_modellink(self):
         return self.model['link'] 
@@ -237,7 +226,21 @@ class Simulator (SimulatorPage):
         benchmark.simulator_name = self.name
         self.benchmarks.append(benchmark)
 
+    def download_modellink():
+        if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
+            get_local(self.model['link'], self.simsrc, self.name)
+        else:
+            git_clone(self.model['link'], self.simsrc, self.name)
+
+        self.model['hash'] = get_githash(self.simsrc)
+        with open(self.simsrc + self.model['inputfile'], 'r') as f:
+            for l in f:
+                s = re.search(r'set_endian\("(.*)"\)', l)
+                if s:
+                    self.model['endian'] = s.group(1)
+
     def gen_and_build(self):
+        self.download_modellink()
         cmd_source = 'source '+env.archc_envfile+' && '
         cmd_cd     = "cd " + self.simsrc + " && "
         cmd_acsim  = self.module['generator'] + " " + self.model['inputfile'] + " " \

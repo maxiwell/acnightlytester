@@ -12,6 +12,7 @@ class Env:
     archc_envfile   = ""
 
     debug_mode      = False
+    condor_mode     = False
 
     def __init__(self):
         self.random     = randint(0000,9999)
@@ -29,6 +30,8 @@ class Env:
         self.workspace     = env.workspace
         self.htmloutput    = env.htmloutput
         self.testnumber    = env.testnumber
+        self.debug_mode    = env.debug_mode
+        self.condor_mode   = env.condor_mode
 
     def setworkspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 

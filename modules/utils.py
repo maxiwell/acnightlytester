@@ -157,8 +157,8 @@ def git_clone(url, dest, pkg = "" ):
 
 
 def cleanup():
-    if env.debug_mode == False:
-        rm(env.workspace)
+    if env.debug_mode == False and env.condor_mode == False:
+    	rm(env.workspace)
 
 def abort ( string ):  
     print(string)

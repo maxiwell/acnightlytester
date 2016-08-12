@@ -17,7 +17,7 @@ def command_line_handler():
                         help="don't remove the 'workspace' folder")
     parser.add_argument('envobj', metavar='env.p')
     parser.add_argument('archcobj', metavar='archc.p')
-    parser.add_argument('simulatorobj', metavar='mips-acsin.p')
+    parser.add_argument('simulatorobj', metavar='mips-acsim.p')
 
     return parser.parse_args()
 
@@ -26,8 +26,8 @@ def main():
     utils.debug = args.debug
    
     utils.env.copy(pickle.load (open (args.envobj, "rb")))
-    archc     = pickle.load (open (args.archcobj, "rb"))
-    simulator = pickle.load (open (args.simulatorobj, "rb"))
+    archc     = pickle.load    (open (args.archcobj, "rb"))
+    simulator = pickle.load    (open (args.simulatorobj, "rb"))
 
     env.set_workspace ( os.getcwd() )
     

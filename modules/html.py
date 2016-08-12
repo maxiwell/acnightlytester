@@ -149,8 +149,8 @@ class HTMLPage:
         strlog = ""
         with open(log,'r') as f:
             for l in f:
-                tmpstr = re.sub(r'<', r'[', l)
-                tmpstr = re.sub(r'>', r']', tmpstr)
+                tmpstr = re.sub(r'<', r'&lt;', l)
+                tmpstr = re.sub(r'>', r'&gt;', tmpstr)
                 tmpstr = re.sub(r'error', r'<b><font color="crinson">error</font></b>', tmpstr)
                 tmpstr = re.sub(r'warning', r'<b><font color="fuchsia">warning</font></b>', tmpstr)
                 tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)

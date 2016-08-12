@@ -175,14 +175,17 @@ class Condor:
         self.indexpage = env.htmloutput + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
-        print(self.simulator.model['name'])
-        print(self.archc.systemc['prefix'])
-        env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
-        line  = simulator.gen_and_build();
-        line += simulator.run_tests()
-        search_and_replace(self.testspage, \
-                   '<td tag=\'' + simulator.name + '\'.*</td></td>', \
-                   HTML.csvcells_to_html(line))
+        try:
+            env.archc_envfile = self.archc.archc['prefix']+'/etc/env.sh'
+            line  = simulator.gen_and_build();
+            line += simulator.run_tests()
+            search_and_replace(self.testspage, \
+                               '<td tag=\'' + simulator.name + '\'.*</td></td>', \
+                               HTML.csvcells_to_html(line))
+        except:
+            abort_testspage("Unexpected error:", sys.exc_info()[0], self.testspage, simulator.name)
+            raise
+
 
     def finalize(self, simulator):
         status = 'OK'

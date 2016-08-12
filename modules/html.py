@@ -23,6 +23,11 @@ class HTML:
         string  = "<td tag='" + tag + "' align=\"center\" colspan=" + str(colspan) + ">"
         string += HTML.fuchsia("Running...") + "</td>"
         return string
+
+    def colspan(cols, string)
+        string  = "<td align=\"center\" colspan=" + str(cols) + ">"
+        string  = string + '</td>'
+        return string
                    
     @staticmethod  
     def href(title, url):

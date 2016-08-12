@@ -25,7 +25,6 @@ class HTML:
         return string
 
     def colspan(cols, text):
-        print(text)
         string   = "<td align=\"center\" colspan=" + str(cols) + ">"
         string  += text + '</td>'
         return string

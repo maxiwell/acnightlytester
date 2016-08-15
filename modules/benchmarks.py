@@ -191,14 +191,13 @@ class acstone(Benchmark):
         git_clone('http://github.com/archc/acstone.git', self.benchfolder)         
 
 
-    def is_open(self, port):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect(("127.0.0.1", int(port)))
-            s.shutdown(2)
-            return True
-        except:
+    def is_port_free(self, port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('127.0.0.1',port))
+        if result == 0:
             return False
+        else:
+            return True
 
     def exportev(self, cross, arch):
         cc  = ''
@@ -208,10 +207,6 @@ class acstone(Benchmark):
 
         export  = ' ARCH="' + arch + '"'
         export += ' CROSS_COMPILER="' + cross + cc + '"'
-        port = 5000
-        while not self.is_open(port):
-            port += 1;
-        export += ' GDBPORT="' + str(port) + '"'
         return export 
 
     def run_tests(self, simulator_info):
@@ -252,6 +247,8 @@ class acstone(Benchmark):
 
             begin = int(app.name.split('-')[0])
             end   = int(app.name.split('-')[1])
+
+            # split the app name to find the range
             for f in os.listdir(self.benchfolder):
                 if re.match(r'.*\.c', f):
                     if int(f.split('.')[0]) >= begin and \
@@ -269,7 +266,12 @@ class acstone(Benchmark):
    
             cmd_env  = "source " + env.get_archcenv() + " && "
             for dataset in app.dataset:
-                cmd = "make " + exportenv + " run"
+
+                port = 5000
+                while not self.is_port_free(port):
+                    port += 1
+
+                cmd = 'make ' + exportenv + ' GDBPORT="' + str(port) + '" run'
                 self.run  ( appfolder, cmd_env + cmd, app, dataset )
                
                 goldenfolder = appfolder + 'golden/'

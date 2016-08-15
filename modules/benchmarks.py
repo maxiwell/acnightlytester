@@ -3,6 +3,7 @@ from .benchbase import Benchmark
 from .utils import *
 from .html  import Table, HTML, HTMLPage
 import tarfile, shutil, socket
+from random import randint
 
 class mibench (Benchmark):
 
@@ -193,13 +194,14 @@ class acstone(Benchmark):
         git_clone('http://github.com/archc/acstone.git', self.benchfolder)         
 
 
-    def is_port_free(self, port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('127.0.0.1',port))
-        if result == 0:
-            return False
-        else:
-            return True
+    def get_free_port(self):
+        result = 0
+        port   = 0
+        while result == 0:
+            port = randint(5000,6000)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex(('127.0.0.1',port))
+        return port
 
     def exportev(self, cross, arch):
         cc  = ''
@@ -269,11 +271,7 @@ class acstone(Benchmark):
             cmd_env  = "source " + env.get_archcenv() + " && "
             for dataset in app.dataset:
 
-                port = 5000
-                while not self.is_port_free(port):
-                    port += 1
-
-                cmd = 'make ' + exportenv + ' GDBPORT="' + str(port) + '" run'
+                cmd = 'make ' + exportenv + ' GDBPORT="' + str(self.get_free_port()) + '" run'
                 self.run  ( appfolder, cmd_env + cmd, app, dataset )
                
                 goldenfolder = appfolder + 'golden/'

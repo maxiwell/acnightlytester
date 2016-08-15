@@ -45,8 +45,10 @@ class mibench (Benchmark):
                 outputfiles['small'] = ['output_small.txt']
                 outputfiles['large'] = ['output_large_softfloat.txt']
             elif app.name == 'automotive/susan':
-                outputfiles['small'] = ['output_small.smoothing.pgm','output_small.edges.pgm','output_small.corners.pgm']
-                outputfiles['large'] = ['output_large.smoothing.pgm','output_large.edges.pgm','output_large.corners.pgm']
+                outputfiles['small'] = ['output_small.smoothing.pgm','output_small.edges.pgm', \
+					'output_small.corners.pgm']
+                outputfiles['large'] = ['output_large.smoothing.pgm','output_large.edges.pgm', \
+					'output_large.corners.pgm']
             elif app.name == 'telecomm/adpcm':
                 if simulator_info.endian == 'big':
                     outputfiles['small'] = ['output_small.adpcm', 'BIG_ENDIAN_output_small.pcm']

@@ -190,6 +190,16 @@ class acstone(Benchmark):
         rm (self.benchfolder)
         git_clone('http://github.com/archc/acstone.git', self.benchfolder)         
 
+
+    def is_open(self, port):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect(("127.0.0.1", int(port)))
+            s.shutdown(2)
+            return True
+        except:
+            return False
+
     def exportev(self, cross, arch):
         cc  = ''
         for f in os.listdir(cross):
@@ -198,7 +208,10 @@ class acstone(Benchmark):
 
         export  = ' ARCH="' + arch + '"'
         export += ' CROSS_COMPILER="' + cross + cc + '"'
-        return export 
+        port = 5000
+        while not self.is_open(port):
+            port += 1;
+        export += ' GDBPORT="' + port + '"'
 
     def run_tests(self, simulator_info):
 

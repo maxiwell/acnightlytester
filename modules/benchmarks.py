@@ -2,7 +2,7 @@
 from .benchbase import Benchmark
 from .utils import *
 from .html  import Table, HTML, HTMLPage
-import tarfile, shutil
+import tarfile, shutil, socket
 
 class mibench (Benchmark):
 
@@ -211,7 +211,8 @@ class acstone(Benchmark):
         port = 5000
         while not self.is_open(port):
             port += 1;
-        export += ' GDBPORT="' + port + '"'
+        export += ' GDBPORT="' + str(port) + '"'
+        return export 
 
     def run_tests(self, simulator_info):
 

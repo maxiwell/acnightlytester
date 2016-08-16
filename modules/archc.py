@@ -31,9 +31,6 @@ class ArchC ():
         self.gdb['src']      = '/gdb/src/'
 
         self.external_libs = []
-        #self.external_libs['src']    = '/external/src'
-        #self.external_libs['prefix'] = '/external/install'
-        #self.external_libs['list']   = []
 
     def get_archc_src(self):
         return env.workspace + self.archc['src']
@@ -58,6 +55,24 @@ class ArchC ():
 
     def get_external_lib_prefix(self, lib):
         return env.workspace + lib['prefix']
+
+    def get_external_libs_PKG_CONFIG_PATH(self):
+        pkg_config_path = '$PKG_CONFIG_PATH'
+        for l in self.external_libs:
+            pkg_config_path += env.workspace + l['prefix'] + '/lib/pkgconfig:' + pkg_config_path
+        return pkg_config_path
+
+    def get_external_libs_LD_LIBRARY_PATH(self):
+        ld_library_path = '$LD_LIBRARY_PATH'
+        for l in self.external_libs:
+            ld_library_path += env.workspace + l['prefix'] + '/lib:' + ld_library_path 
+        return ld_library_path
+
+    def get_external_libs_PATH(self):
+        path = '$PATH'
+        for l in self.external_libs:
+            path += env.workspace + l['prefix'] + '/bin:' + path
+        return path
 
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
@@ -170,9 +185,10 @@ class ArchC ():
     def build_and_install_archc(self):
 
         extra_csvline = ""
-
-        cmd_1 = "cd " + self.get_archc_src() + " && "
-        cmd_2 = "./autogen.sh && " + \
+        cmd_1  = 'export PKG_CONFIG_PATH="' + self.get_external_libs_PKG_CONFIG_PATH() + '" && '
+        cmd_1 += 'export LD_LIBRARY_PATH="' + self.get_external_libs_LD_LIBRARY_PATH() + '" && '
+        cmd_1 += "cd " + self.get_archc_src() + " && "
+        cmd_2  = "./autogen.sh && " + \
                 "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
             extra_csvline += self.build_systemc() + '\n'
@@ -231,7 +247,9 @@ class ArchC ():
         exec_to_var ( cmd ) 
 
         # Each model will change the GDB and BINUTILS folders
-        cmd  = "cd " + self.get_archc_src() + " && "
+        cmd  = 'export PKG_CONFIG_PATH="' + self.get_external_libs_PKG_CONFIG_PATH() + '" && '
+        cmd += 'export LD_LIBRARY_PATH="' + self.get_external_libs_LD_LIBRARY_PATH() + '" && '
+        cmd += "cd " + self.get_archc_src() + " && "
         cmd += "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
             cmd += " --with-systemc=" + self.get_systemc_prefix()

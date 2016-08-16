@@ -17,22 +17,32 @@ models:
     mips:
         inputfile : mips.ac
         run       : ./mips.x --load=
-        link/path : https://github.com/archc/mips.git
+        link/path : https://github.com/maxiwell/mips.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    mips32r2:
+        inputfile : mips.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/maxiwell/mips.git
+        branch    : mips32r2
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     arm:
         inputfile : arm.ac
         run       : ./arm.x --load=
         link/path : https://github.com/maxiwell/arm.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/maxiwell/powerpc.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
         inputfile : sparc.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/maxiwell/sparc.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
 simulators:
@@ -46,6 +56,18 @@ simulators:
         benchmarks: [mibench, spec2006]
     mips-hlt:
         model     : mips
+        modules   : [hltrace]
+        benchmarks: [mibenchsmall]
+    mips32r2-gdb:
+        model     : mips32r2
+        modules   : [gdb]
+        benchmarks: [acstone]
+    mips32r2-acsim-pw:
+        model     : mips32r2
+        modules   : [acsim, powersc]
+        benchmarks: [mibench, spec2006]
+    mips32r2-hlt:
+        model     : mips32r2
         modules   : [hltrace]
         benchmarks: [mibenchsmall]
     arm-gdb:

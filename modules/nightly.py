@@ -59,7 +59,8 @@ class Nightly ():
 
         # -- Simulators
         for simulator in self.simulators:
-            tableline = simulator.get_name() + ';' + simulator.get_modellink() + ';' ;
+            tableline = simulator.get_name() + ';' + simulator.get_modellink() + ';' + \
+                        simulator.get_modelbranch() + ';'
             if simulator.get_modelhash() != '-' :
                 tableline += HTML.href(simulator.get_modelhash()[0:7], simulator.get_modellink().replace('.git','') \
                             + '/commit/' + simulator.model['hash']) + ';'

@@ -203,6 +203,7 @@ class Simulator (SimulatorPage):
         self.model['run']    = run
         self.model['inputfile']  = inputfile
         self.model['link']   = ''
+        self.model['branch'] = 'master'
 
         self.cross = {}
         self.cross['link']   = ''
@@ -230,15 +231,20 @@ class Simulator (SimulatorPage):
     def get_run_fullpath(self):
         return self.get_simsrc() + self.model['run']
 
-    def set_modellink(self, linkpath):
+    def set_modellink(self, linkpath, branch):
         self.model['link'] = linkpath
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            self.model['hash'] = '-'
+            self.model['hash']   = '-'
+            self.model['branch'] = '-'
         else:
-            self.model['hash'] = get_githash_online(linkpath, 'master')
+            self.model['hash']   = get_githash_online(linkpath, branch)
+            self.model['branch'] = branch 
 
     def get_modellink(self):
         return self.model['link'] 
+
+    def get_modelbranch(self):
+        return self.model['branch']
 
     def set_generator(self, generator):
         self.module['generator'] = generator
@@ -282,7 +288,7 @@ class Simulator (SimulatorPage):
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
             get_local(self.model['link'], self.get_simsrc(), self.name)
         else:
-            git_clone(self.model['link'], self.get_simsrc(), self.name)
+            git_clone(self.model['link'], self.model['branch'], self.get_simsrc(), self.name)
 
         with open(self.get_simsrc() + self.model['inputfile'], 'r') as f:
             for l in f:

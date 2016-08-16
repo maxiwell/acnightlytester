@@ -191,7 +191,7 @@ class acstone(Benchmark):
         self.gdbfolder   = benchmark_folder + '/gdb/'
         
         rm (self.benchfolder)
-        git_clone('http://github.com/archc/acstone.git', self.benchfolder)         
+        git_clone('http://github.com/archc/acstone.git', 'master', self.benchfolder)         
 
 
     def get_free_port(self):

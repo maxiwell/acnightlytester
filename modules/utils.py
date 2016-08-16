@@ -112,7 +112,7 @@ def get_tar_git_or_folder(srclink, dstfolder):
             if not os.path.isfile(prefix):
                 if srclink.startswith('http'):
                     if srclink.endswith('.git'):
-                        git_clone (srclink, dstfolder)
+                        git_clone (srclink, 'master', dstfolder)
                         return dstfolder
                     else:
                         get_http(srclink, dstfolder)
@@ -156,10 +156,10 @@ def get_local(path, dest, pkg = ""):
     else:
         print("FAILED")
 
-def git_clone(url, dest, pkg = "" ):
+def git_clone(url, branch, dest, pkg = "" ):
     print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
-    if (os.system("git clone "+url+" " \
-            +dest+" > /dev/null 2>&1") == 0):
+    if (os.system("git clone -b " + branch + " " + url + " " \
+            + dest + " > /dev/null 2>&1 ") == 0):
         print("OK")
     else:
         print("FAILED")

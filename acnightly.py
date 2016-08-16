@@ -53,10 +53,14 @@ def config_parser_yaml(configfile):
             inputfile = yamls['models'][model]['inputfile']
             run       = yamls['models'][model]['run']
             linkpath  = yamls['models'][model]['link/path']
+            branch    = 'master'
+            if 'branch' in yamls['models'][model]:
+                if yamls['models'][model]['branch'] != None:
+                    branch = yamls['models'][model]['branch']
             crosslink = yamls['models'][model]['cross']
             for _module in yamls['simulators'][_sim]['modules']:
                 sim = Simulator(model, _module, run, inputfile)
-                sim.set_modellink(linkpath)
+                sim.set_modellink(linkpath, branch)
                 sim.set_generator(yamls['modules'][_module]['generator'])
                 sim.set_options(yamls['modules'][_module]['options'])
                 if 'desc' in yamls['modules'][_module]:

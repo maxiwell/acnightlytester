@@ -8,10 +8,11 @@ from .benchbase import SimulatorInfo
 
 class ArchC ():
 
-    archc       = {}
-    systemc     = {} 
-    binutils    = {}
-    gdb         = {}
+    archc         = {}
+    systemc       = {} 
+    binutils      = {}
+    gdb           = {}
+    external_libs = []
 
     def __init__(self, _env):
         self.archc = {}
@@ -28,6 +29,11 @@ class ArchC ():
         self.binutils['src'] = '/binutils/src/'
         self.gdb = {}
         self.gdb['src']      = '/gdb/src/'
+
+        self.external_libs = []
+        #self.external_libs['src']    = '/external/src'
+        #self.external_libs['prefix'] = '/external/install'
+        #self.external_libs['list']   = []
 
     def get_archc_src(self):
         return env.workspace + self.archc['src']
@@ -47,16 +53,22 @@ class ArchC ():
     def get_gdb_src(self):
         return env.workspace + self.gdb['src']
 
+    def get_external_lib_src(self, lib):
+        return env.workspace + lib['src']
+
+    def get_external_lib_prefix(self, lib):
+        return env.workspace + lib['prefix']
+
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
         get_tar_git_or_folder (linkpath, self.get_archc_src())
-        if (linkpath.endswith(".git")):
+        if linkpath.endswith(".git") or linkpath.startswith("git"):
             self.archc['hash'] = get_githash(self.get_archc_src())
 
     def set_systemc(self, linkpath):
         self.systemc['link'] = linkpath
         get_tar_git_or_folder (linkpath, self.get_systemc_src())
-        if (linkpath.endswith(".git")):
+        if linkpath.endswith(".git") or linkpath.startswith("git"):
             self.systemc['hash'] = get_githash(self.get_systemc_src())
 
     def set_binutils(self, linkpath):
@@ -68,6 +80,52 @@ class ArchC ():
         self.gdb['link'] = linkpath
         self.gdb['src']  = get_relative_path (\
                     get_tar_git_or_folder (linkpath, self.get_gdb_src()))
+
+    def set_external_libs(self, name, link):
+        lib = {}
+        lib['name'  ] = name
+        lib['link'  ] = link
+        lib['hash'  ] = '-'
+        lib['src'   ] = '/external/src/' + name
+        lib['prefix'] = '/external/install/' + name
+        self.external_libs.append(lib)
+
+    def build_external_lib(self, lib):
+        src    = self.get_external_lib_src(lib)
+        prefix = self.get_external_lib_prefix(lib) 
+        rm (src)
+        get_tar_git_or_folder(lib['link'], src)
+        if lib['link'].endswith(".git") or lib['link'].startswith("git"):
+            lib['hash'] = get_githash(src)
+
+        cmd_1  = "cd " + src + " && "
+        cmd_2  = "autoreconf -vif && "
+        cmd_2 += "./configure --prefix=" + prefix + " --enable-maintainer-mode && "
+        cmd_2 += "make install"
+        cmd = cmd_1 + cmd_2
+
+        print(lib['name'] + ':')
+        print("| " + cmd_2)
+        print("| Building and Installing...", end="", flush=True)
+
+        log = create_rand_file()
+        execstatus = ''
+        if exec_to_log(cmd, log):
+            print("OK")
+            execstatus = HTML.success()
+        else:
+            print("FAILED")
+            execstatus = HTML.fail()
+            
+        # Creating the Build Page
+        htmllog = env.htmloutput + "/" + env.testnumber + "-" + lib['name'] + "-build-log.html"
+        HTML.log_to_html(log, htmllog,  lib['name'] + " build output")
+
+        # Creating a csv line to add in the TestsPage (ArchC Table)
+        csvline  = lib['name'] + ';' + lib['link'] + ';'
+        csvline += lib['hash'][0:7] + ';' + execstatus
+        csvline += '(' + HTML.lhref('log', htmllog) + ')'
+        return csvline
 
     def build_systemc(self):
         if os.path.isdir(self.get_systemc_src()+"/lib"):
@@ -125,6 +183,9 @@ class ArchC ():
         if 'link' in self.gdb:
             extra_csvline += 'GDB;' + self.gdb['link'] + ';-;' + HTML.success() + '\n'
             cmd_2 += " --with-gdb=" + self.get_gdb_src()
+        for l in self.external_libs:
+            extra_csvline += self.build_external_lib(l) + '\n'
+
         cmd_2 += " && make && make install"
         print("ArchC:")
         print("| "+cmd_2)
@@ -158,12 +219,18 @@ class ArchC ():
         return csvline + '\n' + extra_csvline
 
     def reinstall_archc(self):
-        #if not os.path.isdir( self.get_systemc_prefix() + '/lib' ):
+        for l in self.external_libs:
+            cmd  = "cd " + self.get_external_lib_src(l) + " && "
+            cmd += "./configure --prefix=" + self.get_external_lib_prefix(l) + " --enable-maintainer-mode && "
+            cmd += "make install"
+            exec_to_var ( cmd )
+
         cmd  = "cd "+self.get_systemc_src() + " && " 
         cmd += "./configure --prefix=" + self.get_systemc_prefix() + ' && '
         cmd += "make && make install"
-        print ( exec_to_var ( cmd ) ) 
+        exec_to_var ( cmd ) 
 
+        # Each model will change the GDB and BINUTILS folders
         cmd  = "cd " + self.get_archc_src() + " && "
         cmd += "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
@@ -175,7 +242,6 @@ class ArchC ():
         cmd += " && make && make install"
         exec_to_var ( cmd )
 
-        # Each model will change the GDB and BINUTILS folders
 
 
 class Simulator (SimulatorPage):

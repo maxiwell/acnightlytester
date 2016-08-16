@@ -41,6 +41,9 @@ def config_parser_yaml(configfile):
             archc.set_gdb(yamls['archc']['gdb'])
         if 'binutils' in yamls['archc'] and yamls['archc']['binutils'] != None:
             archc.set_binutils(yamls['archc']['binutils'])
+        if 'extlibs' in yamls['archc'] and yamls['archc']['extlibs'] != None:
+            for _lib in yamls['archc'] and yamls['archc']['extlibs']:
+                archc.set_external_libs(_lib, yamls['archc']['extlibs'][_lib])
 
         simlist = []
         if yamls['nightly']['simulators'] == 'all':
@@ -54,9 +57,8 @@ def config_parser_yaml(configfile):
             run       = yamls['models'][model]['run']
             linkpath  = yamls['models'][model]['link/path']
             branch    = 'master'
-            if 'branch' in yamls['models'][model]:
-                if yamls['models'][model]['branch'] != None:
-                    branch = yamls['models'][model]['branch']
+            if 'branch' in yamls['models'][model] and yamls['models'][model]['branch'] != None:
+                branch = yamls['models'][model]['branch']
             crosslink = yamls['models'][model]['cross']
             for _module in yamls['simulators'][_sim]['modules']:
                 sim = Simulator(model, _module, run, inputfile)

@@ -110,7 +110,10 @@ def get_tar_git_or_folder(srclink, dstfolder):
             get_local(srclink, prefix)
         else:
             if not os.path.isfile(prefix):
-                if srclink.startswith('http'):
+                if srclink.startswith('git'):
+                    git_clone (srclink, 'master', dstfolder)
+                    return dstfolder
+                elif srclink.startswith('http'):
                     if srclink.endswith('.git'):
                         git_clone (srclink, 'master', dstfolder)
                         return dstfolder

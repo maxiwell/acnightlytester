@@ -158,7 +158,7 @@ def get_local(path, dest, pkg = ""):
 
 def git_clone(url, branch, dest, pkg = "" ):
     print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
-    if (os.system("git clone -b " + branch + " " + url + " " \
+    if (os.system("git clone --depth 1 -b " + branch + " " + url + " " \
             + dest + " > /dev/null 2>&1 ") == 0):
         print("OK")
     else:

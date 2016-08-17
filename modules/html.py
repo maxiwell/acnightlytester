@@ -67,10 +67,10 @@ class HTML:
         return table_string
 
     @staticmethod
-    def log_to_html(logfile, htmlfile, title):
+    def log_to_html(logfile, htmlfile, title, highlight = []):
         html = HTMLPage(htmlfile)
         html.init_page(title)
-        html.append_log_formatted(logfile)
+        html.append_log_formatted(logfile, highlight)
         html.write_page()
 
 class Table:
@@ -145,23 +145,37 @@ class HTMLPage:
     def append_table(self, table):
         self.string += table.string
 
-    def append_log_formatted(self, log):
+    def append_log_formatted(self, log, highlight = []):
         strlog = ""
         with open(log,'r') as f:
             for l in f:
                 tmpstr = re.sub(r'<', r'&lt;', l)
                 tmpstr = re.sub(r'>', r'&gt;', tmpstr)
-                tmpstr = re.sub(r'error', r'<b><font color="crinson">error</font></b>', tmpstr)
-                tmpstr = re.sub(r'warning', r'<b><font color="fuchsia">warning</font></b>', tmpstr)
+                tmpstr = self.custom_sub ('<b><font color="crinson">', 'error', '</font></b>', tmpstr)
+                tmpstr = self.custom_sub ('<b><font color="fuchsia">', 'warning', '</font></b>', tmpstr)
                 tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
+                for h in highlight:
+                    tmpstr = self.custom_sub ('<b><font color="fuchsia">', h, '</font></b>', tmpstr)
                 strlog += tmpstr
 
         self.string += "<table><tr><td><font face=\"Courier\">\n"
         self.string += strlog
         self.string += "</font></td></tr></table>"
+    
 
     def get_page(self):
         return self.page
+
+    def custom_sub(self, begin, words, end, inputstring):
+
+        # Using the 'error' word as example, the regex below avoids matches with 
+        # 'werror', 'errorprone', '_error', 'error-'. But match correctly with 'error' 
+        # in begin and end of sentences and joined with other character, like ':' and '[]'
+
+        return re.sub(r'(?P<n1>([^a-zA-Z0-9_-]|^))(?P<n2>' + words + ')(?P<n3>([^a-zA-Z0-9_-]|$))', \
+                      r'\g<n1>' +  begin + '\g<n2>' + end + '\g<n3>', inputstring, flags=re.IGNORECASE)
+
+
 
    
 class IndexPage(HTMLPage):

@@ -48,25 +48,13 @@ class Nightly ():
 
         # environment
         ccpath     = exec_to_var('which gcc')
-        cxxpath    = exec_to_var('which g++')
         ccversion  = exec_to_var("gcc --version | awk '/^gcc/ {print $4;}'")
-        cxxversion = exec_to_var("g++ --version | awk '/^g++/ {print $4;}'")
-
         ccdump = create_rand_file()
         exec_to_log('gcc -v', ccdump)
-        cxxdump = create_rand_file()
-        exec_to_log('g++ -v', cxxdump)
-
         ccpage  = env.htmloutput + '/' + env.testnumber + '-gcc-version.html'  
-        cxxpage = env.htmloutput + '/' + env.testnumber + '-g++-version.html'  
-
         HTML.log_to_html (ccdump,  ccpage,  "GCC Version")
-        HTML.log_to_html (cxxdump, cxxpage, "G++ Version")
-
         envlines  = 'GCC Host;' + ccpath  + ';' + ccversion  + ';' + \
                 HTML.success() + ' (' + HTML.lhref('version', ccpage) + ')\n'
-        envlines += 'G++ Host;' + cxxpath + ';' + cxxversion + ';' + \
-                HTML.success() + ' (' + HTML.lhref('version', cxxpage) + ')\n'
         self.testspage.update_archc_table(envlines)
 
         # -- Simulators

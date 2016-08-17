@@ -153,13 +153,13 @@ class HTMLPage:
                 tmpstr = re.sub(r'>', r'&gt;', tmpstr)
                 tmpstr = self.custom_sub ('<b><font color="crinson">', 'error', '</font></b>', tmpstr)
                 tmpstr = self.custom_sub ('<b><font color="fuchsia">', 'warning', '</font></b>', tmpstr)
-                tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
                 for h in highlight:
                     tmpstr = self.custom_sub ('<b><font color="fuchsia">', h, '</font></b>', tmpstr)
+                tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
                 strlog += tmpstr
 
         self.string += "<table><tr><td><font face=\"Courier\">\n"
-        self.string += strlog
+        self.string += strlog 
         self.string += "</font></td></tr></table>"
     
 

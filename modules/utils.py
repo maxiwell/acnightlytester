@@ -40,7 +40,7 @@ def exec_to_log(cmd, log):
                                             shell=True)
     out, err = process.communicate(cmd.encode('utf-8'))
     f = open(log, 'w')
-    f.write(out.strip().decode('utf-8'))
+    f.write(out.decode('utf-8'))
 
     if process.returncode == 0:
         return True

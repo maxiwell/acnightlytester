@@ -37,10 +37,11 @@ class Nightly ():
                 highlight_list = ['--with-float=soft', '--with-newlib']
                 crossdump = create_rand_file()
                 exec_to_log ( crosscmd + '-v', crossdump )
+
                 crosspage = env.htmloutput + '/' + env.testnumber + '-' + s.model['name'] + '-cross-version.html'
                 HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version', highlight_list)
                 crosslines += 'GCC Cross ' + s.model['name'] + ';' + s.cross['link'] + ';' + crossversion + ';' + \
-                            HTML.success() + ' (' + HTML.href('version', crosspage) + ')\n'
+                            HTML.success() + ' (' + HTML.lhref('version', crosspage) + ')\n'
                 models[s.model['name']] = s.cross['link']
                 rm (env.get_xtoolsfolder())
         self.testspage.update_archc_table(crosslines)

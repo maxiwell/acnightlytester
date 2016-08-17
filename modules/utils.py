@@ -28,7 +28,7 @@ def cp(src, dst):
     return False
 
 def rm(dst):
-    if ( os.system("rm -rf "+dst+" > /dev/null 2>&1") == 0 ):
+    if ( os.system("chmod 777 -R " + dst + " && rm -rf " + dst + " > /dev/null 2>&1") == 0 ):
         return True
     else:
         return False

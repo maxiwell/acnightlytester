@@ -158,7 +158,7 @@ class HTMLPage:
                 tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
                 strlog += tmpstr
 
-        self.string += "<table><tr><td><font face=\"Courier\">\n"
+        self.string += "<table><tr><td><font face=\"Courier New\">\n"
         self.string += strlog 
         self.string += "</font></td></tr></table>"
     

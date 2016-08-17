@@ -30,8 +30,21 @@ class Nightly ():
         models = {}   # The dict is just to show one cross per model
         for s in self.simulators:
             if not s.model['name'] in models:
-                crosslines += 'GCC Cross ' + s.model['name'] + ';' + s.cross['link'] + ';-;' + HTML.success() + '\n'
+                # Find the cross version and write the page
+                prefix = get_tar_git_or_folder(s.cross['link'], env.get_xtoolsfolder()) + '/bin/'
+                crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
+                crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
+                print(crossversion)
+                crossdump = create_rand_file()
+                exec_to_log ( crosscmd + '-v', crossdump )
+                crosspage = env.htmloutput + '/' + env.testnumber + '-' + s.model['name'] + '-cross-version.html'
+                HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version')
+                
+                crosslines += 'GCC Cross ' + s.model['name'] + ';' + s.cross['link'] + ';' + crossversion + ';' + \
+                            HTML.success() + ' (' + HTML.href('version', crosspage) + ')\n'
                 models[s.model['name']] = s.cross['link']
+                
+                #rm (env.get_xtoolsfolder())
         self.testspage.update_archc_table(crosslines)
 
         # environment

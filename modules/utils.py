@@ -34,7 +34,15 @@ def rm(dst):
         return False
 
 def exec_to_log(cmd, log):
-    if (os.system ( ' ( /bin/bash -c "' + cmd + '" ) > '+log+' 2>&1' ) == 0):
+    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
+                                            stdout=subprocess.PIPE, \
+                                            stderr=subprocess.STDOUT, \
+                                            shell=True)
+    out, err = process.communicate(cmd.encode('utf-8'))
+    f = open(log, 'w')
+    f.write(out.strip().decode('utf-8'))
+
+    if process.returncode == 0:
         return True
     else:
         return False

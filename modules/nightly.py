@@ -34,17 +34,15 @@ class Nightly ():
                 prefix = get_tar_git_or_folder(s.cross['link'], env.get_xtoolsfolder()) + '/bin/'
                 crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
                 crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
-                print(crossversion)
+                highlight_list = ['--with-float=soft', '--with-newlib']
                 crossdump = create_rand_file()
                 exec_to_log ( crosscmd + '-v', crossdump )
                 crosspage = env.htmloutput + '/' + env.testnumber + '-' + s.model['name'] + '-cross-version.html'
-                HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version')
-                
+                HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version', highlight_list)
                 crosslines += 'GCC Cross ' + s.model['name'] + ';' + s.cross['link'] + ';' + crossversion + ';' + \
                             HTML.success() + ' (' + HTML.href('version', crosspage) + ')\n'
                 models[s.model['name']] = s.cross['link']
-                
-                #rm (env.get_xtoolsfolder())
+                rm (env.get_xtoolsfolder())
         self.testspage.update_archc_table(crosslines)
 
         # environment

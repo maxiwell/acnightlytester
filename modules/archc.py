@@ -315,6 +315,9 @@ class Simulator (SimulatorPage):
     def get_run_fullpath(self):
         return self.get_simsrc() + self.model['run']
 
+    def get_inputfile(self):
+        return self.model['inputfile']
+
     def set_modellink(self, linkpath, branch):
         self.model['link'] = linkpath
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):

@@ -216,7 +216,7 @@ class TestsPage(HTMLPage):
 
         self.tablearchc = Table(['Component', 'Link/Path', 'Version', 'Status'])
 
-        self.tabletests = Table(['Name', 'Link/Path', 'Branch', 'Version', 'Generator', 'Options', \
+        self.tabletests = Table(['Name', 'Link/Path', 'Branch', 'Version', 'Generator', 'Input', 'Options', \
                               'Compilation', 'Benchmark', 'Tested in'])
          
     def close_tests_page(self):

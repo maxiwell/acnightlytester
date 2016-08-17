@@ -71,14 +71,20 @@ class Nightly ():
 
         # -- Simulators
         for simulator in self.simulators:
+            inputfile = simulator.get_inputfile()
             tableline = simulator.get_name() + ';' + simulator.get_modellink() + ';' + \
                         simulator.get_modelbranch() + ';'
             if simulator.get_modelhash() != '-' :
-                tableline += HTML.href(simulator.get_modelhash()[0:7], simulator.get_modellink().replace('.git','') \
-                            + '/commit/' + simulator.model['hash']) + ';'
+                tableline += HTML.href(simulator.get_modelhash()[0:7], simulator.get_modellink().replace('.git', '') \
+                            + '/commit/' + simulator.get_modelhash() ) + ';'
+                inputfile = HTML.href( simulator.get_inputfile(), simulator.get_modellink().replace('.git', '') \
+                            + '/blob/' + simulator.get_modelhash() + '/' + simulator.get_inputfile() ) 
             else:
-                tableline += '-' + ';'
-            tableline += HTML.monospace(simulator.get_generator()) + ';' + HTML.monospace(simulator.get_options()) 
+                tableline = '-' + ';'
+            
+            tableline += HTML.monospace(simulator.get_generator()) + ';' 
+            tableline += HTML.monospace(inputfile) + ';'
+            tableline += HTML.monospace(simulator.get_options()) 
             tableline += HTML.running(simulator.get_name(), 3)
             self.testspage.update_tests_table(tableline)
        

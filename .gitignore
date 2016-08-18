@@ -13,3 +13,4 @@ __pycache__
 xtools
 *.yaml
 *.yml
+*.txt

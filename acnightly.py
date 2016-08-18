@@ -100,6 +100,7 @@ def main():
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")
 
+    nightly.init_pages()
     nightly.building_archc()
 
     for simulator in nightly.simulators:

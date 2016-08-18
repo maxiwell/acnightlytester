@@ -8,6 +8,6 @@
 ###########################################################################
 
 cd /home/lsc/projetos/archc/nightly/acnightlytester/
-./acnightly.py config/site.yaml --condor
-#rsync -Rrazp -v public_html /home/lsc/projetos/archc/acnightlytester/
+ts=`date +"%Y%m%d"`
+./acnightly.py conf/site.yaml --condor &> log_${ts}.txt
 

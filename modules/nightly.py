@@ -8,18 +8,20 @@ import traceback
 class Nightly ():
 
     def __init__(self, archc, simulators):
-        self.indexpage = IndexPage()
-        self.testspage = TestsPage()
-        
         self.archc      = archc
         self.simulators = simulators
 
+    def init_pages(self):
+        self.indexpage = IndexPage()
+        self.testspage = TestsPage()
+ 
         # [TestsPage] Init the Tables
         # -- ArchC 
         csvline = 'ArchC;' + self.archc.archc['link'] + ';' 
         if self.archc.archc['hash'] != '-' :
             csvline += HTML.href(self.archc.archc['hash'][0:7], \
-                                 self.archc.archc['link'].replace('.git','') + '/commit/' + self.archc.archc['hash'] ) 
+                                 self.archc.archc['link'].replace('.git','') + \
+                                 '/commit/' + self.archc.archc['hash'] ) 
         else:
             csvline += self.archc.archc['hash'][0:7]
         csvline += HTML.running('archc', 1)
@@ -89,6 +91,8 @@ class Nightly ():
         csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
 
+
+
     def building_archc(self):
         line = self.archc.build_and_install_archc();
         search_and_replace(self.testspage.get_page(), \
@@ -145,6 +149,9 @@ class Nightly ():
 
 
     def git_hashes_changed(self):
+        changed = False
+        match   = False
+
         last_page = env.htmloutput + "/" + str(int(env.testnumber)-1) + TestsPage.suffix;
         if not os.path.isfile(last_page):
             return True
@@ -157,20 +164,23 @@ class Nightly ():
 
         with open(last_page, "r") as f:
             for l in f:
-
                 # ArchC check
                 s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % self.archc.archc['link'], l)
                 if s:
+                    match = True
                     if self.archc.archc['hash'][0:7] != s.group(2):
                         return True
                 # Simulators check
                 for sim in self.simulators:
                     s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.get_modellink(), l)
                     if s:
+                        match = True
                         if sim.get_modelhash()[0:7] != s.group(2):
                             return True
-        return False
+        if not match:
+            return True
 
+        return False
 
 
 class Condor:
@@ -222,7 +232,8 @@ class Condor:
         HTML.log_to_html (log, abortpage, self.simulator.name + ' System Traceback')
 
         search_and_replace_first (self.testspage, '<td tag=\'' + self.simulator.name + '\'.*</td></td>', \
-                                  HTML.colspan(3, HTML.fail() + '(' +  HTML.lhref('Exception Log', abortpage) + ')' ))
+                                  HTML.colspan(3, HTML.fail() + '(' +  HTML.lhref('Exception Log', abortpage) \
+                                  + ')' ))
         
         search_and_replace_first (self.indexpage, self.simulator.name, 'FAILED')
         
@@ -230,3 +241,4 @@ class Condor:
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + ' (' + \
                                 HTML.lhref('log', self.testspage) + ')' ))
         return '' 
+

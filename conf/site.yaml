@@ -11,7 +11,7 @@ archc:
     systemc   : https://github.com/archc/systemc.git
 #    binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
 #    gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
-    link/path : https://github.com/maxiwell/archc.git
+    link/path : https://github.com/archc/archc.git
     extlibs   : 
         libelf : git://git.fedorahosted.org/git/elfutils.git
 
@@ -19,31 +19,31 @@ models:
     mips:
         inputfile : mips.ac
         run       : ./mips.x --load=
-        link/path : https://github.com/maxiwell/mips.git
+        link/path : https://github.com/archc/mips.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     mips32r2:
         inputfile : mips.ac
         run       : ./mips.x --load=
-        link/path : https://github.com/maxiwell/mips.git
+        link/path : https://github.com/archc/mips.git
         branch    : mips32r2
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     arm:
         inputfile : arm.ac
         run       : ./arm.x --load=
-        link/path : https://github.com/maxiwell/arm.git
+        link/path : https://github.com/archc/arm.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
-        link/path : https://github.com/maxiwell/powerpc.git
+        link/path : https://github.com/archc/powerpc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
         inputfile : sparc.ac
         run       : ./sparc.x --load=
-        link/path : https://github.com/maxiwell/sparc.git
+        link/path : https://github.com/archc/sparc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 

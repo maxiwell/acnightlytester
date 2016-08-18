@@ -8,6 +8,6 @@
 ###########################################################################
 
 cd /home/lsc/projetos/archc/nightly/acnightlytester/
-./acnightly.py conf/config.yaml $1 --condor
+./acnightly.py config/site.yaml --condor
 #rsync -Rrazp -v public_html /home/lsc/projetos/archc/acnightlytester/
 

@@ -12,6 +12,8 @@ from .env import Env
 version = "4.0"
 env = Env()
 
+timeout = 3600
+
 def mkdir(directory):
     if not os.path.exists(directory+"/"):
         os.makedirs(directory+"/")
@@ -38,7 +40,7 @@ def exec_to_log(cmd, log):
                                             stdout=subprocess.PIPE, \
                                             stderr=subprocess.STDOUT, \
                                             shell=True)
-    out, err = process.communicate(cmd.encode('utf-8'))
+    out, err = process.communicate(cmd.encode('utf-8'), timeout)
     f = open(log, 'w')
     f.write(out.decode('utf-8'))
 
@@ -49,7 +51,7 @@ def exec_to_log(cmd, log):
 
 def exec_to_var(cmd):
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    out, err = process.communicate(cmd.encode('utf-8'))
+    out, err = process.communicate(cmd.encode('utf-8'), timeout)
     return out.strip().decode('utf-8')
 
 def find_ext(filename):

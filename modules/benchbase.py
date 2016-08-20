@@ -89,8 +89,8 @@ class Benchmark():
         print('| [compiling] '+app.name+"... ",end="", flush=True)
         cmd_cd = "cd " + srcfolder + " && "
 
-        log = create_rand_file()
-        if exec_to_log(cmd_cd + cmd, log):
+        retcode, log = exec_to_log(cmd_cd + cmd)
+        if retcode:
             print("OK")
             app.buildstatus = HTML.success()
         else:
@@ -104,8 +104,8 @@ class Benchmark():
         print('| [ running ] ' + app.name + " (" + dataset.name + ")... ",end="", flush=True)
         cmd_cd = "cd " + appfolder + " && "
 
-        log = create_rand_file()
-        if exec_to_log(cmd_cd + cmd, log):
+        retcode, log = exec_to_log(cmd_cd + cmd)
+        if retcode:
             print("OK")
         else:
             print("FAILED")
@@ -124,8 +124,8 @@ class Benchmark():
             cmd +=    appfolder + '/' + f + ' '
             cmd += goldenfolder + '/' + f + ' '
             
-            log = create_rand_file() 
-            if not exec_to_log(cmd, log):
+            retcode, log = exec_to_log(cmd)
+            if not retcode:
                 dataset.diffstatus = False
 
             html.append_raw('<h2>File '+f+'</h2>\n') 

@@ -37,8 +37,7 @@ class Nightly ():
                 crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
                 crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
                 highlight_list = ['--with-float=soft', '--with-newlib']
-                crossdump = create_rand_file()
-                exec_to_log ( crosscmd + '-v', crossdump )
+                retcode, crossdump = exec_to_log ( crosscmd + '-v' )
 
                 crosspage = env.htmloutput + '/' + env.testnumber + '-' + s.model['name'] + '-cross-version.html'
                 HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version', highlight_list)
@@ -51,8 +50,7 @@ class Nightly ():
         # environment
         ccpath     = exec_to_var('which gcc')
         ccversion  = exec_to_var("gcc --version | awk '/^gcc/ {print $4;}'")
-        ccdump = create_rand_file()
-        exec_to_log('gcc -v', ccdump)
+        retcode, ccdump = exec_to_log('gcc -v')
         ccpage  = env.htmloutput + '/' + env.testnumber + '-gcc-version.html'  
         HTML.log_to_html (ccdump,  ccpage,  "GCC Version")
         envlines  = 'GCC Host;' + ccpath  + ';' + ccversion  + ';' + \

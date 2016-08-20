@@ -20,18 +20,21 @@ def mkdir(directory):
 
 def cp(src, dst):
     mkdir(dst)
-    if exec_to_log("cp -r "+src+"/* "+dst, "/dev/null"):
+    if exec_to_log("cp -r "+src+"/* "+dst)[0]:
         return True
     else:
-        if exec_to_log("cp -r "+src+" "+dst, "/dev/null"):
+        if exec_to_log("cp -r "+src+" "+dst)[0]:
             return True
 
     return False
 
 def rm(dst):
-    return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")
+    return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")[0]
 
-def exec_to_log(cmd, log):
+def exec_to_log(cmd, log = None):
+    if not log:
+        log = create_rand_file()
+
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
                                             stdout=subprocess.PIPE, \
                                             stderr=subprocess.STDOUT, \
@@ -48,9 +51,9 @@ def exec_to_log(cmd, log):
     f.close()
 
     if process.returncode == 0:
-        return True
+        return True, log
     else:
-        return False
+        return False, log
 
 def exec_to_var(cmd):
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -209,7 +212,7 @@ def get_local(path, dest, pkg = ""):
 
 def git_clone(url, branch, dest, pkg = "" ):
     print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
-    if exec_to_log("git clone --depth 1 -b " + branch + " " + url + " " + dest, "/dev/null"):
+    if exec_to_log("git clone --depth 1 -b " + branch + " " + url + " " + dest)[0]:
         print("OK")
     else:
         print("FAILED")

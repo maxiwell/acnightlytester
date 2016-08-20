@@ -123,9 +123,9 @@ class ArchC ():
         print("| " + cmd_2)
         print("| Building and Installing...", end="", flush=True)
 
-        log = create_rand_file()
+        retcode, log = exec_to_log(cmd)
         execstatus = ''
-        if exec_to_log(cmd, log):
+        if  retcode:
             print("OK")
             execstatus = HTML.success()
         else:
@@ -159,9 +159,9 @@ class ArchC ():
             print("| Building and Installing...", end="", flush=True)
             cmd = cmd_1 + cmd_2
 
-            log = create_rand_file()
+            retcode, log = exec_to_log(cmd) 
             execstatus = ''
-            if exec_to_log(cmd, log):
+            if retcode:
                 print("OK")
                 execstatus = HTML.success()
             else:
@@ -208,9 +208,9 @@ class ArchC ():
         print("| Building and Installing... ", end="", flush=True)
         cmd = cmd_1 + cmd_2
 
-        log = create_rand_file()
+        retcode, log = exec_to_log(cmd)
         execstatus = ''
-        if exec_to_log(cmd, log): 
+        if retcode: 
             print("OK")
             execstatus = HTML.success()
         else:
@@ -396,9 +396,9 @@ class Simulator (SimulatorPage):
         print("| "+cmd)
         print("| Generating and Building... ", end="", flush=True)
 
-        log = create_rand_file()
+        retcode, log = exec_to_log(cmd)
         execstatus = ''
-        if exec_to_log(cmd, log):
+        if retcode:
             print("OK")
             execstatus = HTML.success()
         else:

@@ -133,11 +133,7 @@ def get_tar_git_or_folder(srclink, dstfolder):
                         get_http(srclink, dstfolder)
                 else:
                     get_local(srclink, dstfolder)
-            tar = tarfile.open(prefix)
-            prefix = dstfolder + tar.getnames()[0].split('/')[0]
-            if not os.path.isdir(prefix):
-                tar.extractall(dstfolder)
-            tar.close()
+            prefix = untar(prefix, dstfolder) 
     return os.path.normpath(prefix) + '/' 
 
 # Removing the 'workspace' from absolute path (to Condor approach)
@@ -146,19 +142,35 @@ def get_relative_path(absolute_path):
     return absolute_path.replace(ws,'')
     
 def had_failed(page):
-   with open(page, 'r') as f:
-       for l in f:
-           if re.search("Failed", l):
-               return True
-   return False
+    with open(page, 'r') as f:
+        for l in f:
+            if re.search("Failed", l):
+                return True
+    return False
            
-                      
+def untar (tarfile_, dstfolder):
+    print("| Extracting Tarball... ", end="", flush=True)
+    tar = tarfile.open(tarfile_)
+    if not tar:
+        print("FAILED")
+    prefix = dstfolder + tar.getnames()[0].split('/')[0]
+    # check if the folder already exist 
+    if os.path.isdir(prefix):
+       rm (prefix)
+    tar.extractall(dstfolder)
+    tar.close()
+    print("OK")
+    return prefix
+
 def get_http(url, dest):
-    pkg = os.path.basename(url)
     mkdir(dest)
-    if os.path.isfile(env.get_tarballpool() + pkg):
+    
+    pkg = os.path.basename(url)
+    tarballpool = env.get_tarballpool()
+    
+    if tarballpool and os.path.isfile(tarballpool + pkg):
         print("Getting " + pkg + " from Tarball Pool... ", end="", flush=True)
-        if ( cp(env.get_tarballpool() + pkg, dest) ):
+        if ( cp(tarballpool + pkg, dest) ):
             print("OK")
         else:
             print("FAILED")
@@ -169,9 +181,9 @@ def get_http(url, dest):
         else:
             print("FAILED")
         
-        if env.get_tarballpool():
+        if tarballpool:
             print("| copying to Tarball Pool folder...", end="", flush=True)
-            if cp (dest + "/" + pkg, env.get_tarballpool()):
+            if cp (dest + "/" + pkg, tarballpool):
                 print("OK")
             else:
                 print("FAILED")

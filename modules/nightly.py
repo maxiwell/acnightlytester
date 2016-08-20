@@ -225,8 +225,7 @@ class Condor:
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
 
     def pre_abort(self, string):
-        log = create_rand_file ()
-        exec_to_log ("echo -e '=== Abort===\n\n" + string + "'", log)
+        log = string_to_log ("=== Abort===\n\n" + string)
 
         abortpage = env.htmloutput + '/' + env.testnumber + '-' + self.simulator.name + '-system-error.html'
         HTML.log_to_html (log, abortpage, self.simulator.name + ' System Traceback')

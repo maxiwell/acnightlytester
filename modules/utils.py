@@ -45,6 +45,7 @@ def exec_to_log(cmd, log):
 
     f = open(log, 'w')
     f.write(dump)
+    f.close()
 
     if process.returncode == 0:
         return True
@@ -55,6 +56,16 @@ def exec_to_var(cmd):
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     out, err = process.communicate(cmd.encode('utf-8'), timeout)
     return out.strip().decode('utf-8')
+
+
+def string_to_log(string):
+    log = create_rand_file ()
+    f = open(log)
+    f.write(string)
+    f.close()
+    return log
+ 
+
 
 def find_ext(filename):
     name = filename.split('.')

@@ -37,8 +37,14 @@ def exec_to_log(cmd, log):
                                             stderr=subprocess.STDOUT, \
                                             shell=True)
     out, err = process.communicate(cmd.encode('utf-8'), timeout)
+
+    dump  = "===========\n"
+    dump += "$ " + cmd + '\n'
+    dump += "===========\n\n"
+    dump += out.decode('utf-8')
+
     f = open(log, 'w')
-    f.write(out.decode('utf-8'))
+    f.write(dump)
 
     if process.returncode == 0:
         return True

@@ -149,12 +149,16 @@ class HTMLPage:
         strlog = ""
         with open(log,'r') as f:
             for l in f:
-                tmpstr = re.sub(r'<', r'&lt;', l)
-                tmpstr = re.sub(r'>', r'&gt;', tmpstr)
-                tmpstr = self.custom_sub ('<b><font color="crinson">', 'error', '</font></b>', tmpstr)
-                tmpstr = self.custom_sub ('<b><font color="fuchsia">', 'warning', '</font></b>', tmpstr)
-                for h in highlight:
-                    tmpstr = self.custom_sub ('<b><font color="fuchsia">', h, '</font></b>', tmpstr)
+                if l.startswith("$"):
+                    tmpstr = re.sub(r'&&', r'&&\n', l)
+                else:
+                    tmpstr = re.sub(r'<', r'&lt;', l)
+                    tmpstr = re.sub(r'>', r'&gt;', tmpstr)
+                    tmpstr = self.custom_sub ('<b><font color="crinson">', 'error', '</font></b>', tmpstr)
+                    tmpstr = self.custom_sub ('<b><font color="fuchsia">', 'warning', '</font></b>', tmpstr)
+                    for h in highlight:
+                        tmpstr = self.custom_sub ('<b><font color="fuchsia">', h, '</font></b>', tmpstr)
+                
                 tmpstr = re.sub(r'\n', r'\n<br>', tmpstr)
                 strlog += tmpstr
 
@@ -170,11 +174,11 @@ class HTMLPage:
 
         # Using the 'error' word as example, the regex below avoids matches with 
         # 'werror', 'errorprone', '_error', 'error-'. But match correctly with 'error' 
-        # in begin and end of sentences and joined with other character, like ':' and '[]'
-
+        # in begin and end of sentences and with other character, like 'error:' and '[error]'
         return re.sub(r'(?P<n1>([^a-zA-Z0-9_-]|^))(?P<n2>' + words + ')(?P<n3>([^a-zA-Z0-9_-]|$))', \
                       r'\g<n1>' +  begin + '\g<n2>' + end + '\g<n3>', inputstring, flags=re.IGNORECASE)
 
+    
 
 
    

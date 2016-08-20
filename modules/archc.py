@@ -57,15 +57,17 @@ class ArchC ():
         return env.workspace + lib['prefix']
 
     def get_external_libs_PKG_CONFIG_PATH(self):
-        pkg_config_path = '$PKG_CONFIG_PATH'
+        pkg_config_path = ''
         for l in self.external_libs:
-            pkg_config_path += env.workspace + l['prefix'] + '/lib/pkgconfig:' + pkg_config_path
+            pkg_config_path = env.workspace + l['prefix'] + '/lib/pkgconfig:' + pkg_config_path
+        pkg_config_path += '$PKG_CONFIG_PATH'
         return pkg_config_path
 
     def get_external_libs_LD_LIBRARY_PATH(self):
-        ld_library_path = '$LD_LIBRARY_PATH'
+        ld_library_path = ''
         for l in self.external_libs:
-            ld_library_path += env.workspace + l['prefix'] + '/lib:' + ld_library_path 
+            ld_library_path = env.workspace + l['prefix'] + '/lib:' + ld_library_path 
+        ld_library_path += '$LD_LIBRARY_PATH'
         return ld_library_path
 
     def get_external_libs_PATH(self):

@@ -11,8 +11,7 @@ from .env import Env
 
 version = "4.0"
 env = Env()
-
-timeout = 3600
+timeout = 7200
 
 def mkdir(directory):
     if not os.path.exists(directory+"/"):

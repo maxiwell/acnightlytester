@@ -9,5 +9,5 @@
 
 cd $(dirname `realpath $0`)
 ts=`date +"%Y%m%d"`
-./acnightly.py conf/site.yaml --condor &> log_${ts}.txt
+./acnightly.py conf/site.yaml --condor
 

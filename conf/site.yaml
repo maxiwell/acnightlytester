@@ -2,10 +2,16 @@
 # S{RANDOM}     : Random number up to 9999
 # ${SCRIPTROOT} : Nightly path
 
+# 'tarball pool' is a cache for tarball files. 
+# It is checked before download from internet. 
+# To disable it, comment the line. Git and 
+# Local files do not use this cache. 
+
 nightly:
-    workspace  : /tmp/TEMP${RANDOM}
-    htmloutput : ${SCRIPTROOT}/../public_html
-    simulators : all
+    workspace    : /tmp/TEMP${RANDOM}
+    html output  : ${SCRIPTROOT}/../public_html
+    tarball pool : ${SCRIPTROOT}/pool/
+    simulators   : all
  
 archc:
     systemc   : https://github.com/archc/systemc.git
@@ -15,6 +21,7 @@ archc:
     extlibs   : 
         libelf : git://git.fedorahosted.org/git/elfutils.git
 
+       
 models:
     mips:
         inputfile : mips.ac
@@ -138,7 +145,65 @@ modules:
         custom links:
             gdb version: |
                 `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
-  
+
+cross:
+    mips-gcc: 
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        cc    : mips-newlib-elf-gcc
+        cxx   : mips-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    arm-gcc:
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+        cc    : arm-newlib-eabi-gcc
+        cxx   : arm-newlib-eabi-g++
+        flags : -specs=archc
+        float : soft
+        endian: little
+    powerpc-gcc:
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+        cc    : powerpc-newlib-elf-gcc
+        cxx   : powerpc-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    sparc-gcc: 
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+        cc    : sparc-newlib-elf-gcc
+        cxx   : sparc-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    mips-ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target mips32r2sf-linux
+        float : soft
+        endian: big
+    mips-ecc-hard:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target mips32r2-linux
+        float : hard
+        endian: big
+    arm-ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target arm32v7sf-linux
+        float : soft
+        endian: little
+    powerpc-ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target ppc32-linux
+        float : hard
+        endian: big
+
 benchmarks:
     mibenchtest:
         automotive/qsort     : [small]

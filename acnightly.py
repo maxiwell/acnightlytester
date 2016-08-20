@@ -31,7 +31,9 @@ def config_parser_yaml(configfile):
     with open(configfile, 'r') as config:
         yamls = yaml.load(config)
         utils.env.set_workspace(yamls['nightly']['workspace'])
-        utils.env.set_htmloutput(yamls['nightly']['htmloutput'])
+        utils.env.set_htmloutput(yamls['nightly']['html output'])
+        if 'tarball pool' in yamls['nightly'] and yamls['nightly']['tarball pool'] != None:
+            utils.env.set_tarballpool(yamls['nightly']['tarball pool'])
         utils.env.printenv()
 
         archc = ArchC(utils.env)

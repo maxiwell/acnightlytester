@@ -21,19 +21,16 @@ def mkdir(directory):
 
 def cp(src, dst):
     mkdir(dst)
-    if ( os.system("cp -r "+src+"/* "+dst+" > /dev/null 2>&1") == 0 ):
+    if exec_to_log("cp -r "+src+"/* "+dst, "/dev/null"):
         return True
     else:
-        if ( os.system("cp -r "+src+" "+dst+" > /dev/null 2>&1") == 0 ):
+        if exec_to_log("cp -r "+src+" "+dst, "/dev/null"):
             return True
 
     return False
 
 def rm(dst):
-    if ( os.system("chmod 777 -R " + dst + " && rm -rf " + dst + " > /dev/null 2>&1") == 0 ):
-        return True
-    else:
-        return False
+    return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")
 
 def exec_to_log(cmd, log):
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
@@ -113,8 +110,8 @@ def create_rand_file():
 def get_tar_git_or_folder(srclink, dstfolder):
     dstfolder = os.path.normpath(dstfolder) + '/'
     mkdir (dstfolder)
-    prefix  = dstfolder
-    prefix += os.path.basename(os.path.normpath(srclink))
+    filename = os.path.basename(os.path.normpath(srclink))
+    prefix = dstfolder + filename
     if not os.path.isdir(prefix):
         if os.path.isdir(srclink):
             get_local(srclink, prefix)
@@ -138,8 +135,7 @@ def get_tar_git_or_folder(srclink, dstfolder):
             tar.close()
     return os.path.normpath(prefix) + '/' 
 
-# Removing the 'workspace' from absolute path 
-# to find the relative path (to work in the Condor)
+# Removing the 'workspace' from absolute path (to Condor approach)
 def get_relative_path(absolute_path):
     ws = os.path.normpath(env.workspace)
     return absolute_path.replace(ws,'')
@@ -154,12 +150,26 @@ def had_failed(page):
                       
 def get_http(url, dest):
     pkg = os.path.basename(url)
-    print("Getting " + pkg + " over HTTP... ", end="", flush=True)
     mkdir(dest)
-    if ( urllib.request.urlretrieve(url, dest + "/" + pkg) ):
-        print("OK");
+    if os.path.isfile(env.get_tarballpool() + pkg):
+        print("Getting " + pkg + " from Tarball Pool... ", end="", flush=True)
+        if ( cp(env.get_tarballpool() + pkg, dest) ):
+            print("OK")
+        else:
+            print("FAILED")
     else:
-        print("FAILED")
+        print("Getting " + pkg + " over HTTP... ", end="", flush=True)
+        if ( urllib.request.urlretrieve(url, dest + "/" + pkg) ):
+            print("OK");
+        else:
+            print("FAILED")
+        
+        if env.get_tarballpool():
+            print("| copying to Tarball Pool folder...", end="", flush=True)
+            if cp (dest + "/" + pkg, env.get_tarballpool()):
+                print("OK")
+            else:
+                print("FAILED")
 
 def get_local(path, dest, pkg = ""):
     print("Getting " + pkg + " from " + path + "... ", end="", flush=True)
@@ -171,8 +181,7 @@ def get_local(path, dest, pkg = ""):
 
 def git_clone(url, branch, dest, pkg = "" ):
     print("Cloning "+pkg + " from " + url + "... ", end="", flush=True)
-    if (os.system("git clone --depth 1 -b " + branch + " " + url + " " \
-            + dest + " > /dev/null 2>&1 ") == 0):
+    if exec_to_log("git clone --depth 1 -b " + branch + " " + url + " " + dest, "/dev/null"):
         print("OK")
     else:
         print("FAILED")

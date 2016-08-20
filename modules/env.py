@@ -7,6 +7,7 @@ class Env:
 
     logfolder       = '/log/'
     xtoolsfolder    = '/xtools/'
+    tarballpool     = None
 
     archc_envfile   = ""
 
@@ -30,6 +31,7 @@ class Env:
         self.testnumber    = env.testnumber
         self.debug_mode    = env.debug_mode
         self.condor_mode   = env.condor_mode
+        self.tarballpool   = None
 
     def set_workspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 
@@ -51,6 +53,14 @@ class Env:
     def set_htmloutput(self, htmloutput):
         self.htmloutput = self.resolvenv(htmloutput) 
         self.testnumber = self.compute_testnumber() 
+
+    def set_tarballpool(self, pool):
+        self.tarballpool = os.path.normpath(self.resolvenv(pool)) + '/'
+        if not os.path.exists(self.tarballpool + "/"):
+            os.makedirs(self.tarballpool + "/")
+
+    def get_tarballpool(self):
+        return self.tarballpool
 
     def resolvenv(self,cmd):
         cmd = re.sub(r"\$\{RANDOM\}", str(self.random), cmd)

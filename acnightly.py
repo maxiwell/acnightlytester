@@ -96,8 +96,10 @@ def main():
     args        = command_line_handler()
     
     nightly = config_parser_yaml(args.configfile)
-    utils.env.debug_mode  = args.debug
-    utils.env.condor_mode = args.condor
+    if args.debug:
+        env.enable_dbg()
+    if args.condor:
+        env.enable_condor()
 
     if not nightly.git_hashes_changed() and not args.force:
         utils.abort("All repositories have tested in the last Nightly execution")

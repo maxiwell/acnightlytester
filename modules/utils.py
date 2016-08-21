@@ -86,14 +86,15 @@ def gettime():
 def gethostname():
     return socket.gethostname()
 
-def get_githash(git):
-    l = os.popen("cd "+git+" && ( git log --pretty=format:'%H' -n 1 ) 2>&1").read()
+def get_githash(directory):
+    l = os.popen("cd "+directory+" && ( git log --pretty=format:'%H' -n 1 ) 2>&1").read()
     if not l:
         l = '-'
     return l
 
 def get_githash_online(link, branch):
     return exec_to_var ('git ls-remote ' + link + ' | grep ' + branch + ' | cut -f1')
+
 
 def search_and_replace(filepath, pattern, string):
     with fileinput.input(filepath, inplace=True) as f:

@@ -189,7 +189,6 @@ class IndexPage(HTMLPage):
         
         if not os.path.isfile (self.page):
             self.init_page("ArchC's NightlyTester Main Page")
-            self.append_raw("<p>Produced by NightlyTester @ "+gettime()+"</p>")
             
             table = Table(['Test #', 'Initial', 'Final', 'Report', 'Comment', 'Started by'])
             table.append_raw("<tr><td>0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>")

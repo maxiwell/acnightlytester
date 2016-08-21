@@ -176,9 +176,11 @@ class ArchC ():
 
             # Creating a csv line to add in the TestsPage (ArchC Table)
             csvline = 'SystemC;' + self.systemc['link'] + ';'
-            csvline += HTML.href(self.systemc['hash'][0:7], \
-                                self.systemc['link'].replace('.git','') + '/commit/' + \
-                                self.systemc['hash']) + ';'
+            if self.systemc['hash'] != '-':
+                csvline += HTML.href(self.systemc['hash'][0:7], \
+                           self.systemc['link'].replace('.git','') + '/commit/' + self.systemc['hash']) + ';'
+            else:
+                csvline += self.systemc['hash'] + ';'
 
             csvline += execstatus
             csvline += '(' + HTML.lhref('log', htmllog) + ')'

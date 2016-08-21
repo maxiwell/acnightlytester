@@ -17,7 +17,8 @@ class Env:
     def __init__(self):
         self.random     = randint(0000,9999)
         self.scriptroot = os.getcwd() + '/'
-        self.debug_mode = False
+        self.debug_mode  = False
+        self.condor_mode = False
 
     def copy(self, env):
         self.indexhtml     = env.indexhtml
@@ -96,5 +97,10 @@ class Env:
         print("| scriptroot: "+self.scriptroot)
         print("| htmloutput: "+self.htmloutput)
    
+    def enable_dbg(self):
+        self.debug_mode = True
+
+    def enable_condor(self):
+        self.condor_mode = True
 
 

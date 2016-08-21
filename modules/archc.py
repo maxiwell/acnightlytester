@@ -78,13 +78,13 @@ class ArchC ():
 
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
-        get_tar_git_or_folder (linkpath, self.get_archc_src())
+        self.archc['src']  = get_tar_git_or_folder (linkpath, self.get_archc_src())
         if linkpath.endswith(".git") or linkpath.startswith("git"):
             self.archc['hash'] = get_githash(self.get_archc_src())
 
     def set_systemc(self, linkpath):
         self.systemc['link'] = linkpath
-        get_tar_git_or_folder (linkpath, self.get_systemc_src())
+        self.systemc['src']  = get_tar_git_or_folder (linkpath, self.get_systemc_src())
         if linkpath.endswith(".git") or linkpath.startswith("git"):
             self.systemc['hash'] = get_githash(self.get_systemc_src())
 
@@ -111,7 +111,7 @@ class ArchC ():
         src    = self.get_external_lib_src(lib)
         prefix = self.get_external_lib_prefix(lib) 
         rm (src)
-        get_tar_git_or_folder(lib['link'], src)
+        src = get_tar_git_or_folder(lib['link'], src)
         if lib['link'].endswith(".git") or lib['link'].startswith("git"):
             lib['hash'] = get_githash(src)
 

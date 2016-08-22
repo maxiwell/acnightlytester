@@ -54,24 +54,24 @@ def config_parser_yaml(configfile):
             simlist = yamls['nightly']['simulators']
 
         for _sim in simlist:
-            model     = yamls['simulators'][_sim]['model']
-            inputfile = yamls['models'][model]['inputfile']
-            run       = yamls['models'][model]['run']
-            linkpath  = yamls['models'][model]['link/path']
-            branch    = 'master'
-            if 'branch' in yamls['models'][model] and yamls['models'][model]['branch'] != None:
-                branch = yamls['models'][model]['branch']
-            crosslink = yamls['models'][model]['cross']
-            for _module in yamls['simulators'][_sim]['modules']:
-                sim = Simulator(model, _module, run, inputfile)
+            for _model in yamls['simulators'][_sim]['models']:
+                inputfile = yamls['models'][_model]['inputfile']
+                run       = yamls['models'][_model]['run']
+                linkpath  = yamls['models'][_model]['link/path']
+                branch    = 'master'
+                if 'branch' in yamls['models'][_model] and yamls['models'][_model]['branch'] != None:
+                    branch = yamls['models'][_model]['branch']
+                crosslink = yamls['models'][_model]['cross']
+                
+                sim = Simulator(_model, _sim, run, inputfile)
                 sim.set_modellink(linkpath, branch)
-                sim.set_generator(yamls['modules'][_module]['generator'])
-                sim.set_options(yamls['modules'][_module]['options'])
-                if 'desc' in yamls['modules'][_module]:
-                    sim.set_desc(yamls['modules'][_module]['desc'])
-                if 'custom links' in yamls['modules'][_module]:
-                    for cl in yamls['modules'][_module]['custom links']:
-                        sim.set_custom_links(cl, yamls['modules'][_module]['custom links'][cl])
+                sim.set_generator(yamls['simulators'][_sim]['generator'])
+                sim.set_options  (yamls['simulators'][_sim]['options'])
+                if 'desc' in yamls['simulators'][_sim]:
+                    sim.set_desc(yamls['simulators'][_sim]['desc'])
+                if 'custom links' in yamls['simulators'][_sim]:
+                    for cl in yamls['simulators'][_sim]['custom links']:
+                        sim.set_custom_links(cl, yamls['simulators'][_sim]['custom links'][cl])
         
                 for _bench in yamls['simulators'][_sim]['benchmarks']:
                     bench = eval(_bench)(_bench)
@@ -93,7 +93,7 @@ def config_parser_yaml(configfile):
         return nightly
                 
 def main():
-    args        = command_line_handler()
+    args    = command_line_handler()
     
     nightly = config_parser_yaml(args.configfile)
     if args.debug:

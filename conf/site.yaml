@@ -55,66 +55,58 @@ models:
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
 # Each element in the 'models' array will be combined 
-# with the module to generate simulators
-
-simulators:
-    gdb-multiarch:
-        module    :  gdb
-        models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [acstone-multiarch]
-        desc      : "ACStone using 'gdb-multiarch'"
-    gdb-compiled:
-        module    :  gdb
-        models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [acstone]
-        desc      : "ACStone using 'gdb' compiled from original source code"
-    gdb-acbingen:
-        module    :  gdb
-        models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [acstone-acbingen]
-        desc      : "ACStone using 'gdb' patched by 'acbingen.sh'"
-    acsim:
-        module    :  acsim
-        models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [mibench, spec2006]
-        desc      : "Default ArchC simulator"
-    powersc:
-        module    :  powersc
-        models    : [mips, mips32r2, sparc]
-        benchmarks: [mibench, spec2006]
-        desc      : "Simulator with Power Statistics"
-    hltrace:
-        module    :  hltrace
-        models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [mibenchsmall]
-        desc      : "Simulator with High Level Trace output"
+# with the 'generator' to generate simulators
 
 # 'custom links' must end with ' && echo <file>'
 # The echo output will be used as target file by the link
 
-modules: 
-    acsim: 
-        generator: acsim
-        options: -abi -nw
+simulators:
+    acsim:
+        generator : acsim
+        options   : -abi -nw
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [mibench, spec2006]
+        desc      : "Default ArchC simulator"
     powersc:
-        generator: acsim
-        options: -abi -nw -pw
+        generator : acsim
+        options   : -abi -nw -pw
+        models    : [mips, mips32r2, sparc]
+        benchmarks: [mibench, spec2006]
+        desc      : "Simulator with Power Statistics"
         custom links:
             power report: | 
                 mv window_power_report_*.csv output.txt && echo output.txt
-    hltrace: 
-        generator: acsim
-        options: -abi -nw -hlt
+    hltrace:
+        generator : acsim
+        options   : -abi -nw -hlt
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [mibenchsmall]
+        desc      : "Simulator with High Level Trace output"
         custom links:
             high level trace: |
                 tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
-    gdb:
-        generator: acsim
-        options: -gdb 
-        custom links:
-            gdb version: |
-                `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
-
+    gdb-multiarch:
+        generator : acsim
+        options   : -gdb 
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [acstone]
+        desc      : "ACStone using 'gdb-multiarch'"
+#    gdb-compiled:
+#        generator : acsim
+#        options   : -gdb 
+#        models    : [mips, mips32r2, sparc, arm, powerpc]
+#        benchmarks: [acstone-gdb]
+#        desc      : "ACStone using 'gdb' compiled from original source code"
+#        custom links:
+#            gdb version: |
+#                `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
+#    gdb-acbingen:
+#        generator : acsim
+#        options   : -gdb 
+#        models    : [mips, mips32r2, sparc, arm, powerpc]
+#        benchmarks: [acstone]
+#        desc      : "ACStone using 'gdb' patched by 'acbingen.sh'"
+#
 cross:
     mips-gcc: 
         link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
@@ -224,22 +216,15 @@ benchmarks:
     acstonesmall:
         gdb            : [acstone]
         000-020        : [acstone]
-    acstone-multiarch:
-        000-020        : [acstone]
-        021-050        : [acstone]
-        050-100        : [acstone]
-        100-200        : [acstone]
     acstone:
+        000-020        : [acstone]
+        021-050        : [acstone]
+        050-100        : [acstone]
+        100-200        : [acstone]
+    acstone-gdb:
         gdb            : [acstone]
         000-020        : [acstone]
         021-050        : [acstone]
         050-100        : [acstone]
         100-200        : [acstone]
-    acstone-acbingen:
-        gdb            : [acstone]
-        000-020        : [acstone]
-        021-050        : [acstone]
-        050-100        : [acstone]
-        100-200        : [acstone]
-
 

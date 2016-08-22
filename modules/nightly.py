@@ -43,7 +43,8 @@ class Nightly ():
 
         # -- Simulators
         for sim in self.simulators:
-            tableline  = sim.get_name() + ';' + sim.get_modellink() + ';' + sim.get_modelbranch() + ';'
+            tableline  = sim.get_name() + ';' + sim.get_desc() + ';'
+            tableline += sim.get_modellink() + ';' + sim.get_modelbranch() + ';'
             tableline += sim.get_model_hashtohtml() + ';'
             tableline += HTML.monospace(sim.get_generator()) + ';' 
             tableline += HTML.monospace(sim.get_model_inputtohtml()) + ';'

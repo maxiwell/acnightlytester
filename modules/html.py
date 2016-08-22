@@ -73,6 +73,18 @@ class HTML:
         html.append_log_formatted(logfile, highlight)
         html.write_page()
 
+    @staticmethod
+    def string_to_html(string, htmlfile, title, highlight = []):
+        html = HTMLPage(htmlfile)
+        html.init_page(title)
+        logfile = create_rand_file()
+        f = open(logfile, 'w')
+        f.write(string)
+        f.close()
+        html.append_log_formatted(logfile, highlight)
+        html.write_page()
+
+
 class Table:
 
     string = ""

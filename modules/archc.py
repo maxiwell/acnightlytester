@@ -38,6 +38,14 @@ class ArchC ():
     def get_archc_prefix(self):
         return env.workspace + self.archc['prefix']
 
+    def get_archc_hashtohtml(self):
+        string = '-'
+        if self.archc['hash'] != '-' :
+            string = HTML.href(self.archc['hash'][0:7], \
+                                 self.archc['link'].replace('.git','') + '/commit/' + self.archc['hash'] ) 
+        
+        return string
+
     def get_systemc_src(self):
         return env.workspace + self.systemc['src']
 
@@ -55,7 +63,7 @@ class ArchC ():
 
     def get_external_lib_prefix(self, lib):
         return env.workspace + lib['prefix']
-
+    
     def get_external_libs_PKG_CONFIG_PATH(self):
         pkg_config_path = ''
         for l in self.external_libs:
@@ -75,6 +83,7 @@ class ArchC ():
         for l in self.external_libs:
             path += env.workspace + l['prefix'] + '/bin:' + path
         return path
+
 
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
@@ -381,11 +390,45 @@ class Simulator (SimulatorPage):
     def get_crosslink(self):
         return self.cross['link']
 
+    def get_cross_csvline(self):
+        # Find the cross version and write the page
+        prefix = get_tar_git_or_folder(self.cross['link'], env.get_xtoolsfolder()) + '/bin/'
+        crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
+        crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
+        highlight_list = ['--with-float=soft', '--with-newlib']
+        retcode, crossdump = exec_to_log ( crosscmd + '-v' )
+
+        crosspage = env.htmloutput + '/' + env.testnumber + '-' + self.model['name'] + '-cross-version.html'
+        HTML.log_to_html( crossdump, crosspage, self.model['name'] + ' Cross Version', highlight_list)
+        
+        csvline  = 'GCC Cross ' + self.model['name'] + ';' + self.cross['link'] + ';' 
+        csvline += crossversion + ';' + HTML.success() + ' (' + HTML.lhref('version', crosspage) + ')\n'
+        rm (env.get_xtoolsfolder())
+
+        return csvline
+
     def set_modelhash(self, githash):
         self.model['hash'] = githash
 
     def get_modelhash(self):
         return self.model['hash'] 
+
+    def get_model_hashtohtml(self):
+        string = '-'
+        if self.model['hash'] != '-' :
+            string = HTML.href(self.model['hash'][0:7], \
+                                 self.model['link'].replace('.git','') + '/commit/' + self.model['hash'] ) 
+        
+        return string 
+
+    def get_model_inputtohtml(self):
+        string = self.model['inputfile']
+        if self.model['hash'] != '-' :
+            string = HTML.href( self.model['inputfile'], \
+                                self.model['link'].replace('.git', '') + '/blob/' + self.model['hash'] + '/' + \
+                                self.model['inputfile'] ) 
+        return string
+
 
     def set_custom_links(self, link, cmdline):
         self.custom_links[link] = cmdline

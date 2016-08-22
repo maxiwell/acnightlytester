@@ -17,13 +17,8 @@ class Nightly ():
  
         # [TestsPage] Init the Tables
         # -- ArchC 
-        csvline = 'ArchC;' + self.archc.archc['link'] + ';' 
-        if self.archc.archc['hash'] != '-' :
-            csvline += HTML.href(self.archc.archc['hash'][0:7], \
-                                 self.archc.archc['link'].replace('.git','') + \
-                                 '/commit/' + self.archc.archc['hash'] ) 
-        else:
-            csvline += self.archc.archc['hash'][0:7]
+        csvline  = 'ArchC;' + self.archc.archc['link'] + ';' 
+        csvline += self.archc.get_archc_hashtohtml()
         csvline += HTML.running('archc', 1)
         self.testspage.update_archc_table(csvline)
 
@@ -32,24 +27,13 @@ class Nightly ():
         models = {}   # The dict is just to show one cross per model
         for s in self.simulators:
             if not s.model['name'] in models:
-                # Find the cross version and write the page
-                prefix = get_tar_git_or_folder(s.cross['link'], env.get_xtoolsfolder()) + '/bin/'
-                crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
-                crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
-                highlight_list = ['--with-float=soft', '--with-newlib']
-                retcode, crossdump = exec_to_log ( crosscmd + '-v' )
-
-                crosspage = env.htmloutput + '/' + env.testnumber + '-' + s.model['name'] + '-cross-version.html'
-                HTML.log_to_html( crossdump, crosspage, s.model['name'] + ' Cross Version', highlight_list)
-                crosslines += 'GCC Cross ' + s.model['name'] + ';' + s.cross['link'] + ';' + crossversion + ';' + \
-                            HTML.success() + ' (' + HTML.lhref('version', crosspage) + ')\n'
+                crosslines += s.get_cross_csvline()
                 models[s.model['name']] = s.cross['link']
-                rm (env.get_xtoolsfolder())
         self.testspage.update_archc_table(crosslines)
 
         # environment
-        ccpath     = exec_to_var('which gcc')
-        ccversion  = exec_to_var("gcc --version | awk '/^gcc/ {print $4;}'")
+        ccpath          = exec_to_var('which gcc')
+        ccversion       = exec_to_var("gcc --version | awk '/^gcc/ {print $4;}'")
         retcode, ccdump = exec_to_log('gcc -v')
         ccpage  = env.htmloutput + '/' + env.testnumber + '-gcc-version.html'  
         HTML.log_to_html (ccdump,  ccpage,  "GCC Version")
@@ -58,22 +42,13 @@ class Nightly ():
         self.testspage.update_archc_table(envlines)
 
         # -- Simulators
-        for simulator in self.simulators:
-            inputfile = simulator.get_inputfile()
-            tableline = simulator.get_name() + ';' + simulator.get_modellink() + ';' + \
-                        simulator.get_modelbranch() + ';'
-            if simulator.get_modelhash() != '-' :
-                tableline += HTML.href(simulator.get_modelhash()[0:7], simulator.get_modellink().replace('.git', '') \
-                            + '/commit/' + simulator.get_modelhash() ) + ';'
-                inputfile = HTML.href( simulator.get_inputfile(), simulator.get_modellink().replace('.git', '') \
-                            + '/blob/' + simulator.get_modelhash() + '/' + simulator.get_inputfile() ) 
-            else:
-                tableline = '-' + ';'
-            
-            tableline += HTML.monospace(simulator.get_generator()) + ';' 
-            tableline += HTML.monospace(inputfile) + ';'
-            tableline += HTML.monospace(simulator.get_options()) 
-            tableline += HTML.running(simulator.get_name(), 3)
+        for sim in self.simulators:
+            tableline  = sim.get_name() + ';' + sim.get_modellink() + ';' + sim.get_modelbranch() + ';'
+            tableline += sim.get_model_hashtohtml() + ';'
+            tableline += HTML.monospace(sim.get_generator()) + ';' 
+            tableline += HTML.monospace(sim.get_model_inputtohtml()) + ';'
+            tableline += HTML.monospace(sim.get_options()) 
+            tableline += HTML.running(sim.get_name(), 3)
             self.testspage.update_tests_table(tableline)
        
         # [TestsPage] Close 
@@ -88,7 +63,6 @@ class Nightly ():
         csvline += '<td> -- ('  + HTML.lhref('log', self.testspage.get_page()) + ');-;'
         csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
-
 
 
     def building_archc(self):

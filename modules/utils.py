@@ -143,9 +143,7 @@ def is_linkpath_a_local (link):
 
 def get_tar_git_or_folder(srclink, dstfolder):
     dstfolder = os.path.normpath(dstfolder) + '/'
-    filename = os.path.basename(os.path.normpath(srclink))
-    prefix = os.path.normpath(dstfolder + filename)
-  
+ 
     if is_linkpath_a_git(srclink):
         git_clone (srclink, 'master', dstfolder)
         return dstfolder
@@ -153,16 +151,17 @@ def get_tar_git_or_folder(srclink, dstfolder):
     if is_linkpath_a_local(srclink):
         get_local(srclink, dstfolder)
     
-        # if local is a directory     
         if os.path.isdir (srclink):
             return dstfolder
         else:
-            return untar(prefix, dstfolder)
+            filename = os.path.basename(srclink)
+            return untar(dstfolder + filename, dstfolder)
 
     else:
         if srclink.startswith('http'):
             get_http(srclink, dstfolder)
-            return untar(prefix, dstfolder) 
+            filename = os.path.basename(srclink)
+            return untar(dstfolder + filename, dstfolder) 
     
     return None
 

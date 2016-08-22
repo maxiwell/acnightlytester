@@ -212,9 +212,7 @@ class ArchC ():
         cmd_1 += "cd " + self.get_archc_src() + " && "
         if os.path.isfile( self.get_archc_src() + '/Makefile' ):
             cmd_1 += "make distclean && "
-        cmd_2 = ''
-        if os.path.isfile( self.get_archc_src() + '/autogen.sh' ):
-            cmd_2  += "./autogen.sh && " 
+        cmd_2  = "./autogen.sh && " 
         cmd_2 += "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
             extra_csvline += self.build_systemc() + '\n'

@@ -201,7 +201,7 @@ class ArchC ():
                 csvline += self.systemc['hash'] + ';'
 
             csvline += execstatus
-            csvline += '(' + HTML.lhref('log', htmllog) + ')'
+            csvline += '(' + HTML.lhref('log', htmllog) + ');'
             return csvline
 
     def build_and_install_archc(self):
@@ -254,9 +254,9 @@ class ArchC ():
             csvline += self.archc['hash'][0:7] + ';'
 
         csvline += execstatus
-        csvline += '(' + HTML.lhref('log', htmllog) + ')'
+        csvline += '(' + HTML.lhref('log', htmllog) + ');'
        
-        return csvline + '\n' + extra_csvline
+        return csvline + '\n' + extra_csvline + '\n'
 
     def reinstall_archc(self):
         for l in self.external_libs:

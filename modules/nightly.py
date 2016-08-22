@@ -147,9 +147,6 @@ class Nightly ():
 
 
     def git_hashes_changed(self):
-        changed = False
-        match   = False
-
         last_page = env.htmloutput + "/" + str(int(env.testnumber)-1) + TestsPage.suffix;
         if not os.path.isfile(last_page):
             return True
@@ -160,25 +157,28 @@ class Nightly ():
             if sim.model['hash'] == '-':
                 return True
 
+        matches   = 0
+        matchesOk = 0
         with open(last_page, "r") as f:
             for l in f:
                 # ArchC check
                 s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % self.archc.archc['link'], l)
                 if s:
-                    match = True
+                    matches += 1
                     if self.archc.archc['hash'][0:7] != s.group(2):
                         return True
                 # Simulators check
                 for sim in self.simulators:
-                    s = re.search(r'<td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.get_modellink(), l)
+                    s = re.search(r'<td>(%s)</td><td>.*</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.get_modellink(), l)
                     if s:
-                        match = True
+                        matches += 1
                         if sim.get_modelhash()[0:7] != s.group(2):
                             return True
-        if not match:
-            return True
 
-        return False
+        if matches == len(self.simulators) + 1:
+            return False
+        else:
+            return True
 
 
 class Condor:

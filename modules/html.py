@@ -63,7 +63,7 @@ class HTML:
             for cel in cels:
                 if cel:
                     table_string += "<td>"+cel+"</td>"
-            table_string += "</tr>" 
+            table_string += "</tr>\n" 
         return table_string
 
     @staticmethod
@@ -179,9 +179,6 @@ class HTMLPage:
                       r'\g<n1>' +  begin + '\g<n2>' + end + '\g<n3>', inputstring, flags=re.IGNORECASE)
 
     
-
-
-   
 class IndexPage(HTMLPage):
 
     def __init__(self):

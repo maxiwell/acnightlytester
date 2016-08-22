@@ -84,7 +84,7 @@ class ArchC ():
                                     self.get_archc_src()
                                 )
                             )
-        if linkpath.endswith(".git") or linkpath.startswith("git"):
+        if is_linkpath_a_git (linkpath):
             self.archc['hash'] = get_githash(self.get_archc_src())
 
     def set_systemc(self, linkpath):
@@ -95,7 +95,7 @@ class ArchC ():
                                         self.get_systemc_src()
                                     )
                                 )
-        if linkpath.endswith(".git") or linkpath.startswith("git"):
+        if is_linkpath_a_git (linkpath):
             self.systemc['hash'] = get_githash(self.get_systemc_src())
 
     def set_binutils(self, linkpath):
@@ -130,7 +130,7 @@ class ArchC ():
         prefix = self.get_external_lib_prefix(lib) 
         rm (src)
         src = get_tar_git_or_folder(lib['link'], src)
-        if lib['link'].endswith(".git") or lib['link'].startswith("git"):
+        if is_linkpath_a_git (lib['link']): 
             lib['hash'] = get_githash(src)
 
         cmd_1  = "cd " + src + " && "
@@ -170,7 +170,7 @@ class ArchC ():
         else:
             cmd_1 = "cd "+self.get_systemc_src() + " && " 
             cmd_2 = ""
-            if os.path.isfile(self.get_systemc_src()+"/autogen.sh"):
+            if os.path.isfile(self.get_systemc_src() + "/autogen.sh"):
                 cmd_2 += "./autogen.sh && " 
             cmd_2 += "./configure --prefix=" + self.get_systemc_prefix() 
             cmd_2 += " && make && make install"
@@ -210,8 +210,12 @@ class ArchC ():
         cmd_1  = 'export PKG_CONFIG_PATH="' + self.get_external_libs_PKG_CONFIG_PATH() + '" && '
         cmd_1 += 'export LD_LIBRARY_PATH="' + self.get_external_libs_LD_LIBRARY_PATH() + '" && '
         cmd_1 += "cd " + self.get_archc_src() + " && "
-        cmd_2  = "./autogen.sh && " + \
-                "./configure --prefix=" + self.get_archc_prefix()
+        if os.path.isfile( self.get_archc_src() + '/Makefile' ):
+            cmd_1 += "make distclean && "
+        cmd_2 = ''
+        if os.path.isfile( self.get_archc_src() + '/autogen.sh' ):
+            cmd_2  += "./autogen.sh && " 
+        cmd_2 += "./configure --prefix=" + self.get_archc_prefix()
         if 'link' in self.systemc:
             extra_csvline += self.build_systemc() + '\n'
             cmd_2 += " --with-systemc=" + self.get_systemc_prefix()
@@ -409,6 +413,8 @@ class Simulator (SimulatorPage):
         self.download_modellink()
         cmd_source = 'source '+env.get_archcenv()+' && '
         cmd_cd     = "cd " + self.get_simsrc() + " && "
+        if os.path.isfile(self.get_simsrc() + '/Makefile'):
+            cmd_cd += "make distclean && "
         cmd_acsim  = self.module['generator'] + " " + self.model['inputfile'] + " " \
                     + self.module['options'] + " && "
         cmd_make   = "make "

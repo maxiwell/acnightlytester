@@ -63,11 +63,10 @@ def exec_to_var(cmd):
 
 def string_to_log(string):
     log = create_rand_file ()
-    f = open(log)
+    f = open(log, 'w')
     f.write(string)
     f.close()
     return log
- 
 
 
 def find_ext(filename):
@@ -126,30 +125,51 @@ def insert_line_before_once(filepath, newline, pattern):
 
 def create_rand_file():
     return env.get_logfolder() + '/' + str(randint(0000,9999)) + '.log' 
-   
+
+def is_linkpath_a_git (link):
+    if link.startswith('git'):
+        return True
+    if link.startswith('http') and link.endswith('.git'):
+        return True
+    return False
+
+def is_linkpath_a_local (link):
+    if os.path.isdir(link):
+        return True
+    # in case of local tarball file
+    if os.path.isfile(link):
+        return True
+    return False
+
 def get_tar_git_or_folder(srclink, dstfolder):
     dstfolder = os.path.normpath(dstfolder) + '/'
-    mkdir (dstfolder)
+   # mkdir (dstfolder)
     filename = os.path.basename(os.path.normpath(srclink))
-    prefix = dstfolder + filename
-    if not os.path.isdir(prefix):
-        if os.path.isdir(srclink):
-            get_local(srclink, prefix)
+    prefix = os.path.normpath(dstfolder + filename)
+  
+    # if the srclink was downloaded before in the workspace
+    if os.path.isdir(prefix):
+        return prefix + '/'
+
+    if is_linkpath_a_git(srclink):
+        git_clone (srclink, 'master', dstfolder)
+        return dstfolder
+
+    if is_linkpath_a_local(srclink):
+        get_local(srclink, dstfolder)
+    
+        # if local is a directory     
+        if os.path.isdir (dstfolder):
+            return dstfolder
         else:
-            if not os.path.isfile(prefix):
-                if srclink.startswith('git'):
-                    git_clone (srclink, 'master', dstfolder)
-                    return dstfolder
-                elif srclink.startswith('http'):
-                    if srclink.endswith('.git'):
-                        git_clone (srclink, 'master', dstfolder)
-                        return dstfolder
-                    else:
-                        get_http(srclink, dstfolder)
-                else:
-                    get_local(srclink, dstfolder)
-            prefix = untar(prefix, dstfolder) 
-    return os.path.normpath(prefix) + '/' 
+            return untar(prefix, dstfolder)
+
+    else:
+        if srclink.startswith('http'):
+            get_http(srclink, dstfolder)
+            return untar(prefix, dstfolder) 
+    
+    return None
 
 # Removing the 'workspace' from absolute path (to Condor approach)
 def get_relative_path(absolute_path):
@@ -175,7 +195,7 @@ def untar (tarfile_, dstfolder):
     tar.extractall(dstfolder)
     tar.close()
     print("OK")
-    return prefix
+    return os.path.normpath(prefix) + '/'
 
 def get_http(url, dest):
     mkdir(dest)

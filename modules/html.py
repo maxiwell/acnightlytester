@@ -216,6 +216,7 @@ class IndexPage(HTMLPage):
 class TestsPage(HTMLPage):
 
     tablearchc = None
+    tabledesc  = None
     tabletests = None
 
     suffix = "-tests.html"
@@ -228,15 +229,20 @@ class TestsPage(HTMLPage):
 
         self.tablearchc = Table(['Component', 'Link/Path', 'Version', 'Status'])
 
-        self.tabletests = Table(['Name', 'Description', 'Link/Path', 'Branch', 'Version', 'Generator', \
-                                 'Input', 'Options', 'Compilation', 'Benchmark', 'Tested in'])
+        self.tabledesc  = Table(['Module', 'Generator', 'Options', 'Description'])
+
+        self.tabletests = Table(['Module', 'Link/Path', 'Branch', 'Version', 'Input', \
+                              'Compilation', 'Benchmark', 'Tested in'])
          
     def close_tests_page(self):
         self.tablearchc.close()
+        self.tabledesc.close()
         self.tabletests.close()
         
         self.append_table(self.tablearchc)
-        self.append_raw('<h3>Tests</h3>')
+        self.append_raw('<h3>Module Description Table</h3>')
+        self.append_table(self.tabledesc)
+        self.append_raw('<h3>All Tests Table</h3>')
         self.append_table(self.tabletests)
 
         self.write_page()
@@ -244,6 +250,9 @@ class TestsPage(HTMLPage):
 
     def update_archc_table(self, strline):
         self.tablearchc.append_csv_line(strline)
+
+    def update_description_table (self, strline):
+        self.tabledesc.append_csv_line(strline)
 
     def update_tests_table(self, strline):
         self.tabletests.append_csv_line(strline)

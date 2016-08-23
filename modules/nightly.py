@@ -41,14 +41,24 @@ class Nightly ():
                 HTML.success() + ' (' + HTML.lhref('version', ccpage) + ')\n'
         self.testspage.update_archc_table(envlines)
 
+
+        # -- Description table
+        desclines = ''
+        modules = {}  # The dict is just to show one description per model
+        for sim in self.simulators:
+            if not sim.module['name'] in modules:
+                desclines += '*-' + sim.module['name'] + ";" 
+                desclines += HTML.monospace(sim.get_generator()) + ';' 
+                desclines += HTML.monospace(sim.get_options()) + ';' 
+                desclines += sim.get_desc() + ';\n'
+                modules[sim.module['name']] = sim.get_desc()
+        self.testspage.update_description_table(desclines)
+
         # -- Simulators
         for sim in self.simulators:
-            tableline  = sim.get_name() + ';' + sim.get_desc() + ';'
-            tableline += sim.get_modellink() + ';' + sim.get_modelbranch() + ';'
+            tableline  = sim.get_name() + ';' + sim.get_modellink() + ';' + sim.get_modelbranch() + ';'
             tableline += sim.get_model_hashtohtml() + ';'
-            tableline += HTML.monospace(sim.get_generator()) + ';' 
-            tableline += HTML.monospace(sim.get_model_inputtohtml()) + ';'
-            tableline += HTML.monospace(sim.get_options()) 
+            tableline += HTML.monospace(sim.get_model_inputtohtml()) 
             tableline += HTML.running(sim.get_name(), 3)
             self.testspage.update_tests_table(tableline)
        

@@ -219,10 +219,10 @@ class TestsPage(HTMLPage):
     tabledesc  = None
     tabletests = None
 
-    suffix = "-tests.html"
+    suffix = "tests.html"
 
     def __init__(self):
-        super().__init__(env.htmloutput + "/" + env.testnumber + self.suffix)
+        super().__init__(env.get_htmloutput_fullstring() + self.suffix)
         
         self.init_page("NightlyTester "+version+" Run #"+env.testnumber)
         self.append_raw("Produced by NightlyTester @ "+gettime())
@@ -263,7 +263,7 @@ class SimulatorPage(HTMLPage):
     benchtable = None
 
     def __init__(self, sim):
-        super().__init__(env.htmloutput + "/" + env.testnumber + "-" + sim + ".html")
+        super().__init__(env.get_htmloutput_fullstring() + sim + ".html")
         self.benchtable = Table([])
 
         self.init_page(sim + " Simulator")

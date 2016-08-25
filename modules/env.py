@@ -55,6 +55,15 @@ class Env:
         self.htmloutput = self.resolvenv(htmloutput) 
         self.testnumber = self.compute_testnumber() 
 
+    def get_htmloutput_fullstring(self):
+        return self.htmloutput + "/" + self.testnumber + "-"
+
+    def get_htmloutput_rootdir(self):
+        return self.htmloutput + "/"
+
+    def get_htmloutput_lastexec(self):
+        return self.htmloutput + "/" + str(int(self.testnumber)-1) + "-"
+
     def set_tarballpool(self, pool):
         self.tarballpool = os.path.normpath(self.resolvenv(pool)) + '/'
         if not os.path.exists(self.tarballpool + "/"):

@@ -162,7 +162,7 @@ class ArchC ():
             execstatus = HTML.fail()
             
         # Creating the Build Page
-        htmllog = env.htmloutput + "/" + env.testnumber + "-" + lib['name'] + "-build-log.html"
+        htmllog = env.get_htmloutput_fullstring() + lib['name'] + "-build-log.html"
         HTML.log_to_html(log, htmllog,  lib['name'] + " build output")
 
         # Creating a csv line to add in the TestsPage (ArchC Table)
@@ -198,7 +198,7 @@ class ArchC ():
                 execstatus = HTML.fail()
 
             # Creating the Build Page
-            htmllog = env.htmloutput + "/" + env.testnumber + "-systemc-build-log.html"
+            htmllog = env.get_htmloutput_fullstring() + "systemc-build-log.html"
             HTML.log_to_html(log, htmllog, "SystemC rev " + self.systemc['hash'][0:7] + " build output")
 
             # Creating a csv line to add in the TestsPage (ArchC Table)
@@ -251,7 +251,7 @@ class ArchC ():
             execstatus = HTML.fail()
 
         # Creating the Build Page
-        htmllog = env.htmloutput + "/" + env.testnumber + "-archc-build-log.html"
+        htmllog = env.get_htmloutput_fullstring() + "archc-build-log.html"
         HTML.log_to_html(log, htmllog, "ArchC rev "+self.archc['hash'][0:7]+" build output")
         
         # Creating a csv line to add in the TestsPage (ArchC Table)
@@ -398,7 +398,7 @@ class Simulator (SimulatorPage):
         highlight_list = ['--with-float=soft', '--with-newlib']
         retcode, crossdump = exec_to_log ( crosscmd + '-v' )
 
-        crosspage = env.htmloutput + '/' + env.testnumber + '-' + self.model['name'] + '-cross-version.html'
+        crosspage = env.get_htmloutput_fullstring() + self.model['name'] + '-cross-version.html'
         HTML.log_to_html( crossdump, crosspage, self.model['name'] + ' Cross Version', highlight_list)
         
         csvline  = 'GCC Cross ' + self.model['name'] + ';' + self.cross['link'] + ';' 
@@ -475,7 +475,7 @@ class Simulator (SimulatorPage):
             execstatus = HTML.fail()
 
         # Creating the Build Page
-        buildpage = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-build-log.html"
+        buildpage = env.get_htmloutput_fullstring() + self.name + "-build-log.html"
         HTML.log_to_html(log, buildpage, self.name + " rev "+self.model['hash'][0:7]+" build output")
 
         tableline  = execstatus
@@ -507,8 +507,8 @@ class Simulator (SimulatorPage):
             test_results = HTML.success()
 
         hostname = gethostname()
-        cpuinfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-cpuinfo.txt"
-        meminfofile = env.htmloutput + "/" + env.testnumber + "-" + self.name + "-meminfo.txt"
+        cpuinfofile = env.get_htmloutput_fullstring() + self.name + "-cpuinfo.txt"
+        meminfofile = env.get_htmloutput_fullstring() + self.name + "-meminfo.txt"
 
         exec_to_log("cat /proc/cpuinfo", cpuinfofile)        
         exec_to_log("cat /proc/meminfo", meminfofile)        

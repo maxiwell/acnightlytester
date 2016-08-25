@@ -14,10 +14,10 @@ class Dataset:
         self.custom_links = {}
         self.name = name
 
-        self.execpage = env.htmloutput + '/' + env.testnumber + '-' + sim + '-' + \
+        self.execpage = env.get_htmloutput_fullstring() + sim + '-' + \
                         app.replace('/','_') + '-' + name.replace('/','_') + '-run.html'
                         
-        self.diffpage = env.htmloutput + '/' + env.testnumber + '-' + sim + '-' + \
+        self.diffpage = env.get_htmloutput_fullstring() + sim + '-' + \
                         app.replace('/','_') + '-' + name.replace('/','_') + '-diff.html'
 
         self.diffstatus = True
@@ -35,7 +35,7 @@ class App:
         self.name = name
         self.dataset = []
 
-        self.buildpage = env.htmloutput + '/' + env.testnumber + '-' + sim + \
+        self.buildpage = env.get_htmloutput_fullstring() + sim + \
                          '-' + name.replace('/','_') + '-build.html'
 
     def append_dataset(self, dataset):
@@ -140,7 +140,7 @@ class Benchmark():
                 f = exec_to_var(cmd).split('\n')[-1]
                 ext = find_ext(f)
 
-                dataset.custom_links[link] = env.htmloutput + '/' + env.testnumber + '-' + self.simulator_name + '-' + \
+                dataset.custom_links[link] = env.get_htmloutput_fullstring() + self.simulator_name + '-' + \
                                              app.name.replace('/','_') + '-' + dataset.name + '-' + link.replace(' ','_') + ext
     
                 shutil.move(appfolder + '/' + f, dataset.custom_links[link])

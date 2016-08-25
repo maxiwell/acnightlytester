@@ -35,7 +35,7 @@ class Nightly ():
         ccpath          = exec_to_var('which gcc')
         ccversion       = exec_to_var("gcc --version | awk '/^gcc/ {print $4;}'")
         retcode, ccdump = exec_to_log('gcc -v')
-        ccpage  = env.htmloutput + '/' + env.testnumber + '-gcc-version.html'  
+        ccpage  = env.get_htmloutput_fullstring() + 'gcc-version.html'  
         HTML.log_to_html (ccdump,  ccpage,  "GCC Version")
         envlines  = 'GCC Host;' + ccpath  + ';' + ccversion  + ';' + \
                 HTML.success() + ' (' + HTML.lhref('version', ccpage) + ')\n'
@@ -132,7 +132,7 @@ class Nightly ():
 
 
     def git_hashes_changed(self):
-        last_page = env.htmloutput + "/" + str(int(env.testnumber)-1) + TestsPage.suffix;
+        last_page = env.get_htmloutput_lastexec() + TestsPage.suffix;
         if not os.path.isfile(last_page):
             return True
 
@@ -172,8 +172,8 @@ class Condor:
         self.archc     = archc
         self.simulator = simulator
 
-        self.testspage = env.htmloutput + "/" + env.testnumber + TestsPage.suffix
-        self.indexpage = env.htmloutput + "/" + env.indexhtml
+        self.testspage = env.get_htmloutput_fullstring() + TestsPage.suffix
+        self.indexpage = env.get_htmloutput_rootdir() + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
         try:
@@ -210,7 +210,7 @@ class Condor:
     def pre_abort(self, string):
         log = string_to_log ("=== Abort===\n\n" + string)
 
-        abortpage = env.htmloutput + '/' + env.testnumber + '-' + self.simulator.name + '-system-error.html'
+        abortpage = env.get_htmloutput_fullstring() + self.simulator.name + '-system-error.html'
         HTML.log_to_html (log, abortpage, self.simulator.name + ' System Traceback')
 
         search_and_replace_first (self.testspage, '<td tag=\'' + self.simulator.name + '\'.*</td></td>', \

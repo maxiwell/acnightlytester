@@ -95,7 +95,7 @@ simulators:
         generator : acsim
         options   : -gdb 
         models    : [mips, mips32r2, sparc, arm, powerpc]
-        benchmarks: [acstone-gdb]
+        benchmarks: [acstone_gdb]
         desc      : "ACStone using 'gdb' compiled from original source code"
         custom links:
             gdb version: |
@@ -221,7 +221,7 @@ benchmarks:
         021-050        : [acstone]
         050-100        : [acstone]
         100-200        : [acstone]
-    acstone-gdb:
+    acstone_gdb:
         gdb            : [acstone]
         000-020        : [acstone]
         021-050        : [acstone]

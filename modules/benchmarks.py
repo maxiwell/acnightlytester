@@ -284,6 +284,11 @@ class acstone(Benchmark):
 
                 self.diff ( appfolder, goldenfolder, outputfiles, app, dataset)
 
+class acstone_gdb(acstone):
+
+    def __init__(self, name):
+        super().__init__(name)
+
 class acstonesmall(acstone):
 
     def __init__(self, name):

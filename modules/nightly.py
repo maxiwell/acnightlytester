@@ -71,7 +71,14 @@ class Nightly ():
             tags += s.name
         csvline  =  env.testnumber + ';' + gettime() + '</td>' 
         csvline +=  HTML.running(tags, 1) 
-        csvline += '<td> -- ('  + HTML.lhref('log', self.testspage.get_page()) + ');-;'
+
+        # Here I am using 'href' instead of 'lhref'. This was necessary
+        # to adapt the code to use subfolder in the 'htmloutput' folder
+        # 'lhref' always link with files in the same folder (./file.html)
+        csvline += '<td> -- ('  + HTML.href('log', './' + \
+                                            env.get_htmloutput_prefix() + \
+                                            self.testspage.suffix) + \
+                            ');-;'
         csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
 
@@ -132,7 +139,9 @@ class Nightly ():
 
 
     def git_hashes_changed(self):
-        last_page = env.get_htmloutput_lastexec() + TestsPage.suffix;
+        last_page = env.get_htmloutput() + \
+                    env.get_htmloutput_priorprefix() + \
+                    TestsPage.suffix;
         if not os.path.isfile(last_page):
             return True
 

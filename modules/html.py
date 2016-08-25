@@ -36,7 +36,7 @@ class HTML:
 
     @staticmethod
     def lhref(title, url):
-        url = './'+os.path.basename(url)
+        url = './' + os.path.basename(url)
         return HTML.href(title, url)
 
     @staticmethod
@@ -208,9 +208,9 @@ class IndexPage(HTMLPage):
 
     def update_index_table(self, strline):
         htmlline = HTML.csvline_to_html(strline)
-        insert_line_before_once( filepath = self.page,  \
-                                       newline  = htmlline,       \
-                                       pattern  = '<tr><td>' )    
+        insert_line_before_once( filepath = self.page,      \
+                                 newline  = htmlline,       \
+                                 pattern  = '<tr><td>' )    
 
 
 class TestsPage(HTMLPage):

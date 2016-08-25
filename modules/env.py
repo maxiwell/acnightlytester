@@ -52,17 +52,22 @@ class Env:
         return self.workspace + self.xtoolsfolder
 
     def set_htmloutput(self, htmloutput):
-        self.htmloutput = self.resolvenv(htmloutput) 
+        self.htmloutput = os.path.normpath(self.resolvenv(htmloutput)) + '/'
         self.testnumber = self.compute_testnumber() 
+        if not os.path.exists(self.htmloutput + self.testnumber + "/"):
+            os.makedirs(self.htmloutput + self.testnumber + "/")     
+
+    def get_htmloutput(self):
+        return self.htmloutput 
+
+    def get_htmloutput_priorprefix(self):
+        return str(int(self.testnumber)-1) + "/"
+    
+    def get_htmloutput_prefix(self):
+        return self.testnumber + '/' 
 
     def get_htmloutput_fullstring(self):
-        return self.htmloutput + "/" + self.testnumber + "-"
-
-    def get_htmloutput_rootdir(self):
-        return self.htmloutput + "/"
-
-    def get_htmloutput_lastexec(self):
-        return self.htmloutput + "/" + str(int(self.testnumber)-1) + "-"
+        return self.get_htmloutput() + self.get_htmloutput_prefix()
 
     def set_tarballpool(self, pool):
         self.tarballpool = os.path.normpath(self.resolvenv(pool)) + '/'

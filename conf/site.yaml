@@ -91,15 +91,15 @@ simulators:
         models    : [mips, mips32r2, sparc, arm, powerpc]
         benchmarks: [acstone]
         desc      : "ACStone using 'gdb-multiarch'"
-#    gdb-compiled:
-#        generator : acsim
-#        options   : -gdb 
-#        models    : [mips, mips32r2, sparc, arm, powerpc]
-#        benchmarks: [acstone-gdb]
-#        desc      : "ACStone using 'gdb' compiled from original source code"
-#        custom links:
-#            gdb version: |
-#                `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
+    gdb-compiled:
+        generator : acsim
+        options   : -gdb 
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [acstone-gdb]
+        desc      : "ACStone using 'gdb' compiled from original source code"
+        custom links:
+            gdb version: |
+                `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
 #    gdb-acbingen:
 #        generator : acsim
 #        options   : -gdb 

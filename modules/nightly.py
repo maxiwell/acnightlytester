@@ -66,9 +66,9 @@ class Nightly ():
         self.testspage.close_tests_page()
 
         # [IndexPage] Init 
-        tags = "index"
+        tags = "index,"
         for s in self.simulators:
-            tags += s.name
+            tags += s.name + ','
         csvline  =  env.testnumber + ';' + gettime() + '</td>' 
         csvline +=  HTML.running(tags, 1) 
 
@@ -124,15 +124,19 @@ class Nightly ():
         status = 'OK'
         if had_failed (self.testspage.get_page()):
             status = 'FAILED'
-        search_and_replace_first (self.indexpage.get_page(), simulator.name, status)
+        search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', status)
 
         csvline  = "(" + HTML.href("log", self.testspage.get_page_relative()) + ')'
         
-        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
+        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK,]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
 
-        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
+        search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OKFAILED,]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
+
+        #search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index,.*\'.*>log</a>\)</td>', \
+        #                        HTML.csvcells_to_html(gettime() + ';' + '-- ' + csvline))
+
         cleanup()
 
 
@@ -205,15 +209,19 @@ class Condor:
         if had_failed (self.testspage):
             status = 'FAILED'
 
-        search_and_replace_first (self.indexpage, simulator.name, status)
+        search_and_replace_first (self.indexpage, simulator.name + ',', status)
 
         csvline  = "(" + HTML.lhref("log", self.testspage) + ')'
         
-        search_and_replace_first (self.indexpage, '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
+        search_and_replace_first (self.indexpage, '<td tag=\'index,[OK,]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
 
-        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
+        search_and_replace_first (self.indexpage, '<td tag=\'index,[OKFAILED,]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
+
+        #search_and_replace_first (self.indexpage, '<td tag=\'index,.*\'.*>log</a>\)</td>', \
+        #                        HTML.csvcells_to_html(gettime() + ';' + '--' + csvline))
+
 
     def pre_abort(self, string):
         log = string_to_log ("=== Abort===\n\n" + string)

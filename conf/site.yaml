@@ -85,7 +85,7 @@ simulators:
         custom links:
             high level trace: |
                 tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
-    gdb-multiarch:
+    gdb_multiarch:
         generator : acsim
         options   : -gdb 
         models    : [mips, mips32r2, sparc, arm, powerpc]
@@ -94,7 +94,7 @@ simulators:
         custom links: 
             gdb-multiarch version: |
                 gdb-multiarch -v &> version.txt && echo version.txt
-    gdb-compiled:
+    gdb_compiled:
         generator : acsim
         options   : -gdb 
         models    : [mips, mips32r2, sparc, arm, powerpc]
@@ -103,7 +103,7 @@ simulators:
         custom links:
             gdb version: |
                 `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
-#    gdb-acbingen:
+#    gdb_acbingen:
 #        generator : acsim
 #        options   : -gdb 
 #        models    : [mips, mips32r2, sparc, arm, powerpc]
@@ -111,56 +111,56 @@ simulators:
 #        desc      : "ACStone using 'gdb' patched by 'acbingen.sh'"
 #
 cross:
-    mips-gcc: 
+    mips_gcc: 
         link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
         cc    : mips-newlib-elf-gcc
         cxx   : mips-newlib-elf-g++
         flags : -specs=archc
         float : soft
         endian: big
-    arm-gcc:
+    arm_gcc:
         link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
         cc    : arm-newlib-eabi-gcc
         cxx   : arm-newlib-eabi-g++
         flags : -specs=archc
         float : soft
         endian: little
-    powerpc-gcc:
+    powerpc_gcc:
         link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
         cc    : powerpc-newlib-elf-gcc
         cxx   : powerpc-newlib-elf-g++
         flags : -specs=archc
         float : soft
         endian: big
-    sparc-gcc: 
+    sparc_gcc: 
         link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
         cc    : sparc-newlib-elf-gcc
         cxx   : sparc-newlib-elf-g++
         flags : -specs=archc
         float : soft
         endian: big
-    mips-ecc:
+    mips_ecc:
         link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
         cc    : ecc
         cxx   : ecc
         flags : -target mips32r2sf-linux
         float : soft
         endian: big
-    mips-ecc-hard:
+    mips_ecc-hard:
         link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
         cc    : ecc
         cxx   : ecc
         flags : -target mips32r2-linux
         float : hard
         endian: big
-    arm-ecc:
+    arm_ecc:
         link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
         cc    : ecc
         cxx   : ecc
         flags : -target arm32v7sf-linux
         float : soft
         endian: little
-    powerpc-ecc:
+    powerpc_ecc:
         link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
         cc    : ecc
         cxx   : ecc

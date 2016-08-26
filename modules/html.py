@@ -246,7 +246,11 @@ class TestsPage(HTMLPage):
         self.append_table(self.tabletests)
 
         self.write_page()
-        
+       
+
+    # To use in 'href' tag
+    def get_page_relative(self):
+        return './' + env.get_htmloutput_prefix() + self.suffix
 
     def update_archc_table(self, strline):
         self.tablearchc.append_csv_line(strline)

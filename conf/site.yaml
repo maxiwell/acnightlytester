@@ -91,6 +91,9 @@ simulators:
         models    : [mips, mips32r2, sparc, arm, powerpc]
         benchmarks: [acstone]
         desc      : "ACStone using 'gdb-multiarch'"
+        custom links: 
+            gdb-multiarch version: |
+                gdb-multiarch -v &> version.txt && echo version.txt
     gdb-compiled:
         generator : acsim
         options   : -gdb 

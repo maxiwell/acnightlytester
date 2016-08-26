@@ -75,9 +75,8 @@ class Nightly ():
         # Here I am using 'href' instead of 'lhref'. This was necessary
         # to adapt the code to use subfolder in the 'htmloutput' folder
         # 'lhref' always link with files in the same folder (./file.html)
-        csvline += '<td> -- ('  + HTML.href('log', './' + \
-                                            env.get_htmloutput_prefix() + \
-                                            self.testspage.suffix) + \
+        csvline += '<td> -- ('  + HTML.href('log', \
+                                    self.testspage.get_page_relative()) + \
                             ');-;'
         csvline += gethostname() 
         self.indexpage.update_index_table(csvline)
@@ -127,7 +126,7 @@ class Nightly ():
             status = 'FAILED'
         search_and_replace_first (self.indexpage.get_page(), simulator.name, status)
 
-        csvline  = "(" + HTML.lhref("log", self.testspage.get_page()) + ')'
+        csvline  = "(" + HTML.href("log", self.testspage.get_page_relative()) + ')'
         
         search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
@@ -182,7 +181,7 @@ class Condor:
         self.simulator = simulator
 
         self.testspage = env.get_htmloutput_fullstring() + TestsPage.suffix
-        self.indexpage = env.get_htmloutput_rootdir() + "/" + env.indexhtml
+        self.indexpage = env.get_htmloutput() + "/" + env.indexhtml
         
     def running_simulator (self, simulator):
         try:

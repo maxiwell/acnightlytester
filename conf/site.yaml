@@ -217,6 +217,8 @@ benchmarks:
         #omnetpp       : [test]  # with problem
         #astar         : [test]  # with problem
     acstonesmall:
+        000-020        : [acstone]
+    acstonesmall_gdb:
         gdb            : [acstone]
         000-020        : [acstone]
     acstone:

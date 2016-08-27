@@ -126,7 +126,7 @@ class Nightly ():
             status = 'FAILED'
         search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', status)
 
-        csvline  = "(" + HTML.href("log", self.testspage.get_page_relative()) + ')'
+        csvline  = "(" + HTML.href("log", './' + env.get_htmloutput_prefix() + TestsPage.suffix ) + ')'
         
         search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK,]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
@@ -211,7 +211,7 @@ class Condor:
 
         search_and_replace_first (self.indexpage, simulator.name + ',', status)
 
-        csvline  = "(" + HTML.lhref("log", self.testspage) + ')'
+        csvline  = "(" + HTML.href("log", './' + env.get_htmloutput_prefix() + TestsPage.suffix ) + ')'
         
         search_and_replace_first (self.indexpage, '<td tag=\'index,[OK,]*\'.*>log</a>\)</td>',  \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))

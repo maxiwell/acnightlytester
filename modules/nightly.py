@@ -145,6 +145,7 @@ class Nightly ():
         last_page = env.get_htmloutput() + \
                     env.get_htmloutput_priorprefix() + \
                     TestsPage.suffix;
+        
         if not os.path.isfile(last_page):
             return True
 
@@ -155,7 +156,6 @@ class Nightly ():
                 return True
 
         matches   = 0
-        matchesOk = 0
         with open(last_page, "r") as f:
             for l in f:
                 # ArchC check
@@ -166,11 +166,13 @@ class Nightly ():
                         return True
                 # Simulators check
                 for sim in self.simulators:
-                    s = re.search(r'<td>(%s)</td><td>.*</td><td><a.*>([A-Za-z0-9]*)</a></td>' % sim.get_modellink(), l)
+                    s = re.search(r'<td>(%s)</td><td>(%s)</td><td><a.*>([A-Za-z0-9]*)</a></td>' % (sim.get_modellink(), sim.get_modelbranch()), l)
                     if s:
                         matches += 1
-                        if sim.get_modelhash()[0:7] != s.group(2):
+                        if sim.get_modelhash()[0:7] != s.group(3):
                             return True
+                        else:
+                            break
 
         if matches == len(self.simulators) + 1:
             return False

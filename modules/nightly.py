@@ -237,7 +237,7 @@ class Condor:
         
         search_and_replace_first (self.indexpage, self.simulator.name, 'FAILED')
         
-        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED]*\'.*>log</a>\)</td>', \
+        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED,]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + ' (' + \
                                 HTML.lhref('log', self.testspage) + ')' ))
         return '' 

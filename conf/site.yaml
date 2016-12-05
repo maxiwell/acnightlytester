@@ -216,9 +216,9 @@ benchmarks:
         464.h264ref    : [test] 
         #omnetpp       : [test]  # with problem
         #astar         : [test]  # with problem
-    acstonesmall:
+    acstonetest:
         000-020        : [acstone]
-    acstonesmall_gdb:
+    acstonetest_gdb:
         gdb            : [acstone]
         000-020        : [acstone]
     acstone:

@@ -289,12 +289,12 @@ class acstone_gdb(acstone):
     def __init__(self, name):
         super().__init__(name)
 
-class acstonesmall(acstone):
+class acstonetest(acstone):
 
     def __init__(self, name):
         super().__init__(name)
 
-class acstonesmall_gdb(acstone):
+class acstonetest_gdb(acstone):
 
     def __init__(self, name):
         super().__init__(name)

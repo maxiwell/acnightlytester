@@ -124,21 +124,23 @@ class Nightly ():
         status = 'OK'
         if had_failed (self.testspage.get_page()):
             status = 'FAILED'
+
         search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', status)
 
         csvline  = "(" + HTML.href("log", './' + env.get_htmloutput_prefix() + TestsPage.suffix ) + ')'
-        
+       
+        line = get_first_line_with_pattern(self.indexpage.get_page(), '<td tag=\'index,')
+        okcount     = line.count('OK')
+        failedcount = line.count('FAILED')
+        resultstr  =  str(okcount) + '/' + str(okcount+failedcount)
+
         search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OK,]*\'.*>log</a>\)</td>',  \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.success(resultstr) + csvline))
 
         search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OKFAILED,]*\'.*>log</a>\)</td>', \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
-
-        #search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index,.*\'.*>log</a>\)</td>', \
-        #                        HTML.csvcells_to_html(gettime() + ';' + '-- ' + csvline))
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail(resultstr) + csvline))
 
         cleanup()
-
 
 
     def git_hashes_changed(self):
@@ -214,15 +216,17 @@ class Condor:
         search_and_replace_first (self.indexpage, simulator.name + ',', status)
 
         csvline  = "(" + HTML.href("log", './' + env.get_htmloutput_prefix() + TestsPage.suffix ) + ')'
-        
+
+        line = get_first_line_with_pattern(self.indexpage.get_page(), '<td tag=\'index,')
+        okcount     = line.count('OK')
+        failedcount = line.count('FAILED')
+        resultstr  =  str(okcount) + '/' + str(okcount+failedcount)
+
         search_and_replace_first (self.indexpage, '<td tag=\'index,[OK,]*\'.*>log</a>\)</td>',  \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.success() + csvline))
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.success(resultstr) + csvline))
 
         search_and_replace_first (self.indexpage, '<td tag=\'index,[OKFAILED,]*\'.*>log</a>\)</td>', \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + csvline))
-
-        #search_and_replace_first (self.indexpage, '<td tag=\'index,.*\'.*>log</a>\)</td>', \
-        #                        HTML.csvcells_to_html(gettime() + ';' + '--' + csvline))
+                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail(resultstr) + csvline))
 
 
     def pre_abort(self, string):

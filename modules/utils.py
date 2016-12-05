@@ -94,6 +94,11 @@ def get_githash(directory):
 def get_githash_online(link, branch):
     return exec_to_var ('git ls-remote ' + link + ' | grep ' + branch + ' | cut -f1')
 
+def get_first_line_with_pattern(filepath, pattern):
+    with open(filepath) as f:
+        for l in f:
+            if pattern in l:
+                return l
 
 def search_and_replace(filepath, pattern, string):
     with fileinput.input(filepath, inplace=True) as f:

@@ -5,13 +5,19 @@ from .utils import *
 
 class HTML:
     @staticmethod    
-    def fail():
-        string = "<b><font color=\"crimson\"> Failed </font></b>"
+    def fail(i = ""):
+        if i == "":
+            string = "<b><font color=\"crimson\"> Failed </font></b>"
+        else:
+            string = "<b><font color=\"crimson\"> "+ i +" </font></b>"
         return string
 
     @staticmethod
-    def success():
-        string = "<b><font color=\"green\"> OK </font></b>" 
+    def success(i = ""):
+        if i == "":
+            string = "<b><font color=\"green\"> OK </font></b>" 
+        else:
+            string = "<b><font color=\"green\"> "+ i +" </font></b>" 
         return string
 
     @staticmethod

@@ -307,7 +307,7 @@ class Simulator (SimulatorPage):
     custom_links = {}
 
     def __init__(self, model, module, run, inputfile):
-        self.name = model + '-' + module
+        self.name = model + '-' + module + '-' + get_random()
         super().__init__(self.name)
         
         self.simfolder = "/" + self.name + '/'
@@ -435,14 +435,14 @@ class Simulator (SimulatorPage):
 
     def append_benchmark(self, benchmark):
         benchmark.custom_links   = self.custom_links
-        benchmark.simulator_name = self.name
+        benchmark.simulator_name = self.get_name()
         self.benchmarks.append(benchmark)
 
     def download_modellink(self):
         if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            get_local(self.model['link'], self.get_simsrc(), self.name)
+            get_local(self.model['link'], self.get_simsrc(), self.get_name())
         else:
-            git_clone(self.model['link'], self.model['branch'], self.get_simsrc(), self.name)
+            git_clone(self.model['link'], self.model['branch'], self.get_simsrc(), self.get_name())
 
         with open(self.get_simsrc() + self.model['inputfile'], 'r') as f:
             for l in f:
@@ -461,7 +461,7 @@ class Simulator (SimulatorPage):
         cmd_make   = "make "
 
         cmd = cmd_source + cmd_cd + cmd_acsim + cmd_make 
-        print(self.name + ":")
+        print(self.get_name() + ":")
         print("| "+cmd)
         print("| Generating and Building... ", end="", flush=True)
 
@@ -475,8 +475,8 @@ class Simulator (SimulatorPage):
             execstatus = HTML.fail()
 
         # Creating the Build Page
-        buildpage = env.get_htmloutput_fullstring() + self.name + "-build-log.html"
-        HTML.log_to_html(log, buildpage, self.name + " rev "+self.model['hash'][0:7]+" build output")
+        buildpage = env.get_htmloutput_fullstring() + self.get_name() + "-build-log.html"
+        HTML.log_to_html(log, buildpage, self.get_name() + " rev "+self.model['hash'][0:7]+" build output")
 
         tableline  = execstatus
         tableline += '(' + HTML.lhref('log', buildpage) + ')' + ';'
@@ -493,7 +493,7 @@ class Simulator (SimulatorPage):
             simulator_info.crossbin = self.cross['prefix']
             simulator_info.arch     = self.model['name']
             simulator_info.endian   = self.model['endian']
-            simulator_info.name     = self.name
+            simulator_info.name     = self.get_name()
             simulator_info.run      = self.get_run_fullpath()
             bench.run_tests(simulator_info)
             self.create_benchmark_table(bench)
@@ -507,8 +507,8 @@ class Simulator (SimulatorPage):
             test_results = HTML.success()
 
         hostname = gethostname()
-        cpuinfofile = env.get_htmloutput_fullstring() + self.name + "-cpuinfo.txt"
-        meminfofile = env.get_htmloutput_fullstring() + self.name + "-meminfo.txt"
+        cpuinfofile = env.get_htmloutput_fullstring() + self.get_name() + "-cpuinfo.txt"
+        meminfofile = env.get_htmloutput_fullstring() + self.get_name() + "-meminfo.txt"
 
         exec_to_log("cat /proc/cpuinfo", cpuinfofile)        
         exec_to_log("cat /proc/meminfo", meminfofile)        
@@ -521,7 +521,7 @@ class Simulator (SimulatorPage):
 
 
     def printsim(self):
-        print("Simulator: " + self.name)
+        print("Simulator: " + self.get_name())
         print("| model: " + self.model['name'])
         print("| - from " + self.model['link'])
         print("| module: "      + self.module['name'])

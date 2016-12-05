@@ -1,123 +1,172 @@
 
-
 # S{RANDOM}     : Random number up to 9999
 # ${SCRIPTROOT} : Nightly path
 
+# 'tarball pool' is a cache for tarball files. 
+# It is checked before download from internet. 
+# To disable it, comment the line. Git and 
+# Local files do not use this cache. 
+
 nightly:
-    workspace  : /tmp/TEMP${RANDOM}
-    htmloutput : ${SCRIPTROOT}/public_html/
-    simulators : [ mips-acsim-pw, arm-acsim, powerpc-acsim, sparc-acsim-pw, 
-                   mips-gdb, arm-gdb, powerpc-gdb, sparc-gdb ]
+    workspace    : /tmp/TEMP${RANDOM}
+    html output  : ${SCRIPTROOT}/public_html
+    tarball pool : ${SCRIPTROOT}/pool/
+    simulators   : all
  
 archc:
     systemc   : https://github.com/archc/systemc.git
-    binutils  : 
-    gdb       : 
-    link/path : https://github.com/archc/archc.git
+#    binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
+#    gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
+    link/path : https://github.com/maxiwell/archc.git
+    extlibs   : 
+        libelf : git://git.fedorahosted.org/git/elfutils.git
 
+       
 models:
     mips:
         inputfile : mips.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    mips32r2:
+        inputfile : mips.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/archc/mips.git
+        branch    : mips32r2
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     arm:
         inputfile : arm.ac
         run       : ./arm.x --load=
         link/path : https://github.com/archc/arm.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
         inputfile : sparc.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/archc/sparc.git
+        branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
 
-simulators:
-    mips-gdb:
-        model     : mips
-        modules   : [gdb]
-        benchmarks: [acstonesmall]
-    mips-acsim-pw:
-        model     : mips
-        modules   : [acsim, powersc]
-        benchmarks: [mibenchsmall]
-    mips-hlt:
-        model     : mips
-        modules   : [hltrace]
-        benchmarks: [mibenchsmall]
-    arm-gdb:
-        model     : arm
-        modules   : [gdb]
-        benchmarks: [acstonesmall]
-    arm-acsim:
-        model     : arm
-        modules   : [acsim]
-        benchmarks: [mibenchsmall]
-    arm-hlt:
-        model     : arm
-        modules   : [hltrace]
-        benchmarks: [mibenchsmall]
-    powerpc-gdb:
-        model     : powerpc
-        modules   : [gdb]
-        benchmarks: [acstonesmall]
-    powerpc-acsim:
-        model     : powerpc
-        modules   : [acsim]
-        benchmarks: [mibenchsmall]
-    powerpc-hlt:
-        model     : powerpc
-        modules   : [hltrace]
-        benchmarks: [mibenchsmall]
-    sparc-gdb:
-        model     : sparc
-        modules   : [gdb]
-        benchmarks: [acstonesmall]
-    sparc-acsim-pw:
-        model     : sparc
-        modules   : [acsim, powersc]
-        benchmarks: [mibenchsmall]
-    sparc-hlt:
-        model     : sparc
-        modules   : [hltrace]
-        benchmarks: [mibenchsmall]
+# Each element in the 'models' array will be combined 
+# with the 'generator' to generate simulators
 
 # 'custom links' must end with ' && echo <file>'
 # The echo output will be used as target file by the link
 
-modules: 
-    acsim: 
-        generator: acsim
-        options: -abi -nw
-        desc:
+simulators:
+    acsim:
+        generator : acsim
+        options   : -abi -nw
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [mibenchtest]
+        desc      : "Default ArchC simulator"
     powersc:
-        generator: acsim
-        options: -abi -nw -pw
-        desc:
+        generator : acsim
+        options   : -abi -nw -pw
+        models    : [mips, mips32r2, sparc]
+        benchmarks: [mibenchtest]
+        desc      : "Simulator with Power Statistics"
         custom links:
             power report: | 
                 mv window_power_report_*.csv output.txt && echo output.txt
-    hltrace: 
-        generator: acsim
-        options: -abi -nw -hlt
-        desc:
+    hltrace:
+        generator : acsim
+        options   : -abi -nw -hlt
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [mibenchtest]
+        desc      : "Simulator with High Level Trace output"
         custom links:
             high level trace: |
                 tar -cvf out.tar.bz2 *.hltrace && echo out.tar.bz2
-    gdb:
-        generator: acsim
-        options: -gdb 
-        desc:
+    gdb_multiarch:
+        generator : acsim
+        options   : -gdb 
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [acstonetest]
+        desc      : "ACStone using 'gdb-multiarch'"
+        custom links: 
+            gdb-multiarch version: |
+                gdb-multiarch -v &> version.txt && echo version.txt
+    gdb_compiled:
+        generator : acsim
+        options   : -gdb 
+        models    : [mips, mips32r2, sparc, arm, powerpc]
+        benchmarks: [acstonetest_gdb]
+        desc      : "ACStone using 'gdb' compiled from original source code"
         custom links:
             gdb version: |
                 `find . -iname "*-gdb"` -v &> version.txt && echo version.txt
-  
-benchmarks:
+#    gdb_acbingen:
+#        generator : acsim
+#        options   : -gdb 
+#        models    : [mips, mips32r2, sparc, arm, powerpc]
+#        benchmarks: [acstone]
+#        desc      : "ACStone using 'gdb' patched by 'acbingen.sh'"
+#
+cross:
+    mips_gcc: 
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+        cc    : mips-newlib-elf-gcc
+        cxx   : mips-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    arm_gcc:
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+        cc    : arm-newlib-eabi-gcc
+        cxx   : arm-newlib-eabi-g++
+        flags : -specs=archc
+        float : soft
+        endian: little
+    powerpc_gcc:
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+        cc    : powerpc-newlib-elf-gcc
+        cxx   : powerpc-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    sparc_gcc: 
+        link  : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+        cc    : sparc-newlib-elf-gcc
+        cxx   : sparc-newlib-elf-g++
+        flags : -specs=archc
+        float : soft
+        endian: big
+    mips_ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target mips32r2sf-linux
+        float : soft
+        endian: big
+    mips_ecc-hard:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target mips32r2-linux
+        float : hard
+        endian: big
+    arm_ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target arm32v7sf-linux
+        float : soft
+        endian: little
+    powerpc_ecc:
+        link  : ftp://ellcc.org/pub/ellcc-x86_64-linux-0.1.32.tgz
+        cc    : ecc
+        cxx   : ecc
+        flags : -target ppc32-linux
+        float : hard
+        endian: big
 
 benchmarks:
     mibenchtest:
@@ -167,11 +216,18 @@ benchmarks:
         464.h264ref    : [test] 
         #omnetpp       : [test]  # with problem
         #astar         : [test]  # with problem
-    acstonesmall:
-        #gdb            : [acstone]
+    acstonetest:
+        000-020        : [acstone]
+    acstonetest_gdb:
+        gdb            : [acstone]
         000-020        : [acstone]
     acstone:
-        #gdb            : [acstone]
+        000-020        : [acstone]
+        021-050        : [acstone]
+        050-100        : [acstone]
+        100-200        : [acstone]
+    acstone_gdb:
+        gdb            : [acstone]
         000-020        : [acstone]
         021-050        : [acstone]
         050-100        : [acstone]

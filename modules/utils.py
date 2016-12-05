@@ -129,7 +129,10 @@ def insert_line_before_once(filepath, newline, pattern):
             print ( l , end='')
 
 def create_rand_file():
-    return env.get_logfolder() + '/' + str(randint(0000,9999)) + '.log' 
+    return env.get_logfolder() + '/' + get_random() + '.log' 
+
+def get_random():
+    return str(randint(0000,9999))
 
 def is_linkpath_a_git (link):
     if link.startswith('git'):

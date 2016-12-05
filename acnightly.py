@@ -55,35 +55,36 @@ def config_parser_yaml(configfile):
 
         for _sim in simlist:
             for _model in yamls['simulators'][_sim]['models']:
-                inputfile = yamls['models'][_model]['inputfile']
-                run       = yamls['models'][_model]['run']
-                linkpath  = yamls['models'][_model]['link/path']
-                branch    = 'master'
-                if 'branch' in yamls['models'][_model] and yamls['models'][_model]['branch'] != None:
-                    branch = yamls['models'][_model]['branch']
-                crosslink = yamls['models'][_model]['cross']
+                for _inputfile in yamls['models'][_model]['inputfile']:
+                    inputfile = _inputfile
+                    run       = yamls['models'][_model]['run']
+                    linkpath  = yamls['models'][_model]['link/path']
+                    branch    = 'master'
+                    if 'branch' in yamls['models'][_model] and yamls['models'][_model]['branch'] != None:
+                        branch = yamls['models'][_model]['branch']
+                    crosslink = yamls['models'][_model]['cross']
                 
-                sim = Simulator(_model, _sim, run, inputfile)
-                sim.set_modellink(linkpath, branch)
-                sim.set_generator(yamls['simulators'][_sim]['generator'])
-                sim.set_options  (yamls['simulators'][_sim]['options'])
-                if 'desc' in yamls['simulators'][_sim]:
-                    sim.set_desc(yamls['simulators'][_sim]['desc'])
-                if 'custom links' in yamls['simulators'][_sim]:
-                    for cl in yamls['simulators'][_sim]['custom links']:
-                        sim.set_custom_links(cl, yamls['simulators'][_sim]['custom links'][cl])
+                    sim = Simulator(_model, _sim, run, inputfile)
+                    sim.set_modellink(linkpath, branch)
+                    sim.set_generator(yamls['simulators'][_sim]['generator'])
+                    sim.set_options  (yamls['simulators'][_sim]['options'])
+                    if 'desc' in yamls['simulators'][_sim]:
+                        sim.set_desc(yamls['simulators'][_sim]['desc'])
+                    if 'custom links' in yamls['simulators'][_sim]:
+                        for cl in yamls['simulators'][_sim]['custom links']:
+                            sim.set_custom_links(cl, yamls['simulators'][_sim]['custom links'][cl])
         
-                for _bench in yamls['simulators'][_sim]['benchmarks']:
-                    bench = eval(_bench)(_bench)
-                    for _app in yamls['benchmarks'][_bench] :
-                        app = App(_app, sim.name)
-                        for _dataset in yamls['benchmarks'][_bench][_app]:
-                            dataset = Dataset(_dataset, app.name, sim.name)
-                            app.append_dataset(dataset)
-                        bench.append_app(app)
-                    sim.append_benchmark(bench)
-                sim.set_crosslink( crosslink )
-                simulators.append(sim)
+                    for _bench in yamls['simulators'][_sim]['benchmarks']:
+                        bench = eval(_bench)(_bench)
+                        for _app in yamls['benchmarks'][_bench] :
+                            app = App(_app, sim.name)
+                            for _dataset in yamls['benchmarks'][_bench][_app]:
+                                dataset = Dataset(_dataset, app.name, sim.name)
+                                app.append_dataset(dataset)
+                            bench.append_app(app)
+                        sim.append_benchmark(bench)
+                    sim.set_crosslink( crosslink )
+                    simulators.append(sim)
         
         simulators.sort(key=lambda x: x.name)
         for s in simulators:

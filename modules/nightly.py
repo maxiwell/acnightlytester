@@ -217,7 +217,7 @@ class Condor:
 
         csvline  = "(" + HTML.href("log", './' + env.get_htmloutput_prefix() + TestsPage.suffix ) + ')'
 
-        line = get_first_line_with_pattern(self.indexpage.get_page(), '<td tag=\'index,')
+        line = get_first_line_with_pattern(self.indexpage, '<td tag=\'index,')
         okcount     = line.count('OK')
         failedcount = line.count('FAILED')
         resultstr  =  str(okcount) + '/' + str(okcount+failedcount)
@@ -239,10 +239,7 @@ class Condor:
                                   HTML.colspan(3, HTML.fail() + '(' +  HTML.lhref('Exception Log', abortpage) \
                                   + ')' ))
         
-        search_and_replace_first (self.indexpage, self.simulator.name, 'FAILED')
+        search_and_replace_first (self.indexpage, self.simulator.name + ',', 'FAILED')
         
-        search_and_replace_first (self.indexpage, '<td tag=\'index[OKFAILED,]*\'.*>log</a>\)</td>', \
-                                HTML.csvcells_to_html(gettime() + ';' + HTML.fail() + ' (' + \
-                                HTML.lhref('log', self.testspage) + ')' ))
         return '' 
 

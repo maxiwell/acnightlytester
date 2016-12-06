@@ -24,31 +24,79 @@ archc:
        
 models:
     mips:
-        inputfile : [mips.ac]
+        inputfile : mips.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/archc/mips.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    mips-cache:
+        inputfile : mips_cache.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/archc/mips.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    mips-cache-hier:
+        inputfile : mips_cache2.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     mips32r2:
-        inputfile : [mips.ac]
+        inputfile : mips.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         branch    : mips32r2
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     arm:
-        inputfile : [arm.ac]
+        inputfile : arm.ac
+        run       : ./arm.x --load=
+        link/path : https://github.com/archc/arm.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+    arm-cache:
+        inputfile : arm_cache.ac
+        run       : ./arm.x --load=
+        link/path : https://github.com/archc/arm.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+    arm-cache-hier:
+        inputfile : arm_cache2.ac
         run       : ./arm.x --load=
         link/path : https://github.com/archc/arm.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
-        inputfile : [powerpc.ac]
+        inputfile : powerpc.ac
+        run       : ./powerpc.x --load=
+        link/path : https://github.com/archc/powerpc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+    powerpc-cache:
+        inputfile : powerpc_cache.ac
+        run       : ./powerpc.x --load=
+        link/path : https://github.com/archc/powerpc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+    powerpc-cache-hier:
+        inputfile : powerpc_cache2.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
-        inputfile : [sparc.ac]
+        inputfile : sparc.ac
+        run       : ./sparc.x --load=
+        link/path : https://github.com/archc/sparc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+    sparc-cache:
+        inputfile : sparc_cache.ac
+        run       : ./sparc.x --load=
+        link/path : https://github.com/archc/sparc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+    sparc-cache-hier:
+        inputfile : sparc_cache2.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/archc/sparc.git
         branch    : master
@@ -64,7 +112,7 @@ simulators:
     acsim:
         generator : acsim
         options   : -abi -nw
-        models    : [mips, mips32r2, sparc, arm, powerpc]
+        models    : all
         benchmarks: [mibench, spec2006]
         desc      : "Default ArchC simulator"
     powersc:

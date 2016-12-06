@@ -297,6 +297,7 @@ class ArchC ():
 
 class Simulator (SimulatorPage):
     name        = ""
+    identifier  = ""
 
     model       = {}
     cross       = {}
@@ -307,9 +308,10 @@ class Simulator (SimulatorPage):
     custom_links = {}
 
     def __init__(self, model, module, run, inputfile):
-        self.name = model + '-' + module + '-' + get_random()
+        self.name = model + '-' + module
         super().__init__(self.name)
         
+        self.identifier = get_random()
         self.simfolder = "/" + self.name + '/'
         self.simsrc    = "/src/"
 
@@ -338,6 +340,9 @@ class Simulator (SimulatorPage):
 
     def get_name(self):
         return self.name
+
+    def get_identifier(self):
+        return self.identifier
 
     def get_simfolder(self):
         return env.workspace + self.simfolder

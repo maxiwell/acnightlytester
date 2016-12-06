@@ -24,35 +24,60 @@ archc:
        
 models:
     mips:
-        inputfile : [mips.ac, mips_cache.ac]
+        inputfile : mips.ac
+        run       : ./mips.x --load=
+        link/path : https://github.com/maxiwell/mips.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
+    mips-cache:
+        inputfile : mips_cache.ac
         run       : ./mips.x --load=
         link/path : https://github.com/maxiwell/mips.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     mips32r2:
-        inputfile : [mips.ac]
+        inputfile : mips.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         branch    : mips32r2
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
     arm:
-        inputfile : [arm.ac, arm_cache.ac]
+        inputfile : arm.ac
+        run       : ./arm.x --load=
+        link/path : https://github.com/maxiwell/arm.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
+    arm-cache:
+        inputfile : arm_cache.ac
         run       : ./arm.x --load=
         link/path : https://github.com/maxiwell/arm.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
-        inputfile : [powerpc.ac, powerpc_cache.ac]
+        inputfile : powerpc.ac
+        run       : ./powerpc.x --load=
+        link/path : https://github.com/maxiwell/powerpc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
+    powerpc-cache:
+        inputfile : powerpc_cache.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/maxiwell/powerpc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
-        inputfile : [sparc.ac, sparc_cache.ac]
+        inputfile : sparc.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/maxiwell/sparc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+    sparc-cache:
+        inputfile : sparc_cache.ac
+        run       : ./sparc.x --load=
+        link/path : https://github.com/maxiwell/sparc.git
+        branch    : master
+        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
+
 
 # Each element in the 'models' array will be combined 
 # with the 'generator' to generate simulators
@@ -64,7 +89,7 @@ simulators:
     acsim:
         generator : acsim
         options   : -abi -nw
-        models    : [mips, mips32r2, sparc, arm, powerpc]
+        models    : all
         benchmarks: [mibenchtest]
         desc      : "Default ArchC simulator"
     powersc:

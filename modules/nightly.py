@@ -122,7 +122,7 @@ class Nightly ():
 
     def finalize(self, simulator):
         status = 'OK'
-        if had_failed (self.testspage.get_page()):
+        if had_failed (self.testspage.get_page(), simulator.name):
             status = 'FAILED'
 
         search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', status)
@@ -210,7 +210,7 @@ class Condor:
 
     def finalize(self, simulator):
         status = 'OK'
-        if had_failed (self.testspage):
+        if had_failed (self.testspage, simulator.name):
             status = 'FAILED'
 
         search_and_replace_first (self.indexpage, simulator.name + ',', status)

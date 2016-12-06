@@ -178,13 +178,18 @@ def get_relative_path(absolute_path):
     ws = os.path.normpath(env.workspace)
     return absolute_path.replace(ws,'')
     
-def had_failed(page):
-    with open(page, 'r') as f:
-        for l in f:
-            if re.search("Failed", l):
-                return True
+def had_failed(page, linematch = ''):
+    if linematch != '':
+        line = get_first_line_with_pattern(page, linematch)
+        if re.search("Failed", line):
+            return True
+    else:
+        with open(page, 'r') as f:
+            for l in f:
+                if re.search("Failed", l):
+                    return True
     return False
-           
+    
 def untar (tarfile_, dstfolder):
     print("| Extracting Tarball... ", end="", flush=True)
     tar = tarfile.open(tarfile_)

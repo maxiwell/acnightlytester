@@ -93,12 +93,36 @@ class Nightly ():
             self.running_simulator(simulator)
 
     def running_simulator(self, simulator):
-        env.set_archcenv (self.archc.get_archc_prefix() + '/etc/env.sh')
-        line  = simulator.gen_and_build();
-        line += simulator.run_tests()
-        search_and_replace(self.testspage.get_page(), \
+        try:
+            env.set_archcenv (self.archc.get_archc_prefix() + '/etc/env.sh')
+            line  = simulator.gen_and_build();
+            line += simulator.run_tests()
+            search_and_replace(self.testspage.get_page(), \
                            '<td tag=\'' + simulator.name + '\'.*</td></td>', \
                            HTML.csvcells_to_html(line))
+        except Exception as err:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            self.pre_abort(''.join('!! ' + line for line in lines), simulator)
+            self.finalize(simulator)
+            abort('Aborting')
+            raise
+
+    def pre_abort(self, string, simulator):
+        log = string_to_log ("=== Abort===\n\n" + string)
+
+        abortpage = env.get_htmloutput_fullstring() + simulator.name + '-system-error.html'
+        HTML.log_to_html (log, abortpage, simulator.name + ' System Traceback')
+
+        search_and_replace_first (self.testspage.get_page(), '<td tag=\'' + simulator.name + '\'.*</td></td>', \
+                                  HTML.colspan(3, HTML.fail() + '(' +  HTML.lhref('Exception Log', abortpage) \
+                                  + ')' ))
+        
+        search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', 'FAILED')
+        
+        return '' 
+
+
                                                            
     def condor_runnning_simulator(self, simulator):        
         envobj        = env.get_workspace() + 'env.p'
@@ -204,6 +228,7 @@ class Condor:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
             self.pre_abort(''.join('!! ' + line for line in lines))
+            self.finalize(simulator)
             abort('Aborting')
             raise
 

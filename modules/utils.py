@@ -31,15 +31,21 @@ def cp(src, dst):
 def rm(dst):
     return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")[0]
 
-def exec_to_log(cmd, log = None):
-    if not log:
-        log = create_rand_file()
-
+def _exec(cmd):
     process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
                                             stdout=subprocess.PIPE, \
                                             stderr=subprocess.STDOUT, \
                                             shell=True)
+
     out, err = process.communicate(cmd.encode('utf-8'), timeout)
+    retcode  = process.returncode
+    return out, err, retcode
+
+def exec_to_log(cmd, log = None):
+    if not log:
+        log = create_rand_file()
+
+    out, err, retcode = _exec(cmd)
 
     dump  = "===========\n"
     dump += "$ " + cmd + '\n'
@@ -50,14 +56,13 @@ def exec_to_log(cmd, log = None):
     f.write(dump)
     f.close()
 
-    if process.returncode == 0:
+    if retcode == 0:
         return True, log
     else:
         return False, log
 
 def exec_to_var(cmd):
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    out, err = process.communicate(cmd.encode('utf-8'), timeout)
+    out, err, retcode = _exec(cmd)
     return out.strip().decode('utf-8')
 
 

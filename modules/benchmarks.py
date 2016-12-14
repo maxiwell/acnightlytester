@@ -84,7 +84,7 @@ class mibench (Benchmark):
                 srcfolder = appfolder + '/lame3.70'
                 
             cmd  = "make clean && "
-            cmd += self.exportenv(simulator_info.crossbin, simulator_info.endian) + " make "
+            cmd += self.exportenv(simulator_info.crossbin, simulator_info.endian) + inflate("make") 
     
             self.compile(srcfolder, cmd, app)
     
@@ -164,7 +164,7 @@ class spec2006 (Benchmark):
                
             exportenv = self.exportenv(simulator_info.crossbin, simulator_info.endian)
             cmd  = "make clean " + exportenv + " && "
-            cmd += "make "       + exportenv
+            cmd += inflate("make") + exportenv
 
             self.compile(srcfolder, cmd, app)
     
@@ -228,7 +228,7 @@ class acstone(Benchmark):
 
             # Compile GDB to connect to simulator
             cmd  = './configure --target=' + simulator_info.arch + '-elf --prefix=' + gdbprefix + ' && '
-            cmd += 'make && make install '
+            cmd += inflate("make") + ' && ' + inflate("make install")
             self.compile ( gdbsrc, cmd, app )
             for f in os.listdir(gdbprefix + '/bin/'):
                 if f.endswith("-gdb"):
@@ -265,13 +265,13 @@ class acstone(Benchmark):
             exportenv  = self.exportev(simulator_info.crossbin, simulator_info.name) + gdbcmd
             exportenv += " SIMULATOR='" + simulator_info.run + "'" 
             
-            cmd = "make " + exportenv + " build"
+            cmd = inflate("make") + exportenv + " build"
             self.compile( appfolder, cmd, app )
    
             cmd_env  = "source " + env.get_archcenv() + " && "
             for dataset in app.dataset:
 
-                cmd = 'make ' + exportenv + ' GDBPORT="' + str(self.get_free_port()) + '" run'
+                cmd = inflate("make") + exportenv + ' GDBPORT="' + str(self.get_free_port()) + '" run'
                 self.run  ( appfolder, cmd_env + cmd, app, dataset )
                
                 goldenfolder = appfolder + 'golden/'

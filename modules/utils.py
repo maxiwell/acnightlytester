@@ -13,6 +13,15 @@ version = "4.0"
 env = Env()
 timeout = 7200
 
+def inflate(arg):
+    # In condor environment nproc is not the same. So it's necessary
+    # get the cpuinfo in each inflate call
+    nproc   = exec_to_var("cat /proc/cpuinfo | grep \"^processor\" | wc -l")
+    if arg == "make":
+        return " make -j" + nproc + " " 
+    if arg == "make install":
+        return " make -j" + nproc + " install " 
+
 def mkdir(directory):
     if not os.path.exists(directory+"/"):
         os.makedirs(directory+"/")

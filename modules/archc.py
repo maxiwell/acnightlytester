@@ -145,7 +145,7 @@ class ArchC ():
         cmd_1  = "cd " + src + " && "
         cmd_2  = "autoreconf -vif && "
         cmd_2 += "./configure --prefix=" + prefix + " --enable-maintainer-mode && "
-        cmd_2 += "make install"
+        cmd_2 += inflate("make install")
         cmd = cmd_1 + cmd_2
 
         print(lib['name'] + ':')
@@ -182,7 +182,7 @@ class ArchC ():
             if os.path.isfile(self.get_systemc_src() + "/autogen.sh"):
                 cmd_2 += "./autogen.sh && " 
             cmd_2 += "./configure --prefix=" + self.get_systemc_prefix() 
-            cmd_2 += " && make && make install"
+            cmd_2 += " && " + inflate("make") + " && " + inflate("make install")
             print("SystemC:")
             print("| " + cmd_2)
             print("| Building and Installing...", end="", flush=True)
@@ -235,7 +235,7 @@ class ArchC ():
         for l in self.external_libs:
             extra_csvline += self.build_external_lib(l) + '\n'
 
-        cmd_2 += " && make && make install"
+        cmd_2 += " && " + inflate("make") + " && " + inflate("make install")
         print("ArchC:")
         print("| "+cmd_2)
         print("| Building and Installing... ", end="", flush=True)
@@ -271,12 +271,12 @@ class ArchC ():
         for l in self.external_libs:
             cmd  = "cd " + self.get_external_lib_src(l) + " && "
             cmd += "./configure --prefix=" + self.get_external_lib_prefix(l) + " --enable-maintainer-mode && "
-            cmd += "make install"
+            cmd += inflate("make install")
             exec_to_var ( cmd )
 
         cmd  = "cd "+self.get_systemc_src() + " && " 
         cmd += "./configure --prefix=" + self.get_systemc_prefix() + ' && '
-        cmd += "make && make install"
+        cmd += inflate("make") + " && " + inflate("make install")
         exec_to_var ( cmd ) 
 
         # Each model will change the GDB and BINUTILS folders
@@ -290,7 +290,7 @@ class ArchC ():
             cmd += " --with-binutils=" + self.get_binutils_src()
         if 'link' in self.gdb:
             cmd += " --with-gdb=" + self.get_gdb_src()
-        cmd += " && make && make install"
+        cmd += " && " + inflate("make") + " && " + inflate("make install")
         exec_to_var ( cmd )
 
 
@@ -463,7 +463,7 @@ class Simulator (SimulatorPage):
             cmd_cd += "make distclean && "
         cmd_acsim  = self.module['generator'] + " " + self.model['inputfile'] + " " \
                     + self.module['options'] + " && "
-        cmd_make   = "make "
+        cmd_make   = inflate("make")
 
         cmd = cmd_source + cmd_cd + cmd_acsim + cmd_make 
         print(self.get_name() + ":")

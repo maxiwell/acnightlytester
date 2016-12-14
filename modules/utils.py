@@ -40,11 +40,15 @@ def cp(src, dst):
 def rm(dst):
     return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")[0]
 
-def _exec(cmd):
-    try: 
+def _exec(cmd, errors_in_stdout=True):
+    try:
+        err = subprocess.STDOUT
+        if not errors_in_stdout:
+            err = subprocess.PIPE
+
         process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
                                                 stdout=subprocess.PIPE, \
-                                                stderr=subprocess.STDOUT, \
+                                                stderr=err, \
                                                 shell=True)
 
         out, err = process.communicate(cmd.encode('utf-8'), timeout)
@@ -87,7 +91,7 @@ def exec_to_log(cmd, log = None):
         return False, log
 
 def exec_to_var(cmd):
-    out, err, retcode = _exec(cmd)
+    out, err, retcode = _exec(cmd, errors_in_stdout=False)
     return out.strip().decode('utf-8')
 
 

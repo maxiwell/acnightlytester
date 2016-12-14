@@ -41,14 +41,27 @@ def rm(dst):
     return exec_to_log("chmod 777 -R " + dst + " && rm -rf " + dst, "/dev/null")[0]
 
 def _exec(cmd):
-    process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
-                                            stdout=subprocess.PIPE, \
-                                            stderr=subprocess.STDOUT, \
-                                            shell=True)
+    try: 
+        process = subprocess.Popen('/bin/bash', stdin=subprocess.PIPE,  \
+                                                stdout=subprocess.PIPE, \
+                                                stderr=subprocess.STDOUT, \
+                                                shell=True)
 
-    out, err = process.communicate(cmd.encode('utf-8'), timeout)
-    retcode  = process.returncode
-    return out, err, retcode
+        out, err = process.communicate(cmd.encode('utf-8'), timeout)
+        retcode  = process.returncode
+        return out, err, retcode
+
+    except OSError as e:
+        print ("OSError > ",e.errno)
+        print ("OSError > ",e.strerror)
+        print ("OSError > ",e.filename)
+        raise
+    except subprocess.CalledProcessError as e:
+        print("CalledProcessError > ", e.output)
+        raise
+    except:
+        print ("Error > ",sys.exc_info()[0])
+        raise
 
 def exec_to_log(cmd, log = None):
     if not log:
@@ -59,7 +72,10 @@ def exec_to_log(cmd, log = None):
     dump  = "===========\n"
     dump += "$ " + cmd + '\n'
     dump += "===========\n\n"
-    dump += out.decode('utf-8')
+    try:
+        dump += out.decode('utf-8')
+    except:
+        print ("Error > ", sys.exc_info()[0])
 
     f = open(log, 'w')
     f.write(dump)

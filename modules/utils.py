@@ -11,7 +11,7 @@ from .env import Env
 
 version = "4.0"
 env = Env()
-timeout = 60
+timeout = 7200
 
 def inflate(arg):
     # In condor environment nproc is not the same. So it's necessary

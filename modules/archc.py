@@ -397,12 +397,15 @@ class Simulator (SimulatorPage):
 
     def get_cross_csvline(self):
         # Find the cross version and write the page
-        prefix = get_tar_git_or_folder(self.cross['link'], env.get_xtoolsfolder()) + '/bin/'
-        crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
-        crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
+        prefix, crossversion, crossdump = env.get_xtools_cache(self.cross['link'])
+        if prefix == None:
+            prefix = get_tar_git_or_folder(self.cross['link'], env.get_xtoolsfolder()) + '/bin/'
+            crosscmd = 'cd ' + prefix + ' && `find . -iname "*-gcc"` '
+            crossversion = exec_to_var( crosscmd + "--version | awk '/gcc/ {print $4;}'")
+            retcode, crossdump = exec_to_log ( crosscmd + '-v' )
+            env.add_xtools_cache(self.cross['link'], prefix, crossversion, crossdump)
+            
         highlight_list = ['--with-float=soft', '--with-newlib']
-        retcode, crossdump = exec_to_log ( crosscmd + '-v' )
-
         crosspage = env.get_htmloutput_fullstring() + self.model['name'] + '-cross-version.html'
         HTML.log_to_html( crossdump, crosspage, self.model['name'] + ' Cross Version', highlight_list)
         

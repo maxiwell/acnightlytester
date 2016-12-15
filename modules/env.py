@@ -14,6 +14,8 @@ class Env:
     debug_mode      = False
     condor_mode     = False
 
+    xtoolsdict      = {}
+
     def __init__(self):
         self.random     = randint(0000,9999)
         self.scriptroot = os.getcwd() + '/'
@@ -33,6 +35,7 @@ class Env:
         self.debug_mode    = env.debug_mode
         self.condor_mode   = env.condor_mode
         self.tarballpool   = None
+        self.xtoolsdict    = {}
 
     def set_workspace(self, workspace):
         self.workspace    = self.resolvenv(workspace) 
@@ -116,5 +119,22 @@ class Env:
 
     def enable_condor(self):
         self.condor_mode = True
+
+    def get_xtools_cache(self, linkpath):
+        if linkpath in self.xtoolsdict:
+            return self.xtoolsdict[linkpath]
+        else:
+            return None,None,None 
+
+    def add_xtools_cache(self, linkpath, prefix, crossversion, crossdump):
+        if linkpath in self.xtoolsdict:
+            return False
+        else:
+            self.xtoolsdict[linkpath] = [prefix, crossversion, crossdump]
+            return True
+
+
+
+
 
 

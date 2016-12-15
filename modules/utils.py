@@ -59,14 +59,14 @@ def _exec(cmd, errors_in_stdout=True):
         print ("OSError > ",e.errno)
         print ("OSError > ",e.strerror)
         print ("OSError > ",e.filename)
-        raise
+        return e.strerror, err, 255
     except subprocess.CalledProcessError as e:
         print("CalledProcessError > ", e.output)
-        raise
+        return e.output, err, 255
     except:
         print ("Error > ",sys.exc_info()[0])
-        raise
-
+        return sys.exc_info()[0]
+        
 def exec_to_log(cmd, log = None):
     if not log:
         log = create_rand_file()

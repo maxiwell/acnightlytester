@@ -119,11 +119,8 @@ class Nightly ():
                                   + ')' ))
         
         search_and_replace_first (self.indexpage.get_page(), simulator.name + ',', 'FAILED')
-        
         return '' 
 
-
-                                                           
     def condor_runnning_simulator(self, simulator):        
         envobj        = env.get_workspace() + 'env.p'
         archcobj      = env.get_workspace() + 'archc.p'
@@ -163,9 +160,6 @@ class Nightly ():
 
         search_and_replace_first (self.indexpage.get_page(), '<td tag=\'index[OKFAILED,]*\'.*>log</a>\)</td>', \
                                 HTML.csvcells_to_html(gettime() + ';' + HTML.fail(resultstr) + csvline))
-
-        cleanup()
-
 
     def git_hashes_changed(self):
         last_page = env.get_htmloutput() + \

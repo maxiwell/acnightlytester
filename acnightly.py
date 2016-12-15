@@ -119,6 +119,8 @@ def main():
         else:
             nightly.running_simulator(simulator)
             nightly.finalize(simulator)
+
+    cleanup()
      
 if __name__ == '__main__':
     main()  

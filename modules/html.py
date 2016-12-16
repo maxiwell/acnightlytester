@@ -324,6 +324,10 @@ class SimulatorPage(HTMLPage):
                                 speed += s.group(1)+'<br>'
                             if i:
                                 instr += i.group(1)+'<br>'
+                        if speed == '':
+                            speed = '-;'
+                        if instr == '':
+                           instr = '-;'    
                         csvline += speed + ';' + instr + ';'
                 except:
                     csvline += '-;-;'

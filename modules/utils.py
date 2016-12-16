@@ -11,7 +11,7 @@ from .env import Env
 
 version = "4.0"
 env = Env()
-timeout = 7200
+timeout = 1600 
 
 def inflate(arg):
     # In condor environment nproc is not the same. So it's necessary
@@ -59,17 +59,20 @@ def _exec(cmd, errors_in_stdout=True):
         print ("OSError > ",e.errno)
         print ("OSError > ",e.strerror)
         print ("OSError > ",e.filename)
-        return e.strerror, err, 255
+        #return e.strerror, err, 255
+        return "OSError", err, 255
     except subprocess.CalledProcessError as e:
         print("CalledProcessError > ", e.output)
-        return e.output, err, 255
+        #return e.output, err, 255
+        return "CalledProcessError", err, 255
     except subprocess.TimeoutExpired as e:
         print("TimeoutExpired > "+str(timeout)+"s")
         process.terminate()
         return "TimeoutExpired > "+str(timeout)+"s", err, 255
     except:
         print ("Error > ",sys.exc_info()[0])
-        return sys.exc_info()[0]
+        #return sys.exc_info()[0]
+        return "Error", err, 255 
         
 def exec_to_log(cmd, log = None):
     if not log:
@@ -83,7 +86,7 @@ def exec_to_log(cmd, log = None):
     try:
         dump += out.decode('utf-8')
     except:
-        dump += out
+        dump += "Except Error"
         print ("Error > ", sys.exc_info()[0])
 
     f = open(log, 'w')

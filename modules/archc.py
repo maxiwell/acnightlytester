@@ -169,7 +169,7 @@ class ArchC ():
         for l in self.external_libs:
             pre  = "cd " + self.get_external_lib_src(l) + " && "
             cmd  = re.sub(r"make", inflate("make"), l['cmd'])
-            cmd  = re.sub(r"\./configure", "./configure --prefix=" + prefix, cmd)
+            cmd  = re.sub(r"\./configure", "./configure --prefix=" + self.get_external_lib_prefix(l), cmd)
             allcmd = pre + cmd
             exec_to_var ( allcmd )
 

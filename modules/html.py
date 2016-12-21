@@ -90,6 +90,27 @@ class HTML:
         html.append_log_formatted(logfile, highlight)
         html.write_page()
 
+    @staticmethod
+    def get_link_from_githash(githash, link):
+        string = '-'
+        if githash != '-':
+            if 'github.com' in link:
+                string = HTML.href(githash[0:7], \
+                         link.replace('.git','') + '/commit/' + githash) 
+        return string
+   
+    @staticmethod
+    def get_link_from_file(githash, filename, link):
+        string = filename
+        if githash != '-' :
+            if 'github.com' in link:
+                string = HTML.href( filename, \
+                                link.replace('.git', '') + '/blob/' + githash + '/' + \
+                                filename ) 
+        return string
+
+
+
 
 class Table:
 

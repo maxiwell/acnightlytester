@@ -12,31 +12,27 @@ nightly:
     html output  : ${SCRIPTROOT}/../public_html
     tarball pool : ${SCRIPTROOT}/pool/
     simulators   : all
- 
-archc:
-    systemc   : https://github.com/archc/systemc.git
-#    binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
-#    gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
-    link/path : https://github.com/archc/archc.git
-    extlibs   : 
-        libelf : git://git.fedorahosted.org/git/elfutils.git
 
+# In external libs' cmd, the nightly adds --prefix 
+# in ./configure automatically
+archc:
+    link/path: https://github.com/archc/archc.git
+    branch: master
+    external libs:
+        systemc: 
+            link/path: https://github.com/archc/systemc.git
+            branch: 2.3.1a
+            cmd: ./autogen.sh && ./configure && make && make install 
+        libelf: 
+            link/path: git://git.fedorahosted.org/git/elfutils.git
+            branch: master
+            cmd: autoreconf -vif && ./configure --enable-maintainer-mode && make install
+        #binutils  : https://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2 
+        #gdb       : https://ftp.gnu.org/gnu/gdb/gdb-7.8.tar.gz 
        
 models:
     mips:
         inputfile : mips.ac
-        run       : ./mips.x --load=
-        link/path : https://github.com/archc/mips.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
-    mips-cache:
-        inputfile : mips_cache.ac
-        run       : ./mips.x --load=
-        link/path : https://github.com/archc/mips.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/mips/archc_mips_toolchain_20141215_64bit.tar.bz2
-    mips-cache-hier:
-        inputfile : mips_cache2.ac
         run       : ./mips.x --load=
         link/path : https://github.com/archc/mips.git
         branch    : master
@@ -53,50 +49,14 @@ models:
         link/path : https://github.com/archc/arm.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
-    arm-cache:
-        inputfile : arm_cache.ac
-        run       : ./arm.x --load=
-        link/path : https://github.com/archc/arm.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
-    arm-cache-hier:
-        inputfile : arm_cache2.ac
-        run       : ./arm.x --load=
-        link/path : https://github.com/archc/arm.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/arm/archc_arm_toolchain_20150102_64bit.tar.bz2
     powerpc:
         inputfile : powerpc.ac
         run       : ./powerpc.x --load=
         link/path : https://github.com/archc/powerpc.git
         branch    : master
         cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
-    powerpc-cache:
-        inputfile : powerpc_cache.ac
-        run       : ./powerpc.x --load=
-        link/path : https://github.com/archc/powerpc.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
-    powerpc-cache-hier:
-        inputfile : powerpc_cache2.ac
-        run       : ./powerpc.x --load=
-        link/path : https://github.com/archc/powerpc.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/powerpc/archc_powerpc_toolchain_20141215_64bit.tar.bz2
     sparc:
         inputfile : sparc.ac
-        run       : ./sparc.x --load=
-        link/path : https://github.com/archc/sparc.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
-    sparc-cache:
-        inputfile : sparc_cache.ac
-        run       : ./sparc.x --load=
-        link/path : https://github.com/archc/sparc.git
-        branch    : master
-        cross     : http://archc.lsc.ic.unicamp.br/downloads/Tools/sparc/archc_sparc_toolchain_20141215_64bit.tar.bz2
-    sparc-cache-hier:
-        inputfile : sparc_cache2.ac
         run       : ./sparc.x --load=
         link/path : https://github.com/archc/sparc.git
         branch    : master

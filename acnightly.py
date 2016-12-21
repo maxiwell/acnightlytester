@@ -37,15 +37,22 @@ def config_parser_yaml(configfile):
         utils.env.printenv()
 
         archc = ArchC(utils.env)
-        archc.set_systemc(yamls['archc']['systemc'])
         archc.set_linkpath(yamls['archc']['link/path'])
-        if 'gdb' in yamls['archc'] and yamls['archc']['gdb'] != None:
-            archc.set_gdb(yamls['archc']['gdb'])
-        if 'binutils' in yamls['archc'] and yamls['archc']['binutils'] != None:
-            archc.set_binutils(yamls['archc']['binutils'])
-        if 'extlibs' in yamls['archc'] and yamls['archc']['extlibs'] != None:
-            for _lib in yamls['archc'] and yamls['archc']['extlibs']:
-                archc.set_external_libs(_lib, yamls['archc']['extlibs'][_lib])
+        if 'external libs' in yamls['archc']:
+            extlibs = yamls['archc']['external libs']
+            if extlibs != None:
+                for _lib in extlibs:
+                    link = None
+                    branch = None
+                    cmd = None
+                    if 'link/path' in extlibs[_lib]:
+                        link   = extlibs[_lib]['link/path']
+                    if 'branch' in extlibs[_lib]:
+                        branch = extlibs[_lib]['branch']
+                    if 'cmd' in extlibs[_lib]:
+                        cmd = extlibs[_lib]['cmd']
+                    if link != None:
+                        archc.set_external_libs(_lib, link, branch, cmd)
 
         simlist = []
         if yamls['nightly']['simulators'] == 'all':

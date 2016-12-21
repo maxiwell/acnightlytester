@@ -1,5 +1,5 @@
 
-import os
+import os, glob
 import subprocess
 from .utils import *
 from .html import *
@@ -9,9 +9,6 @@ from .benchbase import SimulatorInfo
 class ArchC ():
 
     archc         = {}
-    systemc       = {} 
-    binutils      = {}
-    gdb           = {}
     external_libs = []
 
     def __init__(self, _env):
@@ -19,16 +16,6 @@ class ArchC ():
         self.archc['src']       = "/archc/src"
         self.archc['prefix']    = "/archc/install"
         self.archc['hash']      = '-'
-
-        self.systemc = {}
-        self.systemc['src']     = "/systemc/src"
-        self.systemc['prefix']  = "/systemc/install"
-        self.systemc['hash']    = '-'
-
-        self.binutils = {}
-        self.binutils['src'] = '/binutils/src/'
-        self.gdb = {}
-        self.gdb['src']      = '/gdb/src/'
 
         self.external_libs = []
 
@@ -39,43 +26,32 @@ class ArchC ():
         return env.workspace + self.archc['prefix']
 
     def get_archc_hashtohtml(self):
-        string = '-'
-        if self.archc['hash'] != '-' :
-            string = HTML.href(self.archc['hash'][0:7], \
-                                 self.archc['link'].replace('.git','') + '/commit/' + self.archc['hash'] ) 
-        
-        return string
+        return HTML.get_link_from_githash(self.archc['hash'], self.archc['link'])
 
-    def get_systemc_src(self):
-        return env.workspace + self.systemc['src']
-
-    def get_systemc_prefix(self):
-        return env.workspace + self.systemc['prefix']
-
-    def get_binutils_src(self):
-        return env.workspace + self.binutils['src']
-
-    def get_gdb_src(self):
-        return env.workspace + self.gdb['src']
+    def get_external_lib_by_name(self, libname):
+        for l in self.external_libs:
+            if l['name'] == libname:
+                return l
+        return None
 
     def get_external_lib_src(self, lib):
-        return env.workspace + lib['src']
+        return env.workspace + lib['src'];
 
     def get_external_lib_prefix(self, lib):
-        return env.workspace + lib['prefix']
-    
+        return env.workspace + lib['prefix'];
+
     def get_external_libs_PKG_CONFIG_PATH(self):
-        pkg_config_path = ''
+        pkg_config_path = '$PKG_CONFIG_PATH'
         for l in self.external_libs:
-            pkg_config_path = env.workspace + l['prefix'] + '/lib/pkgconfig:' + pkg_config_path
-        pkg_config_path += '$PKG_CONFIG_PATH'
+            for d in glob.glob(env.workspace + l['prefix'] + '/lib*/pkgconfig'):
+                pkg_config_path = d + ":" + pkg_config_path
         return pkg_config_path
 
     def get_external_libs_LD_LIBRARY_PATH(self):
-        ld_library_path = ''
+        ld_library_path = '$LD_LIBRARY_PATH'
         for l in self.external_libs:
-            ld_library_path = env.workspace + l['prefix'] + '/lib:' + ld_library_path 
-        ld_library_path += '$LD_LIBRARY_PATH'
+            for d in glob.glob (env.workspace + l['prefix'] + '/lib*'): 
+                ld_library_path = d + ":" + ld_library_path 
         return ld_library_path
 
     def get_external_libs_PATH(self):
@@ -83,8 +59,7 @@ class ArchC ():
         for l in self.external_libs:
             path += env.workspace + l['prefix'] + '/bin:' + path
         return path
-
-
+    
     def set_linkpath(self, linkpath):
         self.archc['link'] = linkpath
         self.archc['src']  = get_relative_path ( 
@@ -96,39 +71,12 @@ class ArchC ():
         if is_linkpath_a_git (linkpath):
             self.archc['hash'] = get_githash(self.get_archc_src())
 
-    def set_systemc(self, linkpath):
-        self.systemc['link'] = linkpath
-        self.systemc['src']  = get_relative_path ( 
-                                    get_tar_git_or_folder (
-                                        linkpath, 
-                                        self.get_systemc_src()
-                                    )
-                                )
-        if is_linkpath_a_git (linkpath):
-            self.systemc['hash'] = get_githash(self.get_systemc_src())
-
-    def set_binutils(self, linkpath):
-        self.binutils['link'] = linkpath
-        self.binutils['src']  = get_relative_path ( 
-                                    get_tar_git_or_folder (
-                                        linkpath, 
-                                        self.get_binutils_src()
-                                    )
-                                )
-
-    def set_gdb(self, linkpath):
-        self.gdb['link'] = linkpath
-        self.gdb['src']  = get_relative_path (
-                                get_tar_git_or_folder (
-                                    linkpath, 
-                                    self.get_gdb_src()
-                                )
-                            )
-
-    def set_external_libs(self, name, link):
+    def set_external_libs(self, name, link, branch, cmd):
         lib = {}
         lib['name'  ] = name
         lib['link'  ] = link
+        lib['branch'] = branch
+        lib['cmd'   ] = cmd
         lib['hash'  ] = '-'
         lib['src'   ] = '/external/src/' + name
         lib['prefix'] = '/external/install/' + name
@@ -137,22 +85,24 @@ class ArchC ():
     def build_external_lib(self, lib):
         src    = self.get_external_lib_src(lib)
         prefix = self.get_external_lib_prefix(lib) 
-        rm (src)
-        src = get_tar_git_or_folder(lib['link'], src)
+        cmd    = lib['cmd']
+        branch = lib['branch']
         if is_linkpath_a_git (lib['link']): 
+            git_clone(lib['link'], lib['branch'], src)
             lib['hash'] = get_githash(src)
+        else:
+            src = get_tar_git_or_folder(lib['link'], src)
 
-        cmd_1  = "cd " + src + " && "
-        cmd_2  = "autoreconf -vif && "
-        cmd_2 += "./configure --prefix=" + prefix + " --enable-maintainer-mode && "
-        cmd_2 += inflate("make install")
-        cmd = cmd_1 + cmd_2
+        pre  = "cd " + src + " && "
+        cmd  = re.sub(r"make", inflate("make"), cmd)
+        cmd  = re.sub(r"\./configure", "./configure --prefix=" + prefix, cmd)
 
+        allcmd = pre + cmd
         print(lib['name'] + ':')
-        print("| " + cmd_2)
+        print("| " + cmd)
         print("| Building and Installing...", end="", flush=True)
 
-        retcode, log = exec_to_log(cmd)
+        retcode, log = exec_to_log(allcmd)
         execstatus = ''
         if  retcode:
             print("OK")
@@ -167,55 +117,16 @@ class ArchC ():
 
         # Creating a csv line to add in the TestsPage (ArchC Table)
         csvline  = lib['name'] + ';' + lib['link'] + ';'
-        csvline += lib['hash'][0:7] + ';' + execstatus
+        csvline += HTML.get_link_from_githash(lib['hash'], lib['link']) + ';' + execstatus
         csvline += '(' + HTML.lhref('log', htmllog) + ')'
         return csvline
-
-    def build_systemc(self):
-        if os.path.isdir(self.get_systemc_src()+"/lib"):
-            cp (self.get_systemc_src(), self.get_systemc_prefix())
-            csvline = 'SystemC;' + self.systemc['link'] + ";-;" + HTML.success() 
-            return csvline
-        else:
-            cmd_1 = "cd "+self.get_systemc_src() + " && " 
-            cmd_2 = ""
-            if os.path.isfile(self.get_systemc_src() + "/autogen.sh"):
-                cmd_2 += "./autogen.sh && " 
-            cmd_2 += "./configure --prefix=" + self.get_systemc_prefix() 
-            cmd_2 += " && " + inflate("make") + " && " + inflate("make install")
-            print("SystemC:")
-            print("| " + cmd_2)
-            print("| Building and Installing...", end="", flush=True)
-            cmd = cmd_1 + cmd_2
-
-            retcode, log = exec_to_log(cmd) 
-            execstatus = ''
-            if retcode:
-                print("OK")
-                execstatus = HTML.success()
-            else:
-                print("FAILED")
-                execstatus = HTML.fail()
-
-            # Creating the Build Page
-            htmllog = env.get_htmloutput_fullstring() + "systemc-build-log.html"
-            HTML.log_to_html(log, htmllog, "SystemC rev " + self.systemc['hash'][0:7] + " build output")
-
-            # Creating a csv line to add in the TestsPage (ArchC Table)
-            csvline = 'SystemC;' + self.systemc['link'] + ';'
-            if self.systemc['hash'] != '-':
-                csvline += HTML.href(self.systemc['hash'][0:7], \
-                           self.systemc['link'].replace('.git','') + '/commit/' + self.systemc['hash']) + ';'
-            else:
-                csvline += self.systemc['hash'] + ';'
-
-            csvline += execstatus
-            csvline += '(' + HTML.lhref('log', htmllog) + ');'
-            return csvline
 
     def build_and_install_archc(self):
 
         extra_csvline = ""
+        for l in self.external_libs:
+            extra_csvline += self.build_external_lib(l) + '\n'
+
         cmd_1  = 'export PKG_CONFIG_PATH="' + self.get_external_libs_PKG_CONFIG_PATH() + '" && '
         cmd_1 += 'export LD_LIBRARY_PATH="' + self.get_external_libs_LD_LIBRARY_PATH() + '" && '
         cmd_1 += "cd " + self.get_archc_src() + " && "
@@ -223,18 +134,10 @@ class ArchC ():
             cmd_1 += "make distclean && "
         cmd_2  = "./autogen.sh && " 
         cmd_2 += "./configure --prefix=" + self.get_archc_prefix()
-        if 'link' in self.systemc:
-            extra_csvline += self.build_systemc() + '\n'
-            cmd_2 += " --with-systemc=" + self.get_systemc_prefix()
-        if 'link' in self.binutils: 
-            extra_csvline += 'Binutils;' + self.binutils['link'] + ';-;' + HTML.success() + '\n'
-            cmd_2 += " --with-binutils=" + self.get_binutils_src()
-        if 'link' in self.gdb:
-            extra_csvline += 'GDB;' + self.gdb['link'] + ';-;' + HTML.success() + '\n'
-            cmd_2 += " --with-gdb=" + self.get_gdb_src()
-        for l in self.external_libs:
-            extra_csvline += self.build_external_lib(l) + '\n'
-
+        for ext in ['systemc', 'binutils', 'gdb']:
+            lib = self.get_external_lib_by_name(ext)
+            if lib != None:
+                cmd_2 += " --with-"+ext+"=" + self.get_external_lib_prefix(lib)
         cmd_2 += " && " + inflate("make") + " && " + inflate("make install")
         print("ArchC:")
         print("| "+cmd_2)
@@ -256,12 +159,7 @@ class ArchC ():
         
         # Creating a csv line to add in the TestsPage (ArchC Table)
         csvline = 'ArchC;' + self.archc['link'] + ';' 
-        if self.archc['hash'] != '-' :
-            csvline += HTML.href(self.archc['hash'][0:7], \
-                                 self.archc['link'].replace('.git','') + '/commit/' + self.archc['hash'] ) + ';'
-        else:
-            csvline += self.archc['hash'][0:7] + ';'
-
+        csvline += HTML.get_link_from_githash(self.archc['hash'], self.archc['link']) + ';' 
         csvline += execstatus
         csvline += '(' + HTML.lhref('log', htmllog) + ');'
        
@@ -269,30 +167,23 @@ class ArchC ():
 
     def reinstall_archc(self):
         for l in self.external_libs:
-            cmd  = "cd " + self.get_external_lib_src(l) + " && "
-            cmd += "./configure --prefix=" + self.get_external_lib_prefix(l) + " --enable-maintainer-mode && "
-            cmd += inflate("make install")
-            exec_to_var ( cmd )
-
-        cmd  = "cd "+self.get_systemc_src() + " && " 
-        cmd += "./configure --prefix=" + self.get_systemc_prefix() + ' && '
-        cmd += inflate("make") + " && " + inflate("make install")
-        exec_to_var ( cmd ) 
+            pre  = "cd " + self.get_external_lib_src(l) + " && "
+            cmd  = re.sub(r"make", inflate("make"), l['cmd'])
+            cmd  = re.sub(r"\./configure", "./configure --prefix=" + prefix, cmd)
+            allcmd = pre + cmd
+            exec_to_var ( allcmd )
 
         # Each model will change the GDB and BINUTILS folders
         cmd  = 'export PKG_CONFIG_PATH="' + self.get_external_libs_PKG_CONFIG_PATH() + '" && '
         cmd += 'export LD_LIBRARY_PATH="' + self.get_external_libs_LD_LIBRARY_PATH() + '" && '
         cmd += "cd " + self.get_archc_src() + " && "
         cmd += "./configure --prefix=" + self.get_archc_prefix()
-        if 'link' in self.systemc:
-            cmd += " --with-systemc=" + self.get_systemc_prefix()
-        if 'link' in self.binutils: 
-            cmd += " --with-binutils=" + self.get_binutils_src()
-        if 'link' in self.gdb:
-            cmd += " --with-gdb=" + self.get_gdb_src()
+        for ext in ['systemc', 'binutils', 'gdb']:
+            lib = self.get_external_lib_by_name(ext)
+            if lib != None:
+                cmd += " --with-"+ext+"=" + self.get_external_lib_prefix(lib)
         cmd += " && " + inflate("make") + " && " + inflate("make install")
         exec_to_var ( cmd )
-
 
 
 class Simulator (SimulatorPage):
@@ -358,12 +249,12 @@ class Simulator (SimulatorPage):
 
     def set_modellink(self, linkpath, branch):
         self.model['link'] = linkpath
-        if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            self.model['hash']   = '-'
-            self.model['branch'] = '-'
-        else:
+        if is_linkpath_a_git(self.model['link']):
             self.model['hash']   = get_githash_online(linkpath, branch)
             self.model['branch'] = branch 
+        else:
+            self.model['hash']   = '-'
+            self.model['branch'] = '-'
 
     def get_modellink(self):
         return self.model['link'] 
@@ -422,21 +313,10 @@ class Simulator (SimulatorPage):
         return self.model['hash'] 
 
     def get_model_hashtohtml(self):
-        string = '-'
-        if self.model['hash'] != '-' :
-            string = HTML.href(self.model['hash'][0:7], \
-                                 self.model['link'].replace('.git','') + '/commit/' + self.model['hash'] ) 
-        
-        return string 
+        return HTML.get_link_from_githash(self.model['hash'], self.model['link'])
 
     def get_model_inputtohtml(self):
-        string = self.model['inputfile']
-        if self.model['hash'] != '-' :
-            string = HTML.href( self.model['inputfile'], \
-                                self.model['link'].replace('.git', '') + '/blob/' + self.model['hash'] + '/' + \
-                                self.model['inputfile'] ) 
-        return string
-
+        return HTML.get_link_from_file(self.model['hash'], self.model['inputfile'], self.model['link'])
 
     def set_custom_links(self, link, cmdline):
         self.custom_links[link] = cmdline
@@ -447,10 +327,10 @@ class Simulator (SimulatorPage):
         self.benchmarks.append(benchmark)
 
     def download_modellink(self):
-        if (self.model['link'].startswith("./")) or (self.model['link'].startswith("/")):
-            get_local(self.model['link'], self.get_simsrc(), self.get_name())
-        else:
+        if (is_linkpath_a_git(self.model['link'])):
             git_clone(self.model['link'], self.model['branch'], self.get_simsrc(), self.get_name())
+        else:
+            get_local(self.model['link'], self.get_simsrc(), self.get_name())
 
         with open(self.get_simsrc() + self.model['inputfile'], 'r') as f:
             for l in f:
